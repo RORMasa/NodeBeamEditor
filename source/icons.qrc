@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>icons/BeamsAddS.png</file>
+        <file>icons/BeamsArg.png</file>
+        <file>icons/BeamsDelete.png</file>
+        <file>icons/DeleteNode.png</file>
+        <file>icons/DuplicateNode.png</file>
+        <file>icons/MoveNode.png</file>
+        <file>icons/NewNode.png</file>
+        <file>icons/RectSelNode.png</file>
+        <file>icons/RotateNode.png</file>
+        <file>icons/ScaleNode.png</file>
+    </qresource>
+</RCC>

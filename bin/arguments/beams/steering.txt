@@ -1,0 +1,8 @@
+Hydros
+100,200,100
+beamType=BEAM_HYDRO
+beamStrength=1000000
+beamSpring=1000000
+beamDamp=1000
+beamDeform=50000
+beamPrecompression=1.0

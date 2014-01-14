@@ -1,0 +1,9 @@
+Default
+200,100,0
+beamType=NORMALTYPE
+beamStrength=1000
+beamSpring=1000
+beamDamp=1000
+beamDeform=1000
+beamPrecompression=1.0
+group=body
