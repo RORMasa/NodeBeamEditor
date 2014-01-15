@@ -82,6 +82,7 @@ public:
     double pii;
 
     QVector <float >backgroundcolor;
+    QVector <float> gridcolor;
 
     //Measuring distance
     bool MeasuringDistance;

@@ -88,6 +88,8 @@ GLWidget::GLWidget(QWidget *parent)
     backgroundcolor[1] = 0.15;
     backgroundcolor[2] = 0.15;
     backgroundcolor[3] = 0.15;
+    gridcolor.resize(4);
+    gridcolor[3] = 1.0;
 
 }
 
@@ -175,7 +177,7 @@ void GLWidget::draw()
     double y_max = 10 + 0.5;
 
     glLineWidth(1);
-    glColor4f(0.25f,0.25f,0.25f,0.2f);
+    glColor4f(gridcolor[0],gridcolor[1],gridcolor[2],gridcolor[3]);
     glBegin(GL_LINES);
 
     for (int i = -10; i <= 10; i++) {

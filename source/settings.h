@@ -34,6 +34,8 @@ private slots:
 
     void on_listWidget_currentRowChanged(int currentRow);
 
+    void on_pushButton_3_clicked();
+
 private:
     Ui::settings *ui;
     void showEvent(QShowEvent *);
@@ -41,6 +43,7 @@ private:
 
     //Colors
     QColor bg_color;
+    QColor grid_color;
 
 };
 

@@ -226,7 +226,7 @@ public:
     QString CurrentNamePrefix;
 
     void NewNodeNamePrefix();
-    bool NewNodeNamePrefix(QString prefix);
+    void NewNodeNamePrefix(QString prefix);
 
     QString NewNodeName(QString prefix);
 

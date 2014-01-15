@@ -23,8 +23,11 @@ settings::settings(QWidget *parent) :
     //Color buttons
     QString stylesheet;
     bg_color.setRgb(appsett->value("bg_color_r").toInt(),appsett->value("bg_color_g").toInt(),appsett->value("bg_color_b").toInt());
+    grid_color.setRgb(appsett->value("grid_color_r").toInt(),appsett->value("grid_color_g").toInt(),appsett->value("grid_color_b").toInt());
     stylesheet = QString("background-color: %1").arg(bg_color.name());
     ui->pushButton_2->setStyleSheet(stylesheet);
+    stylesheet = QString("background-color: %1").arg(grid_color.name());
+    ui->pushButton_3->setStyleSheet(stylesheet);
 
     QVector <QString> pages;
     pages.resize(3);
@@ -62,7 +65,9 @@ void settings::SaveSettings()
     appsett->setValue("bg_color_r", bg_color.red());
     appsett->setValue("bg_color_g", bg_color.green());
     appsett->setValue("bg_color_b", bg_color.blue());
-
+    appsett->setValue("grid_color_r", grid_color.red());
+    appsett->setValue("grid_color_g", grid_color.green());
+    appsett->setValue("grid_color_b", grid_color.blue());
 }
 
 void settings::on_buttonBox_accepted()
@@ -84,7 +89,7 @@ void settings::on_pushButton_clicked()
 void settings::on_pushButton_2_clicked()
 {
     QString stylesheet;
-    bg_color = QColorDialog::getColor(bg_color,0,"Choose beam color",0);
+    bg_color = QColorDialog::getColor(bg_color,0,"Choose background color",0);
     if(bg_color.isValid())
     {
         stylesheet = QString("background-color: %1").arg(bg_color.name());
@@ -102,4 +107,17 @@ void settings::on_listWidget_currentRowChanged(int currentRow)
 void settings::showEvent(QShowEvent *)
 {
 
+}
+
+/* Change grid color */
+void settings::on_pushButton_3_clicked()
+{
+    QString stylesheet;
+    grid_color = QColorDialog::getColor(grid_color,0,"Choose grid color",0);
+    if(grid_color.isValid())
+    {
+        stylesheet = QString("background-color: %1").arg(grid_color.name());
+        ui->pushButton_3->setStyleSheet(stylesheet);
+
+    }
 }

@@ -123,7 +123,11 @@ GLWidgetOrtho::GLWidgetOrtho(QWidget *parent)
     backgroundcolor[1] = 0.15;
     backgroundcolor[2] = 0.15;
     backgroundcolor[3] = 0.15;
-
+    gridcolor.resize(4);
+    gridcolor[0] = 1.0;
+    gridcolor[1] = 1.0;
+    gridcolor[2] = 1.0;
+    gridcolor[3] = 1.0;
 }
 
 GLWidgetOrtho::~GLWidgetOrtho()
@@ -277,7 +281,7 @@ void GLWidgetOrtho::draw()
     if(SnapToGrid)
     {
         int lineamount = 3/GridSize;
-        glColor4f(0.1f,0.1f,0.1f,1.0f);
+        glColor4f(gridcolor[0],gridcolor[1],gridcolor[2],gridcolor[3]);
         glLineWidth(1);
         glBegin(GL_LINES);
         for (int i = -lineamount; i <= lineamount; i++) {
@@ -295,6 +299,7 @@ void GLWidgetOrtho::draw()
         glEnd();
     }
 
+    glColor4f(gridcolor[0],gridcolor[1],gridcolor[2],gridcolor[3]);
     glLineWidth(2);
     glBegin(GL_LINES);
     for (int i = -10; i <= 10; i++) {

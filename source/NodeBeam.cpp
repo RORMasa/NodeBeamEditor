@@ -1202,14 +1202,14 @@ void NodeBeam::ExportBeamNG(const QString &fileName)
         {
             for(int i=0; i<Hubwheels.size();i++)
             {
-                for(int i2=0; i<HWArguments[Hubwheels[i].arguments].KeyValuePairs.size();i2++)
-                {
-                    bool ok;
-                    outStream << "       {" << '"' << HWArguments[Hubwheels[i].arguments].KeyValuePairs[i2].name << '"';
-                    float value = HWArguments[Hubwheels[i].arguments].KeyValuePairs[i2].value.toFloat(&ok);
-                    if(ok) outStream << ":" << HWArguments[Hubwheels[i].arguments].KeyValuePairs[i2].value <<"},\r\n";
-                    else outStream << ":" << '"' << HWArguments[Hubwheels[i].arguments].KeyValuePairs[i2].value<< '"'<<"},\r\n";
-                }
+//                for(int i2=0; i<HWArguments[Hubwheels[i].arguments].KeyValuePairs.size();i2++)
+//                {
+//                    bool ok;
+//                    outStream << "       {" << '"' << HWArguments[Hubwheels[i].arguments].KeyValuePairs[i2].name << '"';
+//                    float value = HWArguments[Hubwheels[i].arguments].KeyValuePairs[i2].value.toFloat(&ok);
+//                    if(ok) outStream << ":" << HWArguments[Hubwheels[i].arguments].KeyValuePairs[i2].value <<"},\r\n";
+//                    else outStream << ":" << '"' << HWArguments[Hubwheels[i].arguments].KeyValuePairs[i2].value<< '"'<<"},\r\n";
+//                }
                 outStream <<"       ["<<'"'<<Hubwheels[i].name<<'"'<<", "<<'"'<<  Hubwheels[i].group  <<'"'<<", "<<'"'<<  Hubwheels[i].node1   <<'"'<<", "<<'"'<<   Hubwheels[i].node2    <<'"'<<", "<<'"'<<    Hubwheels[i].nodeArm <<'"'<<", "<<'"'<<    Hubwheels[i].nodeS <<'"'<<", "<<'"'<<    Hubwheels[i].wheelDir<<'"'<<"],\r\n";
             }
 
@@ -2550,7 +2550,7 @@ void NodeBeam::NewNodeNamePrefix()
     NodeNameCalculators[NodeNameCalculators.size()-1] = 0;
 }
 
-bool NodeBeam::NewNodeNamePrefix(QString prefix)
+void NodeBeam::NewNodeNamePrefix(QString prefix)
 {
 
     NodeNamePrefixes.resize(NodeNamePrefixes.size()+1);

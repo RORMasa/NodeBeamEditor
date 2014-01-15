@@ -696,6 +696,7 @@ bool JBeam::FindObjectByKey(QString key)
         if(CurrentPos->key == key) break;
         GoToNext();
     }
+    return ok;
 }
 
 void JBeam::InsertObject()
