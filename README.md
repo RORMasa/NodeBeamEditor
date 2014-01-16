@@ -1,4 +1,4 @@
 NodeBeamEditor
 ==============
 
-Testing 2
+NodeBeam Editor is a tool for building and editing BeamNG and Rigs of Rods nodebeam structures.
