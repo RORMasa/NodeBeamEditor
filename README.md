@@ -20,10 +20,10 @@ The active file can be saved in editors own xml file format.
 * Rigs of Rods
 
 ##Future plans
-* Node and beam arguments, modifying, importing exporting
 * Improve BeamNG import and export features to support slots, and to be able to export to existing file and rewrite only modified sections
 * Improve Rigs of Rods import / export
 * Improve the basic tools to make the editor more user friendly
+* Add support to LUA scripting
 * Add support for hydros and wheels
 * Add tool to measure angle and distance
 * Engine calculator, visually show torque and power curve.
