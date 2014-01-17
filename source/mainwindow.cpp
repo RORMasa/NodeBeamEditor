@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     HubWheelProperties->setNBPointer(&CurrentNodeBeam->HWArguments);
     HubWheelProperties->argumenttype = HubWheelProperties->HUBWHEEL_ARGUMENTS;
 
-    setWindowTitle(tr("BeamNG Editor - New NodeBeam"));
+    setWindowTitle(tr("NodeBeam Editor - New NodeBeam"));
 
     //Settings for the application
     AppSettings = new settings;
