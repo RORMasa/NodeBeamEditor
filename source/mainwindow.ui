@@ -64,6 +64,15 @@ QToolButton:hover {
      border-color:rgb(255, 255, 0);
      font:  12px;
 }
+QToolButton:disabled {
+	background-color: #e2e2e2;
+     border-style: outset;
+     border-width: 0px;
+     font:  12px;
+	
+	color: rgb(150, 150, 150);
+     padding: 6px;
+}
 QPushButton {
 	background-color: rgb(68, 68, 68);
      border-style: outset;
@@ -583,6 +592,9 @@ QTabWidget::tab-bar {
            </property>
           </widget>
           <widget class="QToolButton" name="toolButton_15">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="geometry">
             <rect>
              <x>510</x>
@@ -596,6 +608,9 @@ QTabWidget::tab-bar {
            </property>
           </widget>
           <widget class="QToolButton" name="toolButton_16">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="geometry">
             <rect>
              <x>510</x>
@@ -983,6 +998,69 @@ QTabWidget::tab-bar {
           <attribute name="title">
            <string>Page</string>
           </attribute>
+          <widget class="QFrame" name="frame_5">
+           <property name="geometry">
+            <rect>
+             <x>170</x>
+             <y>40</y>
+             <width>838</width>
+             <height>30</height>
+            </rect>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <widget class="QSpinBox" name="spinBox">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>0</y>
+              <width>61</width>
+              <height>31</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>View zoom</string>
+            </property>
+            <property name="suffix">
+             <string>%</string>
+            </property>
+            <property name="maximum">
+             <number>500</number>
+            </property>
+            <property name="singleStep">
+             <number>10</number>
+            </property>
+            <property name="value">
+             <number>100</number>
+            </property>
+           </widget>
+           <widget class="QComboBox" name="comboBox_3_views">
+            <property name="geometry">
+             <rect>
+              <x>80</x>
+              <y>0</y>
+              <width>161</width>
+              <height>31</height>
+             </rect>
+            </property>
+           </widget>
+          </widget>
          </widget>
         </widget>
        </item>
@@ -1748,63 +1826,6 @@ QTabWidget::tab-bar {
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout"/>
-        </item>
-        <item>
-         <widget class="QFrame" name="frame_5">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-          <widget class="QSpinBox" name="spinBox">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>0</y>
-             <width>61</width>
-             <height>31</height>
-            </rect>
-           </property>
-           <property name="toolTip">
-            <string>View zoom</string>
-           </property>
-           <property name="suffix">
-            <string>%</string>
-           </property>
-           <property name="maximum">
-            <number>500</number>
-           </property>
-           <property name="singleStep">
-            <number>10</number>
-           </property>
-           <property name="value">
-            <number>100</number>
-           </property>
-          </widget>
-          <widget class="QComboBox" name="comboBox_3_views">
-           <property name="geometry">
-            <rect>
-             <x>80</x>
-             <y>0</y>
-             <width>161</width>
-             <height>31</height>
-            </rect>
-           </property>
-          </widget>
-         </widget>
         </item>
        </layout>
       </item>

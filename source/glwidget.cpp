@@ -227,6 +227,7 @@ void GLWidget::draw()
 
     /* Drawing beams */
     glColor4f(0.0f,0.4f,0.6f,1.0f);
+    glLineWidth(1);
     glBegin(GL_LINES);
     i3=0;
     int NodeAmount = NBPointer->Nodes.size();
@@ -240,7 +241,28 @@ void GLWidget::draw()
             if(NBPointer->BeamGroups[i2].draw)
             {
 
-                if(i3 == NBPointer->ActiveBeam) glColor4f(0.6f,0.4f,0.0f,1.0f);
+                if(i3 == NBPointer->ActiveBeam)
+                {
+                    glEnd();
+                    glColor4f(0.6f,0.4f,0.0f,1.0f);
+                    glLineWidth(4);
+                    glBegin(GL_LINES);
+
+
+                    int Bnode1 = NBPointer->Beams[i3].Node1GlobalID;
+                    int Bnode2 = NBPointer->Beams[i3].Node2GlobalID;
+                    if((Bnode1<NodeAmount) && (Bnode2<NodeAmount))
+                    {
+                        //qDebug()<<"Rendering beams 7 .... " << Bnode1 << ", " << Bnode2;
+                        glVertex3f(NBPointer->Nodes[Bnode1].locX, NBPointer->Nodes[Bnode1].locY, NBPointer->Nodes[Bnode1].locZ);
+                        glVertex3f(NBPointer->Nodes[Bnode2].locX, NBPointer->Nodes[Bnode2].locY, NBPointer->Nodes[Bnode2].locZ);
+                        //qDebug()<<"Rendering beams 8 .... ";
+                    }
+                    glEnd();
+                    glLineWidth(1);
+                    glBegin(GL_LINES);
+
+                }
                 else
                 {
                     if(NBPointer->Beams[i3].HasBeamDefs)
@@ -255,17 +277,18 @@ void GLWidget::draw()
                         glColor4f(0.0f,0.4f,0.6f,1.0f);
                     }
 
-                }
+
+                    int Bnode1 = NBPointer->Beams[i3].Node1GlobalID;
+                    int Bnode2 = NBPointer->Beams[i3].Node2GlobalID;
+                    if((Bnode1<NodeAmount) && (Bnode2<NodeAmount))
+                    {
+                        //qDebug()<<"Rendering beams 7 .... " << Bnode1 << ", " << Bnode2;
+                        glVertex3f(NBPointer->Nodes[Bnode1].locX, NBPointer->Nodes[Bnode1].locY, NBPointer->Nodes[Bnode1].locZ);
+                        glVertex3f(NBPointer->Nodes[Bnode2].locX, NBPointer->Nodes[Bnode2].locY, NBPointer->Nodes[Bnode2].locZ);
+                        //qDebug()<<"Rendering beams 8 .... ";
+                    }
 
 
-                int Bnode1 = NBPointer->Beams[i3].Node1GlobalID;
-                int Bnode2 = NBPointer->Beams[i3].Node2GlobalID;
-                if((Bnode1<NodeAmount) && (Bnode2<NodeAmount))
-                {
-                    //qDebug()<<"Rendering beams 7 .... " << Bnode1 << ", " << Bnode2;
-                    glVertex3f(NBPointer->Nodes[Bnode1].locX, NBPointer->Nodes[Bnode1].locY, NBPointer->Nodes[Bnode1].locZ);
-                    glVertex3f(NBPointer->Nodes[Bnode2].locX, NBPointer->Nodes[Bnode2].locY, NBPointer->Nodes[Bnode2].locZ);
-                    //qDebug()<<"Rendering beams 8 .... ";
                 }
 
             }

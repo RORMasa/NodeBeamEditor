@@ -21,9 +21,32 @@ MainWindow::MainWindow(QWidget *parent) :
     BeamProperties = new BeamDefaultsDialog;
     HubWheelProperties = new BeamDefaultsDialog;
 
+    /* 3D perspective view */
+    QVBoxLayout *vertikaali = new QVBoxLayout;
+    QWidget * OpenGLView = new QWidget;
+    vertikaali->addWidget(glWidget);
+    vertikaali->addWidget(ui->spinBox);
+    ui->spinBox->setMaximumWidth(100);
+    ui->spinBox->setMinimumHeight(28);
+    vertikaali->setMargin(1);
+    OpenGLView->setLayout(vertikaali);
+
+    /* Orthographic view */
+    QVBoxLayout *vertikaali2 = new QVBoxLayout;
+    QWidget * OpenGLViewO = new QWidget;
+    vertikaali2->addWidget(glWidgetO);
+    vertikaali2->addWidget(ui->comboBox_3_views);
+    ui->comboBox_3_views->setMaximumWidth(100);
+    ui->comboBox_3_views->setMinimumHeight(28);
+    vertikaali2->setMargin(1);
+    OpenGLViewO->setLayout(vertikaali2);
+
+    /* Views into tab widget */
     OpenGLViews = new QTabWidget;
-    OpenGLViews->addTab(glWidget,tr("3D View"));
-    OpenGLViews->addTab(glWidgetO,tr("Orthographic View"));
+    OpenGLViews->addTab(OpenGLView,tr("3D View"));
+    OpenGLViews->addTab(OpenGLViewO, tr("Orthographic View"));
+    //OpenGLViews->addTab(glWidget,tr("3D View"));
+    //OpenGLViews->addTab(glWidgetO,tr("Orthographic View"));
 
     ui->horizontalLayout->addWidget(OpenGLViews);
 
