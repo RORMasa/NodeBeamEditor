@@ -1,7 +1,7 @@
 NodeBeam Editor
 ==============
 
-NodeBeam Editor is a tool for building and editing BeamNG and Rigs of Rods nodebeam structures. The editor is still at very early stage of development.
+NodeBeam Editor is a simple tool for building and editing BeamNG and Rigs of Rods nodebeam structures. The editor is still at very early stage of development.
 
 ##Current features
 Currently it is possible to add nodes and beams, organize them in groups and define beam arguments. User can set blueprints to orthographic views. 
@@ -27,6 +27,7 @@ The active file can be saved in editors own xml file format.
 * Add support for hydros and wheels
 * Add tool to measure angle and distance
 * Engine calculator, visually show torque and power curve.
+* Beam organizer
 * Generator/Calculator for RoR tracks node beam structure
 
 ##Bugs
