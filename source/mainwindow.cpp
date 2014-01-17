@@ -48,6 +48,12 @@ MainWindow::MainWindow(QWidget *parent) :
     glWidgetO->backgroundcolor[0] = (AppSettings->readsetting("bg_color_r").toInt())/255.0f;
     glWidgetO->backgroundcolor[1] = (AppSettings->readsetting("bg_color_g").toInt())/255.0f;
     glWidgetO->backgroundcolor[2] = (AppSettings->readsetting("bg_color_b").toInt())/255.0f;
+    glWidget->gridcolor[0] = (AppSettings->readsetting("grid_color_r").toInt())/255.0f;
+    glWidget->gridcolor[1] = (AppSettings->readsetting("grid_color_g").toInt())/255.0f;
+    glWidget->gridcolor[2] = (AppSettings->readsetting("grid_color_b").toInt())/255.0f;
+    glWidgetO->gridcolor[0] = (AppSettings->readsetting("grid_color_r").toInt())/255.0f;
+    glWidgetO->gridcolor[1] = (AppSettings->readsetting("grid_color_g").toInt())/255.0f;
+    glWidgetO->gridcolor[2] = (AppSettings->readsetting("grid_color_b").toInt())/255.0f;
 
     QObject::connect(glWidget, SIGNAL(NodeBeamUpdated()), this, SLOT(MainNodeBeamUpdated()));
     QObject::connect(glWidgetO, SIGNAL(NodeBeamUpdated()), this, SLOT(MainNodeBeamUpdated()));
@@ -187,22 +193,22 @@ void MainWindow::on_actionImport_Rigs_of_Rods_triggered()
 /* File menu / Export to BeamNG triggered */
 void MainWindow::on_actionExport_to_BeamNG_triggered()
 {
-//    QTime Timer;
+    QTime Timer;
 
-//    QString fileName = QFileDialog::getSaveFileName(this, "Export to JBeam",QDir::currentPath(),"BeamNG file (*.jbeam);;All files (*.*)",0,QFileDialog::DontUseNativeDialog);
-//    if (!fileName.isEmpty())
-//    {
-//        Timer.start();
-//        CurrentNodeBeam->ExportBeamNG(fileName);
+    QString fileName = QFileDialog::getSaveFileName(this, "Export to JBeam",QDir::currentPath(),"BeamNG file (*.jbeam);;All files (*.*)",0,QFileDialog::DontUseNativeDialog);
+    if (!fileName.isEmpty())
+    {
+        Timer.start();
+        CurrentNodeBeam->ExportBeamNG(fileName);
 
-//        int result = Timer.elapsed();
-//        QString resultt = "File exporting finished in ";
-//        resultt.append(QString::number(result));
-//        resultt.append(" ms !");
-//        ui->statusBar->showMessage(resultt);
-//    }
+        int result = Timer.elapsed();
+        QString resultt = "File exporting finished in ";
+        resultt.append(QString::number(result));
+        resultt.append(" ms !");
+        ui->statusBar->showMessage(resultt);
+    }
 
-    CurrentNodeBeam->WriteInJBeamTree("pickup_fueltank");
+//    CurrentNodeBeam->WriteInJBeamTree("pickup_fueltank");
 
 
 //tosi vanha    QFileDialog SaveWindow;
@@ -1609,6 +1615,13 @@ void MainWindow::SettingsUpdated()
     glWidgetO->backgroundcolor[0] = (AppSettings->readsetting("bg_color_r").toInt())/255.0f;
     glWidgetO->backgroundcolor[1] = (AppSettings->readsetting("bg_color_g").toInt())/255.0f;
     glWidgetO->backgroundcolor[2] = (AppSettings->readsetting("bg_color_b").toInt())/255.0f;
+
+    glWidget->gridcolor[0] = (AppSettings->readsetting("grid_color_r").toInt())/255.0f;
+    glWidget->gridcolor[1] = (AppSettings->readsetting("grid_color_g").toInt())/255.0f;
+    glWidget->gridcolor[2] = (AppSettings->readsetting("grid_color_b").toInt())/255.0f;
+    glWidgetO->gridcolor[0] =  (AppSettings->readsetting("grid_color_r").toInt())/255.0f;
+    glWidgetO->gridcolor[1] =  (AppSettings->readsetting("grid_color_g").toInt())/255.0f;
+    glWidgetO->gridcolor[2] =  (AppSettings->readsetting("grid_color_b").toInt())/255.0f;
 }
 
 void MainWindow::on_horizontalSlider_sliderMoved(int position)

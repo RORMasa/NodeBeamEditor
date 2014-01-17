@@ -36,6 +36,8 @@ The active file can be saved in editors own xml file format.
 * Rigs of rods import has trouble with set_node_defaults
 * Rigs of rods importer does not import nodes2
 * Array tool does not work
+* Selection tool does not work properly from the tree view
+* When selecting a lot of nodes, the treeview can be extremely slow because of a Qt bug
 
 ##What it can be used for
 * Making of basic node beam structure
