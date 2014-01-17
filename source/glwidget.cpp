@@ -227,7 +227,7 @@ void GLWidget::draw()
 
     /* Drawing beams */
     glColor4f(0.0f,0.4f,0.6f,1.0f);
-    glLineWidth(1);
+    glLineWidth(2);
     glBegin(GL_LINES);
     i3=0;
     int NodeAmount = NBPointer->Nodes.size();
@@ -259,7 +259,7 @@ void GLWidget::draw()
                         //qDebug()<<"Rendering beams 8 .... ";
                     }
                     glEnd();
-                    glLineWidth(1);
+                    glLineWidth(2);
                     glBegin(GL_LINES);
 
                 }

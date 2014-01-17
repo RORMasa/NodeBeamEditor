@@ -50,3 +50,9 @@ The active file can be saved in editors own xml file format.
 * Adding wheels
 * Adding hydros
 * Adding anything else except nodes and beams
+
+##Shortcut keys
+* G  Move
+* R  Rotate
+* S  Scale
+* X, Y, Z lock axis when moving, rotating or scaling by mouse
