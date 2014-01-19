@@ -180,6 +180,8 @@ private slots:
 
     void on_toolButton_20_clicked();
 
+    void on_actionAbout_triggered();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
@@ -200,5 +202,7 @@ private:
 
     //Lift all nodes tab buttons up, except buttoni
     void ButtsUp(int buttoni);
+
+    QString AboutBox;
 };
 

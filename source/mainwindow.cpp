@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    AboutBox = "NodeBeam Editor\nVersion: 0.21";
+
     ui->setupUi(this);
     glWidget = new GLWidget;    
     glWidgetO = new GLWidgetOrtho;
@@ -1645,6 +1647,8 @@ void MainWindow::SettingsUpdated()
     glWidgetO->gridcolor[0] =  (AppSettings->readsetting("grid_color_r").toInt())/255.0f;
     glWidgetO->gridcolor[1] =  (AppSettings->readsetting("grid_color_g").toInt())/255.0f;
     glWidgetO->gridcolor[2] =  (AppSettings->readsetting("grid_color_b").toInt())/255.0f;
+
+    CurrentNodeBeam->VehicleAuthors[0] = AppSettings->readsetting("author");
 }
 
 void MainWindow::on_horizontalSlider_sliderMoved(int position)
@@ -1667,4 +1671,12 @@ void MainWindow::on_toolButton_20_clicked()
         glWidgetO->SetScaleByDistance=0;
     }
 
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox* about = new QMessageBox;
+    about->setText(AboutBox);
+    about->setWindowTitle("About");
+    about->show();
 }

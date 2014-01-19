@@ -1149,7 +1149,7 @@ void NodeBeam::ExportBeamNG(const QString &fileName)
             {
                 if(NodeGroups[i].draw)
                 {
-                    outStream <<"       ["<<'"'<<Nodes[i3].NodeName<<'"'<<", "<<Nodes[i3].locX<<", "<<Nodes[i3].locY<<", "<<Nodes[i3].locZ<<"],\r\n";
+                    outStream <<"       ["<<'"'<<Nodes[i3].NodeName<<'"'<<", "<<QString::number(Nodes[i3].locX,'f',6)<<", "<<QString::number(Nodes[i3].locY,'f',6)<<", "<<QString::number(Nodes[i3].locZ,'f',6)<<"],\r\n";
                 }
                 i3++;
             }
@@ -1197,9 +1197,10 @@ void NodeBeam::ExportBeamNG(const QString &fileName)
 
         outStream <<"]\r\n";
 
-        outStream <<"   "<<'"'<<"hubwheels"<<'"'<<" : [\r\n";
+
         if(Hubwheels.size()>0)
         {
+        outStream <<"   "<<'"'<<"hubwheels"<<'"'<<" : [\r\n";
             for(int i=0; i<Hubwheels.size();i++)
             {
 //                for(int i2=0; i<HWArguments[Hubwheels[i].arguments].KeyValuePairs.size();i2++)
@@ -1218,7 +1219,6 @@ void NodeBeam::ExportBeamNG(const QString &fileName)
 
         }
 
-        outStream <<"]\r\n";
         outStream <<"\r\n}\r\n";
         outStream <<"}\r\n";
 
