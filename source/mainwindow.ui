@@ -1025,41 +1025,54 @@ QTabWidget::tab-bar {
            <property name="frameShadow">
             <enum>QFrame::Raised</enum>
            </property>
-           <widget class="QSpinBox" name="spinBox">
+           <widget class="QComboBox" name="comboBox_3_views">
             <property name="geometry">
              <rect>
               <x>10</x>
               <y>0</y>
-              <width>61</width>
+              <width>91</width>
               <height>31</height>
              </rect>
             </property>
-            <property name="toolTip">
-             <string>View zoom</string>
-            </property>
-            <property name="suffix">
-             <string>%</string>
-            </property>
-            <property name="maximum">
-             <number>500</number>
-            </property>
-            <property name="singleStep">
-             <number>10</number>
-            </property>
-            <property name="value">
-             <number>100</number>
-            </property>
            </widget>
-           <widget class="QComboBox" name="comboBox_3_views">
+           <widget class="QDoubleSpinBox" name="doubleSpinBox">
             <property name="geometry">
              <rect>
-              <x>80</x>
+              <x>110</x>
               <y>0</y>
-              <width>161</width>
+              <width>62</width>
               <height>31</height>
              </rect>
             </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
            </widget>
+          </widget>
+          <widget class="QSpinBox" name="spinBox">
+           <property name="geometry">
+            <rect>
+             <x>90</x>
+             <y>40</y>
+             <width>61</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="toolTip">
+            <string>View zoom</string>
+           </property>
+           <property name="suffix">
+            <string>%</string>
+           </property>
+           <property name="maximum">
+            <number>500</number>
+           </property>
+           <property name="singleStep">
+            <number>10</number>
+           </property>
+           <property name="value">
+            <number>100</number>
+           </property>
           </widget>
          </widget>
         </widget>

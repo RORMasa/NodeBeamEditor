@@ -653,14 +653,14 @@ void GLWidgetOrtho::mousePressEvent(QMouseEvent *event)
             OriginalLocationsX.clear();
             OriginalLocationsY.clear();
             OriginalLocationsZ.clear();
-            for(int i5=0; i5<NBPointer->SelectedNodes2.size(); i5++)
+            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
             {
                 OriginalLocationsX.resize(OriginalLocationsX.size()+1);
                 OriginalLocationsY.resize(OriginalLocationsY.size()+1);
                 OriginalLocationsZ.resize(OriginalLocationsZ.size()+1);
-                OriginalLocationsX[i5] = NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locX;
-                OriginalLocationsY[i5] = NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locY;
-                OriginalLocationsZ[i5] = NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locZ;
+                OriginalLocationsX[i5] = NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX;
+                OriginalLocationsY[i5] = NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY;
+                OriginalLocationsZ[i5] = NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ;
             }
             float distance_x = event->x()-(xWidth*0.5f);
             float distance_y = event->y()-(yHeight*0.5f);
@@ -674,14 +674,14 @@ void GLWidgetOrtho::mousePressEvent(QMouseEvent *event)
             OriginalLocationsX.clear();
             OriginalLocationsY.clear();
             OriginalLocationsZ.clear();
-            for(int i5=0; i5<NBPointer->SelectedNodes2.size(); i5++)
+            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
             {
                 OriginalLocationsX.resize(OriginalLocationsX.size()+1);
                 OriginalLocationsY.resize(OriginalLocationsY.size()+1);
                 OriginalLocationsZ.resize(OriginalLocationsZ.size()+1);
-                OriginalLocationsX[i5] = NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locX;
-                OriginalLocationsY[i5] = NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locY;
-                OriginalLocationsZ[i5] = NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locZ;
+                OriginalLocationsX[i5] = NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX;
+                OriginalLocationsY[i5] = NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY;
+                OriginalLocationsZ[i5] = NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ;
             }
 
             float distance_x = event->x()-(xWidth*0.5f);
@@ -906,11 +906,11 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             ZPointer1 = &movement_z;
 
 
-            for(int i5=0; i5<NBPointer->SelectedNodes2.size(); i5++)
+            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
             {
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locX += -viewscalefactor*(**XPointer2);
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locY += -viewscalefactor*(**YPointer2);
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locZ += -viewscalefactor*(**ZPointer2);
+                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX += -viewscalefactor*(**XPointer2);
+                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY += -viewscalefactor*(**YPointer2);
+                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ += -viewscalefactor*(**ZPointer2);
             }
 
             updateGL();
@@ -929,9 +929,9 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             YPointer1 = &movement_y;
             ZPointer1 = &movement_z;
 
-            for(int i5=0; i5<NBPointer->SelectedNodes2.size(); i5++)
+            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
             {
-                    NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locX += -viewscalefactor*(**XPointer2);
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX += -viewscalefactor*(**XPointer2);
             }
             updateGL();
         }
@@ -949,9 +949,9 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             YPointer1 = &movement_y;
             ZPointer1 = &movement_z;
 
-            for(int i5=0; i5<NBPointer->SelectedNodes2.size(); i5++)
+            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
             {
-                    NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locY += -viewscalefactor*(**YPointer2);
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY += -viewscalefactor*(**YPointer2);
             }
             updateGL();
         }
@@ -969,9 +969,9 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             YPointer1 = &movement_y;
             ZPointer1 = &movement_z;
 
-            for(int i5=0; i5<NBPointer->SelectedNodes2.size(); i5++)
+            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
             {
-                    NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locZ += -viewscalefactor*(**ZPointer2);
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ += -viewscalefactor*(**ZPointer2);
             }
             updateGL();
         }
@@ -984,11 +984,11 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             scalefactor = sqrt((scalefactor_x*scalefactor_x + scalefactor_y*scalefactor_y));
             scalefactor = scalefactor/StartDistanceFromOrigin[0];
 
-            for(int i5=0; i5<NBPointer->SelectedNodes2.size(); i5++)
+            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
             {
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locX = OriginalLocationsX[i5]*(scalefactor);
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locY = OriginalLocationsY[i5]*(scalefactor);
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locZ = OriginalLocationsZ[i5]*(scalefactor);
+                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX = OriginalLocationsX[i5]*(scalefactor);
+                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY = OriginalLocationsY[i5]*(scalefactor);
+                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ = OriginalLocationsZ[i5]*(scalefactor);
 
             }
             updateGL();
@@ -1002,9 +1002,9 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             scalefactor = sqrt((scalefactor_x*scalefactor_x + scalefactor_y*scalefactor_y));
             scalefactor = scalefactor/StartDistanceFromOrigin[0];
 
-            for(int i5=0; i5<NBPointer->SelectedNodes2.size(); i5++)
+            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
             {
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locX = OriginalLocationsX[i5]*(scalefactor);
+                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX = OriginalLocationsX[i5]*(scalefactor);
 
             }
             updateGL();
@@ -1018,9 +1018,9 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             scalefactor = sqrt((scalefactor_x*scalefactor_x + scalefactor_y*scalefactor_y));
             scalefactor = scalefactor/StartDistanceFromOrigin[0];
 
-            for(int i5=0; i5<NBPointer->SelectedNodes2.size(); i5++)
+            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
             {
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locY = OriginalLocationsY[i5]*(scalefactor);
+                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY = OriginalLocationsY[i5]*(scalefactor);
 
             }
             updateGL();
@@ -1034,9 +1034,9 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             scalefactor = sqrt((scalefactor_x*scalefactor_x + scalefactor_y*scalefactor_y));
             scalefactor = scalefactor/StartDistanceFromOrigin[0];
 
-            for(int i5=0; i5<NBPointer->SelectedNodes2.size(); i5++)
+            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
             {
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i5]].locZ = OriginalLocationsZ[i5]*(scalefactor);
+                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ = OriginalLocationsZ[i5]*(scalefactor);
 
             }
             updateGL();
@@ -1069,12 +1069,12 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             float a2 = qSin(angle);
             float b2 = qCos(angle);
 
-            for(int i2=0; i2<NBPointer->SelectedNodes2.size();i2++)
+            for(int i2=0; i2<NBPointer->SelectedNodes.size();i2++)
             {
                 float XCoordinate = OriginalLocationsY[i2];
                 float YCoordinate = OriginalLocationsZ[i2];
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i2]].locY = a1*XCoordinate - b1*YCoordinate;
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i2]].locZ = a2*XCoordinate + b2*YCoordinate;
+                NBPointer->Nodes[NBPointer->SelectedNodes[i2]].locY = a1*XCoordinate - b1*YCoordinate;
+                NBPointer->Nodes[NBPointer->SelectedNodes[i2]].locZ = a2*XCoordinate + b2*YCoordinate;
             }
             updateGL();
             QString Message = "Rotating X: ";
@@ -1110,12 +1110,12 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             float a2 = qSin(angle);
             float b2 = qCos(angle);
 
-            for(int i2=0; i2<NBPointer->SelectedNodes2.size();i2++)
+            for(int i2=0; i2<NBPointer->SelectedNodes.size();i2++)
             {
                 float XCoordinate = OriginalLocationsX[i2];
                 float YCoordinate = OriginalLocationsZ[i2];
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i2]].locX = a1*XCoordinate - b1*YCoordinate;
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i2]].locZ = a2*XCoordinate + b2*YCoordinate;
+                NBPointer->Nodes[NBPointer->SelectedNodes[i2]].locX = a1*XCoordinate - b1*YCoordinate;
+                NBPointer->Nodes[NBPointer->SelectedNodes[i2]].locZ = a2*XCoordinate + b2*YCoordinate;
             }
             updateGL();
             QString Message = "Rotating Y: ";
@@ -1152,12 +1152,12 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             float a2 = qSin(angle);
             float b2 = qCos(angle);
 
-            for(int i2=0; i2<NBPointer->SelectedNodes2.size();i2++)
+            for(int i2=0; i2<NBPointer->SelectedNodes.size();i2++)
             {
                 float XCoordinate = OriginalLocationsX[i2];
                 float YCoordinate = OriginalLocationsY[i2];
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i2]].locX = a1*XCoordinate - b1*YCoordinate;
-                NBPointer->Nodes[NBPointer->SelectedNodes2[i2]].locY = a2*XCoordinate + b2*YCoordinate;
+                NBPointer->Nodes[NBPointer->SelectedNodes[i2]].locX = a1*XCoordinate - b1*YCoordinate;
+                NBPointer->Nodes[NBPointer->SelectedNodes[i2]].locY = a2*XCoordinate + b2*YCoordinate;
             }
             updateGL();
             QString Message = "Rotating Z: ";

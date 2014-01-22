@@ -55,6 +55,7 @@ public:
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
     bool AddingNodes;
+    double ViewHeight; //in meters
     int MovingNodes;
     int ScalingNodes;
     int RotatingNodes;
@@ -90,6 +91,8 @@ public:
     QVector3D distance_1;
     QVector3D distance_2;
 
+    void resizeGL(int width, int height);
+
 public slots:
     void setNBPointer(NodeBeam *NBPointer1);
     void setViewTop();
@@ -108,7 +111,6 @@ protected:
     void draw();
     void initializeGL();
     void paintGL();
-    void resizeGL(int width, int height);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
@@ -120,7 +122,7 @@ private:
     int zRot;
     int xWidth;
     int yHeight; //in pixels
-    double ViewHeight; //in meters
+
     double mouseRollPos;
     QPoint lastPos;
     QColor qtGreen;

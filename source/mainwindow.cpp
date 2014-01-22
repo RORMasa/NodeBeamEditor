@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    AboutBox = "NodeBeam Editor\nVersion: 0.21";
+    AboutBox = "NodeBeam Editor\nVersion: 0.22";
 
     ui->setupUi(this);
     glWidget = new GLWidget;    
@@ -37,11 +37,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QVBoxLayout *vertikaali2 = new QVBoxLayout;
     QWidget * OpenGLViewO = new QWidget;
     vertikaali2->addWidget(glWidgetO);
-    vertikaali2->addWidget(ui->comboBox_3_views);
+    vertikaali2->addWidget(ui->frame_5);
     ui->comboBox_3_views->setMaximumWidth(100);
     ui->comboBox_3_views->setMinimumHeight(28);
     vertikaali2->setMargin(1);
     OpenGLViewO->setLayout(vertikaali2);
+
+    ui->doubleSpinBox->setValue(2.0);
 
     /* Views into tab widget */
     OpenGLViews = new QTabWidget;
@@ -1679,4 +1681,17 @@ void MainWindow::on_actionAbout_triggered()
     about->setText(AboutBox);
     about->setWindowTitle("About");
     about->show();
+}
+
+/* Change orthographic view zoom */
+void MainWindow::on_doubleSpinBox_editingFinished()
+{
+
+}
+
+void MainWindow::on_doubleSpinBox_valueChanged(double arg1)
+{
+    glWidgetO->ViewHeight = arg1;
+    glWidgetO->resizeGL(glWidgetO->width(), glWidgetO->height());
+    glWidgetO->updateGL();
 }
