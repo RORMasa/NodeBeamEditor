@@ -121,3 +121,9 @@ void settings::on_pushButton_3_clicked()
 
     }
 }
+
+/* Locate RoR exe */
+void settings::on_pushButton_4_clicked()
+{
+
+}

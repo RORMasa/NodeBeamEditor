@@ -74,6 +74,7 @@ public:
     int CurrentBeamGroup;
 
     bool ShowNodeNumbers;
+    bool ShowNodeNumbers1; //Shows actual ID's, for RoR
 
     int MovingNodes;
     int ScalingNodes;
@@ -104,7 +105,7 @@ signals:
 protected:
     void draw();
     void drawpicking();
-    void RenderTextInScene();
+    void RenderTextInScene(bool names);
     void initializeGL();
     void paintGL();
     void resizeGL(int width, int height);

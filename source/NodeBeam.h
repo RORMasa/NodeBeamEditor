@@ -26,7 +26,6 @@ struct Node
     int green;
     int blue;
 
-
 };
 
 struct NodeGroup
@@ -104,6 +103,22 @@ struct Hubwheel
     float RotationY;
     float width;
     float radius;
+};
+
+class node
+{
+    QString NodeName;
+    float locX;
+    float locY;
+    float locZ;
+    QString Properties;
+
+    //The number of group in which this node belongs to
+    int GroupID;
+
+    //for color picking feature values between 0-255
+    int green;
+    int blue;
 };
 
 class NodeBeam
@@ -200,8 +215,9 @@ public:
     /* Delete Beam */
     void DeleteBeam(int BeamIndex);
 
-    /* Move node to group */
+    /* Move to group */
     int MoveToGroup(int NodeGlobalID, int GroupID);
+    void MoveToGroupBeam();
 
     /* Duplicate nodes */
     void DuplicateNodes();

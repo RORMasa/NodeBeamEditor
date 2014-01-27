@@ -568,8 +568,8 @@ QTabWidget::tab-bar {
           <widget class="QCheckBox" name="checkBox">
            <property name="geometry">
             <rect>
-             <x>730</x>
-             <y>10</y>
+             <x>590</x>
+             <y>30</y>
              <width>141</width>
              <height>20</height>
             </rect>
@@ -647,6 +647,19 @@ QTabWidget::tab-bar {
            </property>
            <property name="text">
             <string>Show axis arrows</string>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_3">
+           <property name="geometry">
+            <rect>
+             <x>590</x>
+             <y>50</y>
+             <width>141</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Show node ID's</string>
            </property>
           </widget>
          </widget>
@@ -1894,15 +1907,8 @@ QTabWidget::tab-bar {
     </property>
     <addaction name="actionAbout"/>
    </widget>
-   <widget class="QMenu" name="menuNobeBeam">
-    <property name="title">
-     <string>NobeBeam</string>
-    </property>
-    <addaction name="actionEdit_details"/>
-   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
-   <addaction name="menuNobeBeam"/>
    <addaction name="menuGenerate"/>
    <addaction name="menuHelp"/>
   </widget>

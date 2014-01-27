@@ -10,12 +10,13 @@
 #include "Generators/tracksgenerator.h"
 #include "inputdialog.h"
 #include "settings.h"
+#include <QTimerEvent>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    AboutBox = "NodeBeam Editor\nVersion: 0.22";
+    AboutBox = "NodeBeam Editor\nVersion: 0.24";
 
     ui->setupUi(this);
     glWidget = new GLWidget;    
@@ -124,6 +125,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->horizontalSlider->setRange(0, 100);
     ui->horizontalSlider->setPageStep(2);
     ui->horizontalSlider->setValue(100);
+
+    autosave.start();
+
 }
 
 MainWindow::~MainWindow()
@@ -486,7 +490,12 @@ void MainWindow::MainNodeBeamUpdated()
         item->setText(CurrentNodeBeam->Hubwheels[i].name);
         ui->listWidget->addItem(item);
     }
-
+    if(autosave.elapsed()>60000)
+    {
+        CurrentNodeBeam->SaveAs("autosave.beamproj");
+        ui->statusBar->showMessage("Autosave: vehicle saved", 10000);
+        autosave.restart();
+    }
 
 }
 
@@ -760,7 +769,7 @@ void MainWindow::on_pushButton_22_shownodenumbers_clicked()
 {
 
 }
-/* Show node numbers button */
+/* Show node names button */
 void MainWindow::on_checkBox_clicked()
 {
     if(ui->checkBox->isChecked())
@@ -772,6 +781,19 @@ void MainWindow::on_checkBox_clicked()
         glWidget->ShowNodeNumbers = 0;
     }
 }
+/* Show node ID's button */
+void MainWindow::on_checkBox_3_clicked()
+{
+    if(ui->checkBox_3->isChecked())
+    {
+        glWidget->ShowNodeNumbers1 = 1;
+    }
+    else
+    {
+        glWidget->ShowNodeNumbers1 = 0;
+    }
+}
+
 
 /* Import BeamNG file triggered */
 void MainWindow::on_actionImport_BeamNG_triggered()
@@ -1695,3 +1717,4 @@ void MainWindow::on_doubleSpinBox_valueChanged(double arg1)
     glWidgetO->resizeGL(glWidgetO->width(), glWidgetO->height());
     glWidgetO->updateGL();
 }
+

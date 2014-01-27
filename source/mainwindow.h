@@ -7,6 +7,7 @@
 #include <QTreeWidget>
 #include "beamdefaultsdialog.h"
 #include "settings.h"
+#include <QTime>
 
 namespace Ui {
 class MainWindow;
@@ -186,6 +187,8 @@ private slots:
 
     void on_doubleSpinBox_valueChanged(double arg1);
 
+    void on_checkBox_3_clicked();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
@@ -196,6 +199,8 @@ private:
     QTreeWidgetItem *item;
     QTreeWidgetItem *item2;
     QTabWidget *OpenGLViews;
+
+    QTime autosave;
 
     void loadFile(const QString &fileName);
     int CurrentBeamGroupi;

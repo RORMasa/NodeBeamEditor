@@ -13,8 +13,8 @@
 #include "NodeBeam.h"
 
 //NB Editoria varten
-static const qreal node_size = 0.10;
-static const int num_divisions = 32;
+//static const qreal node_size = 0.10;
+//static const int num_divisions = 32;
 
 
 NodeBeam::NodeBeam()
@@ -1274,7 +1274,7 @@ void NodeBeam::ExportRoR(const QString &fileName)
             {
                 if(NodeGroups[i].draw)
                 {
-                    outStream << i3 <<", "<< Nodes[i3].locX <<", "<<Nodes[i3].locY<<", "<<Nodes[i3].locZ<<", l 50 \r\n";
+                    outStream << i3 <<", "<< QString::number(Nodes[i3].locY,'f',6) <<", "<<QString::number(Nodes[i3].locZ,'f',6) <<", "<< QString::number(Nodes[i3].locX,'f',6) <<", l 50 \r\n";
                 }
                 i3++;
             }
@@ -1318,13 +1318,6 @@ void NodeBeam::AddNodeT(float locx, float locy, float locz, int NodeGroupID, QSt
     if(NodeName != "")
     {
         /* If a name was given as input parameter, check that node with this name does not exsist */
-//        for(int i=0; i< Nodes.size(); i++)
-//        {
-//            if(Nodes[i].NodeName == NodeName)
-//            {
-//                NodeName.append("_1");
-//            }
-//        }
         TempNode.NodeName = NewNodeName(CurrentNamePrefix);
     }
     else
@@ -1332,13 +1325,9 @@ void NodeBeam::AddNodeT(float locx, float locy, float locz, int NodeGroupID, QSt
         /* Naming the node, different letter for each group */
         QString NodeName = "";
         NodeName.append(char(NodeGroupID+97));
-        if(NodeGroups.size()>0) NodeName.append(QString::number(NodeGroups[NodeGroupID].NodeAmount));
-        else NodeName.append(QString::number(0));
-//        NodeName=GiveName(0,"",NodeGroupID);
-        TempNode.NodeName=NodeName;
+        TempNode.NodeName = NewNodeName(NodeName);
     }
     AddNode(NodeGroupID);
-
 }
 
 /* Add node to last group */
@@ -2120,6 +2109,12 @@ int NodeBeam::MoveToGroup(int NodeGlobalID, int GroupID)
     }
 
     return nodeindex-1;
+}
+
+/* Move beams to group */
+void NodeBeam::MoveToGroupBeam()
+{
+
 }
 
 /* Save current vehicle project */

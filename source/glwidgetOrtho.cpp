@@ -280,8 +280,8 @@ void GLWidgetOrtho::draw()
 
     if(SnapToGrid)
     {
-        int lineamount = 3/GridSize;
-        glColor4f(gridcolor[0],gridcolor[1],gridcolor[2],gridcolor[3]);
+        int lineamount = 10/GridSize;
+        glColor4f(0.75*gridcolor[0],0.75*gridcolor[1],0.75*gridcolor[2],gridcolor[3]);
         glLineWidth(1);
         glBegin(GL_LINES);
         for (int i = -lineamount; i <= lineamount; i++) {
@@ -290,7 +290,7 @@ void GLWidgetOrtho::draw()
                 glVertex3d(x_max, (double)(GridSize*i), 0.0);
             }
         }
-        for (int i = -10; i <= 10; i++) {
+        for (int i = -lineamount; i <= lineamount; i++) {
             if (i != 0) {
                 glVertex3d((double)(GridSize*i), y_min, 0.0);
                 glVertex3d((double)(GridSize*i), y_max, 0.0);
@@ -300,7 +300,7 @@ void GLWidgetOrtho::draw()
     }
 
     glColor4f(gridcolor[0],gridcolor[1],gridcolor[2],gridcolor[3]);
-    glLineWidth(2);
+    glLineWidth(3);
     glBegin(GL_LINES);
     for (int i = -10; i <= 10; i++) {
         if (i != 0) {

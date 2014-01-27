@@ -407,32 +407,53 @@ void GLWidget::drawpicking()
 }
 
 /* Rendering node names next of nodes */
-void GLWidget::RenderTextInScene()
+void GLWidget::RenderTextInScene(bool names)
 {
 
-    glColor4f(1.0f,1.0f,0.0f,1.0f);
-    int i3 = 0;
-    for(int i2=0; i2<NBPointer->NodeGroups.size();i2++)
+    if(names)
     {
-        for(int i=0; i<NBPointer->NodeGroups[i2].NodeAmount; i++)
+        glColor4f(1.0f,1.0f,0.0f,1.0f);
+        int i3 = 0;
+        for(int i2=0; i2<NBPointer->NodeGroups.size();i2++)
         {
-            if(NBPointer->NodeGroups[i2].draw)
+            for(int i=0; i<NBPointer->NodeGroups[i2].NodeAmount; i++)
             {
-                QPainter painter(this);
-                painter.setRenderHint(QPainter::Antialiasing);
-                if(NBPointer->Nodes[i3].GlobalID == NBPointer->ActiveNode);
-                else;
+                if(NBPointer->NodeGroups[i2].draw)
+                {
+                    QPainter painter(this);
+                    painter.setRenderHint(QPainter::Antialiasing);
+                    if(NBPointer->Nodes[i3].GlobalID == NBPointer->ActiveNode);
+                    else;
 
-                renderText(NBPointer->Nodes[i3].locX, NBPointer->Nodes[i3].locY+0.02f, NBPointer->Nodes[i3].locZ, NBPointer->Nodes[i3].NodeName, QFont( "times", 10, QFont::Normal, 0 ));
-                painter.end();
+                    renderText(NBPointer->Nodes[i3].locX, NBPointer->Nodes[i3].locY+0.02f, NBPointer->Nodes[i3].locZ, NBPointer->Nodes[i3].NodeName, QFont( "times", 10, QFont::Normal, 0 ));
+                    painter.end();
+                }
+                i3++;
             }
-            i3++;
         }
     }
+    else
+    {
+        glColor4f(1.0f,1.0f,0.0f,1.0f);
+        int i3 = 0;
+        for(int i2=0; i2<NBPointer->NodeGroups.size();i2++)
+        {
+            for(int i=0; i<NBPointer->NodeGroups[i2].NodeAmount; i++)
+            {
+                if(NBPointer->NodeGroups[i2].draw)
+                {
+                    QPainter painter(this);
+                    painter.setRenderHint(QPainter::Antialiasing);
+                    if(NBPointer->Nodes[i3].GlobalID == NBPointer->ActiveNode);
+                    else;
 
-
-
-
+                    renderText(NBPointer->Nodes[i3].locX, NBPointer->Nodes[i3].locY+0.02f, NBPointer->Nodes[i3].locZ, QString::number(NBPointer->Nodes[i3].GlobalID), QFont( "times", 10, QFont::Normal, 0 ));
+                    painter.end();
+                }
+                i3++;
+            }
+        }
+    }
 }
 
 /* Draw arrows for X, Y and Z axis */
@@ -652,7 +673,8 @@ void GLWidget::paintGL()
 
     renderText(10, yHeight-20, TextOverlay, QFont( "Arial", 14, QFont::Bold, 0 ) );
 
-    if(ShowNodeNumbers) RenderTextInScene();
+    if(ShowNodeNumbers) RenderTextInScene(1);
+    else if(ShowNodeNumbers1) RenderTextInScene(0);
 
     QGLWidget::swapBuffers();
 }
