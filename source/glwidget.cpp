@@ -178,7 +178,7 @@ void GLWidget::draw()
 
     glLineWidth(1);
     glColor4f(gridcolor[0],gridcolor[1],gridcolor[2],gridcolor[3]);
-    qDebug() << gridcolor[0] << ", " << gridcolor[1] << ", " << gridcolor[2];
+  //  qDebug() << gridcolor[0] << ", " << gridcolor[1] << ", " << gridcolor[2];
     glBegin(GL_LINES);
 
     for (int i = -10; i <= 10; i++) {

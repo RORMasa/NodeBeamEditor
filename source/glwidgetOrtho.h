@@ -117,14 +117,20 @@ protected:
 
 private:
 
+    /* View rotation and sizes*/
     int xRot;
     int yRot;
     int zRot;
     int xWidth;
     int yHeight; //in pixels
 
+    /* View offset in for panning the view */
+    float ViewOffsetX;
+    float ViewOffsetY;
+    float ViewOffsetZ;
+
     double mouseRollPos;
-    QPoint lastPos;
+    QPoint lastPos; //Last mouse position before current position
     QColor qtGreen;
     QColor qtPurple;
     QColor qtGrey;
@@ -182,11 +188,16 @@ private:
 
     /* Blueprint functions */
     GLuint texture[6]; //Storage for blueprint images
-
     void DrawBlueprint(); //drawing function
     float blueprint_h[6]; //height in pixels
     float blueprint_w[6]; //width in pixels
     QVector <QVector3D> blueprint_viewrot;
+
+    /* Light positions */
+    const GLfloat first_pos[4] = {0.0f, 0.0f, 50.0f, 0.0f};
+    const GLfloat first_dir[4] = {0.0f, 0.0f, -1.0f, 0.0f};
+    const GLfloat second_pos[4] = {0.0f, 0.0f, -50.0f, 0.0f};
+    const GLfloat second_dir[4] = {0.0f, 0.0f, 1.0f, 0.0f};
 
 };
 

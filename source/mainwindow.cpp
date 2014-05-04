@@ -291,13 +291,16 @@ void MainWindow::on_treeWidget_itemSelectionChanged()
         glWidgetO->updateGL();
 
 
-        //qDebug() << "Updating SELECTION";
+        qDebug() << "Updating SELECTION";
         CurrentNodeBeam->SelectedNodes.clear();
         for(int i=0; i<ui->treeWidget->selectedItems().size(); i++)
         {
-            CurrentNodeBeam->SelectedNodes.append(ui->treeWidget->selectedItems()[i]->text(1).toInt());
-            //qDebug() << ui->treeWidget->selectedItems()[i]->text(1);
-            //qDebug() << CurrentNodeBeam->SelectedNodes[i];
+            if(ui->treeWidget->selectedItems()[i]->text(2) != "Group")
+            {
+                CurrentNodeBeam->SelectedNodes.append(ui->treeWidget->selectedItems()[i]->text(1).toInt());
+                qDebug() << ui->treeWidget->selectedItems()[i]->text(1);
+                qDebug() << CurrentNodeBeam->SelectedNodes[i];
+            }
         }
     }
 
@@ -955,6 +958,7 @@ void MainWindow::on_toolButton_clicked()
     {
         if(OpenGLViews->currentIndex()!=1) OpenGLViews->setCurrentIndex(1);
         glWidgetO->AddingNodes=1;
+        ui->stackedWidget->setCurrentIndex(0);
     }
     else glWidgetO->AddingNodes=0;
 }
@@ -967,6 +971,7 @@ void MainWindow::on_toolButton_2_clicked()
     {
         glWidgetO->MovingNodes = 1;
         glWidget->MovingNodes=1;
+        ui->stackedWidget->setCurrentIndex(1);
     }
     else
     {
@@ -975,6 +980,53 @@ void MainWindow::on_toolButton_2_clicked()
     }
 
 
+}
+
+/* Move by typing distance, button clicked from top toolbar*/
+void MainWindow::on_toolButton_21_clicked()
+{
+    bool NumberTest = 1;
+    float MoveDistX;
+    float MoveDistY;
+    float MoveDistZ;
+    if(ui->lineEdit_movex->text() == "") MoveDistX = 0;
+    else MoveDistX = ui->lineEdit_movex->text().toFloat(&NumberTest);
+    if(NumberTest)
+    {
+        if(ui->lineEdit_movey->text() == "") MoveDistY = 0;
+        else MoveDistY = ui->lineEdit_movey->text().toFloat(&NumberTest);
+        if(NumberTest)
+        {
+            if(ui->lineEdit_movez->text() == "") MoveDistZ = 0;
+            else MoveDistZ = ui->lineEdit_movez->text().toFloat(&NumberTest);
+        }
+    }
+    if(!NumberTest)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("The moving distance must be a number.");
+        msgBox.exec();
+    }
+    else
+    {
+        for(int i2=0; i2<CurrentNodeBeam->SelectedNodes.size();i2++)
+        {
+            CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX + MoveDistX;
+            CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY + MoveDistY;
+            CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ + MoveDistZ;
+
+        }
+    }
+    glWidget->updateGL();
+    glWidgetO->updateGL();
+}
+
+/* Move - reset values in text boxes */
+void MainWindow::on_toolButton_22_clicked()
+{
+    ui->lineEdit_movex->clear();
+    ui->lineEdit_movey->clear();
+    ui->lineEdit_movez->clear();
 }
 
 /* Scale nodes */
@@ -1717,4 +1769,5 @@ void MainWindow::on_doubleSpinBox_valueChanged(double arg1)
     glWidgetO->resizeGL(glWidgetO->width(), glWidgetO->height());
     glWidgetO->updateGL();
 }
+
 

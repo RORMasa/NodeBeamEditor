@@ -245,20 +245,10 @@ QTabWidget::tab-bar {
           <attribute name="title">
            <string>Nodes</string>
           </attribute>
-          <widget class="QComboBox" name="comboBox_2">
-           <property name="geometry">
-            <rect>
-             <x>730</x>
-             <y>60</y>
-             <width>131</width>
-             <height>28</height>
-            </rect>
-           </property>
-          </widget>
           <widget class="QFrame" name="frame_2">
            <property name="geometry">
             <rect>
-             <x>930</x>
+             <x>950</x>
              <y>10</y>
              <width>161</width>
              <height>81</height>
@@ -270,88 +260,56 @@ QTabWidget::tab-bar {
            <property name="frameShadow">
             <enum>QFrame::Raised</enum>
            </property>
-           <widget class="QLineEdit" name="lineEdit_zcoordinate">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>40</y>
-              <width>61</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>The Z coordinate of new nodes.</string>
-            </property>
-           </widget>
-           <widget class="QSpinBox" name="spinBox_grids">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>60</y>
-              <width>61</width>
-              <height>22</height>
-             </rect>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-            <property name="singleStep">
-             <number>5</number>
-            </property>
-            <property name="value">
-             <number>25</number>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_zcoordinate">
-            <property name="geometry">
-             <rect>
-              <x>80</x>
-              <y>40</y>
-              <width>81</width>
-              <height>21</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Z coordinate</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_7grids">
-            <property name="geometry">
-             <rect>
-              <x>80</x>
-              <y>60</y>
-              <width>61</width>
-              <height>21</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Grid size</string>
-            </property>
-           </widget>
-           <widget class="QLineEdit" name="lineEdit">
+           <widget class="QCheckBox" name="checkBox_3">
             <property name="geometry">
              <rect>
               <x>10</x>
               <y>20</y>
-              <width>61</width>
+              <width>141</width>
               <height>20</height>
              </rect>
             </property>
+            <property name="text">
+             <string>Show node ID's</string>
+            </property>
            </widget>
-           <widget class="QLabel" name="label_zcoordinate_2">
+           <widget class="QCheckBox" name="checkBox_2">
             <property name="geometry">
              <rect>
-              <x>80</x>
-              <y>20</y>
-              <width>81</width>
+              <x>10</x>
+              <y>40</y>
+              <width>131</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Show axis arrows</string>
+            </property>
+           </widget>
+           <widget class="QCheckBox" name="checkBox">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>60</y>
+              <width>141</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Show node names</string>
+            </property>
+           </widget>
+           <widget class="QCheckBox" name="checkBox_gridsnap">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>0</y>
+              <width>101</width>
               <height>21</height>
              </rect>
             </property>
             <property name="text">
-             <string>Name prefix</string>
+             <string>Snap to grid</string>
             </property>
            </widget>
           </widget>
@@ -552,32 +510,6 @@ QTabWidget::tab-bar {
             <enum>Qt::ToolButtonTextUnderIcon</enum>
            </property>
           </widget>
-          <widget class="QToolButton" name="toolButton_13">
-           <property name="geometry">
-            <rect>
-             <x>870</x>
-             <y>60</y>
-             <width>51</width>
-             <height>31</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Apply</string>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="checkBox">
-           <property name="geometry">
-            <rect>
-             <x>590</x>
-             <y>30</y>
-             <width>141</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Show node names</string>
-           </property>
-          </widget>
           <widget class="QToolButton" name="toolButton_14">
            <property name="geometry">
             <rect>
@@ -623,44 +555,250 @@ QTabWidget::tab-bar {
             <string>Array</string>
            </property>
           </widget>
-          <widget class="QCheckBox" name="checkBox_gridsnap">
+          <widget class="QStackedWidget" name="stackedWidget">
            <property name="geometry">
             <rect>
-             <x>730</x>
-             <y>30</y>
-             <width>101</width>
-             <height>21</height>
+             <x>580</x>
+             <y>-1</y>
+             <width>301</width>
+             <height>101</height>
             </rect>
            </property>
-           <property name="text">
-            <string>Snap to grid</string>
+           <property name="currentIndex">
+            <number>1</number>
            </property>
-          </widget>
-          <widget class="QCheckBox" name="checkBox_2">
-           <property name="geometry">
-            <rect>
-             <x>590</x>
-             <y>10</y>
-             <width>131</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Show axis arrows</string>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="checkBox_3">
-           <property name="geometry">
-            <rect>
-             <x>590</x>
-             <y>50</y>
-             <width>141</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Show node ID's</string>
-           </property>
+           <widget class="QWidget" name="page">
+            <widget class="QComboBox" name="comboBox_2">
+             <property name="geometry">
+              <rect>
+               <x>90</x>
+               <y>60</y>
+               <width>131</width>
+               <height>25</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QToolButton" name="toolButton_13">
+             <property name="geometry">
+              <rect>
+               <x>222</x>
+               <y>57</y>
+               <width>51</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Apply</string>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="lineEdit">
+             <property name="geometry">
+              <rect>
+               <x>90</x>
+               <y>10</y>
+               <width>61</width>
+               <height>20</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_zcoordinate_2">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>10</y>
+               <width>81</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Name prefix</string>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="lineEdit_zcoordinate">
+             <property name="geometry">
+              <rect>
+               <x>90</x>
+               <y>30</y>
+               <width>61</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="toolTip">
+              <string>The Z coordinate of new nodes.</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_zcoordinate">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>81</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Z coordinate</string>
+             </property>
+            </widget>
+            <widget class="QSpinBox" name="spinBox_grids">
+             <property name="geometry">
+              <rect>
+               <x>230</x>
+               <y>30</y>
+               <width>61</width>
+               <height>22</height>
+              </rect>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="singleStep">
+              <number>5</number>
+             </property>
+             <property name="value">
+              <number>25</number>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_7grids">
+             <property name="geometry">
+              <rect>
+               <x>170</x>
+               <y>30</y>
+               <width>61</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Grid size</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_zcoordinate_3">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>60</y>
+               <width>81</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Node group</string>
+             </property>
+            </widget>
+           </widget>
+           <widget class="QWidget" name="page_2">
+            <widget class="QLineEdit" name="lineEdit_movex">
+             <property name="geometry">
+              <rect>
+               <x>30</x>
+               <y>30</y>
+               <width>81</width>
+               <height>22</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="lineEdit_movey">
+             <property name="geometry">
+              <rect>
+               <x>30</x>
+               <y>50</y>
+               <width>81</width>
+               <height>22</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="lineEdit_movez">
+             <property name="geometry">
+              <rect>
+               <x>30</x>
+               <y>70</y>
+               <width>81</width>
+               <height>22</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_zcoordinate_4">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>31</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>X</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_zcoordinate_5">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>50</y>
+               <width>31</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Y</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_zcoordinate_6">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>70</y>
+               <width>31</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Z</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_zcoordinate_7">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>5</y>
+               <width>91</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Move (meters)</string>
+             </property>
+            </widget>
+            <widget class="QToolButton" name="toolButton_21">
+             <property name="geometry">
+              <rect>
+               <x>120</x>
+               <y>60</y>
+               <width>51</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Move</string>
+             </property>
+            </widget>
+            <widget class="QToolButton" name="toolButton_22">
+             <property name="geometry">
+              <rect>
+               <x>120</x>
+               <y>30</y>
+               <width>51</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Reset</string>
+             </property>
+            </widget>
+           </widget>
           </widget>
          </widget>
          <widget class="QWidget" name="tab_2">

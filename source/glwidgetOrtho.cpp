@@ -128,6 +128,7 @@ GLWidgetOrtho::GLWidgetOrtho(QWidget *parent)
     gridcolor[1] = 1.0;
     gridcolor[2] = 1.0;
     gridcolor[3] = 1.0;
+
 }
 
 GLWidgetOrtho::~GLWidgetOrtho()
@@ -247,10 +248,6 @@ void GLWidgetOrtho::setViewLeft()
 //! [6]
 void GLWidgetOrtho::draw()
 {
-    const GLfloat first_pos[4] = {0.0f, 0.0f, 50.0f, 0.0f};
-    const GLfloat first_dir[4] = {0.0f, 0.0f, -1.0f, 0.0f};
-    const GLfloat second_pos[4] = {0.0f, 0.0f, -50.0f, 0.0f};
-    const GLfloat second_dir[4] = {0.0f, 0.0f, 1.0f, 0.0f};
 
     glLightfv(GL_LIGHT0, GL_POSITION, first_pos);
     glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, first_dir);
@@ -498,7 +495,7 @@ void GLWidgetOrtho::paintGL()
     glClearColor(backgroundcolor[0], backgroundcolor[1], backgroundcolor[2], backgroundcolor[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    glTranslatef(0.0, 0.0, -10.0);
+    glTranslatef(ViewOffsetX, ViewOffsetY, -10.0);
     glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
     glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
     glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
@@ -546,11 +543,11 @@ void GLWidgetOrtho::mousePressEvent(QMouseEvent *event)
             if(SnapToGrid)
             {
                 double viewscalefactor = ViewHeight/yHeight;
-                float locx = 2*viewscalefactor*(event->x()-(xWidth*0.5));
-                float locy = 2*viewscalefactor*(event->y()-(yHeight*0.5));
+                float locx = 2*viewscalefactor*(event->x()-(xWidth*0.5))-ViewOffsetX;
+                float locy = 2*viewscalefactor*(event->y()-(yHeight*0.5))+ViewOffsetY;
                 float tempx;
                 float tempy;
-                int lineamount = 3/GridSize;
+                int lineamount = 10/GridSize;
 
                 for (int i = -lineamount; i <= lineamount; i++) {
 
@@ -589,8 +586,8 @@ void GLWidgetOrtho::mousePressEvent(QMouseEvent *event)
 
                 double viewscalefactor = ViewHeight/yHeight;
 
-                float locx = 2*viewscalefactor*(event->x()-(xWidth*0.5));
-                float locy = 2*viewscalefactor*(event->y()-(yHeight*0.5));
+                float locx = 2*viewscalefactor*(event->x()-(xWidth*0.5))-ViewOffsetX;
+                float locy = 2*viewscalefactor*(event->y()-(yHeight*0.5))+ViewOffsetY;
 
                 if(inverse_X) locx = -locx;
                 if(inverse_Y) locy = -locy;
@@ -613,8 +610,8 @@ void GLWidgetOrtho::mousePressEvent(QMouseEvent *event)
         {
             if (event->buttons() & Qt::LeftButton) {
                 double viewscalefactor = ViewHeight/yHeight;
-                Rx0 = 2*viewscalefactor*(event->x()-(xWidth*0.5));
-                Ry0 = 2*viewscalefactor*(event->y()-(yHeight*0.5));
+                Rx0 = 2*viewscalefactor*(event->x()-(xWidth*0.5))-ViewOffsetX;
+                Ry0 = 2*viewscalefactor*(event->y()-(yHeight*0.5))+ViewOffsetY;
                 qDebug() << Rx0 << " x0, y0 " << Ry0;
                 if(inverse_X) Rx0 = -Rx0;
                 if(inverse_Y) Ry0 = -Ry0;
@@ -691,7 +688,7 @@ void GLWidgetOrtho::mousePressEvent(QMouseEvent *event)
             float cos_alfa = qAcos(distance_x/distance_t);
             float sin_alfa = qAsin(distance_y/distance_t);
 
-            float pii = 355.0f/113.0f;
+            //float pii = 355.0f/113.0f;
 
             if(sin_alfa>0)
             {
@@ -713,8 +710,8 @@ void GLWidgetOrtho::mouseReleaseEvent(QMouseEvent *event)
     {
         double viewscalefactor = ViewHeight/yHeight;
 
-        Rx1 = 2*viewscalefactor*(event->x()-(xWidth*0.5));
-        Ry1 = 2*viewscalefactor*(event->y()-(yHeight*0.5));
+        Rx1 = 2*viewscalefactor*(event->x()-(xWidth*0.5))-ViewOffsetX;
+        Ry1 = 2*viewscalefactor*(event->y()-(yHeight*0.5))+ViewOffsetY;
 
         if(inverse_X) Rx1 = -Rx1;
         if(inverse_Y) Ry1 = -Ry1;
@@ -1050,7 +1047,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             float cos_alfa = qAcos(distance_x/distance_t);
             float sin_alfa = qAsin(distance_y/distance_t);
 
-            float pii = 355.0f/113.0f;
+            //float pii = 355.0f/113.0f;
 
             float angle;
             if(sin_alfa>0)
@@ -1063,6 +1060,12 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             }
 
             angle = StartDistanceFromOrigin[0] - angle;
+
+            //Rounding to 0.1 degrees resolution
+            angle = angle*(360.0f/(2*pii));
+            QString angle2 = QString::number(angle, 'f', 1);
+            angle = angle2.toFloat();
+            angle = angle*((2*pii)/360.0f);
 
             float a1 = qCos(angle);
             float b1 = qSin(angle);
@@ -1091,7 +1094,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             float cos_alfa = qAcos(distance_x/distance_t);
             float sin_alfa = qAsin(distance_y/distance_t);
 
-            float pii = 355.0f/113.0f;
+            //float pii = 355.0f/113.0f;
 
             float angle;
             if(sin_alfa>0)
@@ -1104,6 +1107,12 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             }
 
             angle = StartDistanceFromOrigin[0] - angle;
+
+            //Rounding to 0.1 degrees resolution
+            angle = angle*(360.0f/(2*pii));
+            QString angle2 = QString::number(angle, 'f', 1);
+            angle = angle2.toFloat();
+            angle = angle*((2*pii)/360.0f);
 
             float a1 = qCos(angle);
             float b1 = qSin(angle);
@@ -1133,7 +1142,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             float cos_alfa = qAcos(distance_x/distance_t);
             float sin_alfa = qAsin(distance_y/distance_t);
 
-            float pii = 355.0f/113.0f;
+            //float pii = 355.0f/113.0f;
 
             float angle;
             if(sin_alfa>0)
@@ -1146,6 +1155,15 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             }
 
             angle = StartDistanceFromOrigin[0] - angle;
+
+            //Rounding to 0.1 degrees resolution
+            angle = angle*(360.0f/(2*pii));
+            QString angle2 = QString::number(angle, 'f', 0);
+            angle = angle2.toFloat();
+
+            angle = angle*((2*pii)/360.0f);
+
+
 
             float a1 = qCos(angle);
             float b1 = qSin(angle);
@@ -1164,6 +1182,17 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             Message.append(QString::number((angle*360.0f/(2*pii))));
             TextOverlay = Message;
         }
+
+    }
+    else if (event->buttons() & Qt::RightButton)
+    {
+
+        //Panning the view
+        ViewOffsetX = ViewOffsetX + 2*(ViewHeight/yHeight)*(event->x() - lastPos.x());
+        ViewOffsetY = ViewOffsetY + -2*(ViewHeight/yHeight)*(event->y() - lastPos.y());
+
+        qDebug() << "näkymä siirtyy: " << ViewOffsetX << ", " << ViewOffsetY;
+        updateGL();
 
     }
     //qDebug()<< "ortogonal view "<< event->pos();

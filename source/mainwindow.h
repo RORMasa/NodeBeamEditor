@@ -189,6 +189,10 @@ private slots:
 
     void on_checkBox_3_clicked();
 
+    void on_toolButton_21_clicked();
+
+    void on_toolButton_22_clicked();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
