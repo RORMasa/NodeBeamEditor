@@ -125,6 +125,9 @@ class NodeBeam
 {
 
 public:
+
+    bool EditorMode; //BeamNG <==> ROR axises
+
     QVector<Node> Nodes;
     QVector<Beam> Beams;
     QVector<Hubwheel> Hubwheels;
@@ -207,17 +210,16 @@ public:
     /* Delete node */
     void DeleteNode(int NodeGlobalID);
 
-    /* Add beam functions*/
+    /* Beam functions */
     void AddBeam(int Node1ID, int Node2ID, int BeamGroup);
     void AddBeamT();
-    int NewBeamGroup(QString groupname);
-
-    /* Delete Beam */
     void DeleteBeam(int BeamIndex);
 
-    /* Move to group */
-    int MoveToGroup(int NodeGlobalID, int GroupID);
-    void MoveToGroupBeam();
+    /* Group functions */
+    int NewBeamGroup(QString groupname); //Make new beam group
+    int MoveToGroup(int NodeGlobalID, int GroupID); //Move node to group
+    void MoveToGroupBeam(); //Move beam to group
+    void DeleteNodeGroup(int NodeGroupID); //Delete node group
 
     /* Duplicate nodes */
     void DuplicateNodes();

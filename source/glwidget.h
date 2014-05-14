@@ -75,7 +75,6 @@ public:
 
     bool ShowNodeNumbers;
     bool ShowNodeNumbers1; //Shows actual ID's, for RoR
-    bool EditorAxisMode; //RoR or BeamNG axises
 
     int MovingNodes;
     int ScalingNodes;

@@ -246,21 +246,42 @@ void NodeBeam::ParseLine(QString line, int ParsingMode)
                     }
                     else if(grid_index == 1)
                     {
-                        Nodes[(Nodes.size()-1)].locX = temp.toFloat();
+                        if(EditorMode == 1)
+                        {
+                            Nodes[(Nodes.size()-1)].locY = temp.toFloat();
+                        }
+                        else
+                        {
+                            Nodes[(Nodes.size()-1)].locX = temp.toFloat();
+                        }
 
                         temp = "";
                         grid_index++;
                     }
                     else if(grid_index == 2)
                     {
-                        Nodes[(Nodes.size()-1)].locY = temp.toFloat();
+                        if(EditorMode == 1)
+                        {
+                            Nodes[(Nodes.size()-1)].locZ = temp.toFloat();
+                        }
+                        else
+                        {
+                            Nodes[(Nodes.size()-1)].locY = temp.toFloat();
+                        }
 
                         temp = "";
                         grid_index++;
                     }
                     else if(grid_index == 3)
                     {
-                        Nodes[(Nodes.size()-1)].locZ = temp.toFloat();
+                        if(EditorMode == 1)
+                        {
+                            Nodes[(Nodes.size()-1)].locX = temp.toFloat();
+                        }
+                        else
+                        {
+                            Nodes[(Nodes.size()-1)].locZ = temp.toFloat();
+                        }
 
                         temp = "";
                         grid_index++;
@@ -277,7 +298,14 @@ void NodeBeam::ParseLine(QString line, int ParsingMode)
             }
             if(grid_index<4)
             {
-                Nodes[(Nodes.size()-1)].locZ = temp.toFloat();
+                if(EditorMode == 1)
+                {
+                    Nodes[(Nodes.size()-1)].locX = temp.toFloat();
+                }
+                else
+                {
+                    Nodes[(Nodes.size()-1)].locZ = temp.toFloat();
+                }
 
                 temp = "";
             }
@@ -1636,7 +1664,9 @@ void NodeBeam::ExtrudeNodes()
 
         //Add beams between the extruded part and exsisting part
 
-        ActiveBeamGroup = NewBeamGroup("Extruded");
+        //ActiveBeamGroup = NewBeamGroup("Extruded");
+        ActiveBeamGroup = BeamGroups.size()-1;
+        if(ActiveBeamGroup < 0) ActiveBeamGroup = NewBeamGroup("Extruded");
         for(int i=0; i<SelectedNodes.size(); i++)
         {
             AddBeam(SelectedNodes[i], SelectedNodes2[i], ActiveBeamGroup);
@@ -2646,4 +2676,61 @@ double NodeBeam::calculate_length(double x, double y)
 {
     double length = sqrt((x*x)+(y*y));
     return length;
+}
+
+/* Delete node group */
+void NodeBeam::DeleteNodeGroup(int NodeGroupID)
+{
+    if((NodeGroups.size()>1)&&(NodeGroupID != 0))
+    {
+        //If there is nodes in the group, move them to previous group
+        if(NodeGroups[NodeGroupID].NodeAmount>0)
+        {
+            int i;
+            while(NodeGroups[NodeGroupID].NodeAmount>0)
+            {
+                for(i=0; i<Nodes.size();i++)
+                {
+                    if(Nodes[i].GroupID == NodeGroupID) break;
+                }
+                MoveToGroup(i,NodeGroupID-1);
+            }
+        }
+        //The group should be now empty, so remove the group
+        NodeGroups.remove(NodeGroupID);
+        for(int i=0; i<Nodes.size();i++)
+        {
+            if(Nodes[i].GroupID > NodeGroupID) Nodes[i].GroupID--;
+        }
+        for(int i=0; i<NodeGroups.size();i++)
+        {
+            if(NodeGroups[i].NodeGroupID > NodeGroupID) NodeGroups[i].NodeGroupID--;
+        }
+    }
+    if((NodeGroups.size()>1)&&(NodeGroupID == 0))
+    {
+        //If there is nodes in the group, move them to previous group
+        if(NodeGroups[NodeGroupID].NodeAmount>0)
+        {
+            while(NodeGroups[NodeGroupID].NodeAmount>0)
+            {
+                int i;
+                for(i=0; i<Nodes.size();i++)
+                {
+                    if(Nodes[i].GroupID == NodeGroupID) break;
+                }
+                MoveToGroup(i,NodeGroupID+1);
+            }
+        }
+        //The group should be now empty, so remove the group
+        NodeGroups.remove(NodeGroupID);
+        for(int i=0; i<Nodes.size();i++)
+        {
+            if(Nodes[i].GroupID > NodeGroupID) Nodes[i].GroupID--;
+        }
+        for(int i=0; i<NodeGroups.size();i++)
+        {
+            if(NodeGroups[i].NodeGroupID > NodeGroupID) NodeGroups[i].NodeGroupID--;
+        }
+    }
 }

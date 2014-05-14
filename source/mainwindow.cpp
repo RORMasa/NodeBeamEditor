@@ -148,7 +148,7 @@ MainWindow::MainWindow(QWidget *parent) :
     if(AppSettings->readsetting("editor_mode")=="2")
     {
         EditorMode = 1;
-        glWidget->EditorAxisMode = 1;
+        CurrentNodeBeam->EditorMode = 1;
         ui->lineEdit_3->move(80,90);
         ui->lineEdit_4->move(80,50);
         ui->lineEdit_5->move(80,70);
@@ -163,7 +163,7 @@ MainWindow::MainWindow(QWidget *parent) :
     else
     {
         EditorMode = 0;
-        glWidget->EditorAxisMode = 0;
+        CurrentNodeBeam->EditorMode = 0;
         StatusBar_mode->setText("BeamNG");
     }
 
@@ -1507,6 +1507,10 @@ void MainWindow::on_toolButton_7_clicked()
         {
             CurrentNodeBeam->SelectedNodes[i2] = CurrentNodeBeam->SelectedNodes[i2]-1;
         }
+    }
+    if(ui->treeWidget->currentItem()->text(2) == "Group")
+    {
+        CurrentNodeBeam->DeleteNodeGroup(ui->treeWidget->currentItem()->text(3).toInt());
     }
     MainNodeBeamUpdated();
 }
