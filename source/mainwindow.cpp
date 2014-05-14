@@ -11,12 +11,13 @@
 #include "inputdialog.h"
 #include "settings.h"
 #include <QTimerEvent>
+#include <QPixmap>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    AboutBox = "NodeBeam Editor\nVersion: 0.24";
+    AboutBox = "<br><br><br><b>Version: 0.26</b><br><br>Built on May 14 2014, 04:00<br><br><a href='https://github.com/RORMasa/NodeBeamEditor'>https://github.com/RORMasa/NodeBeamEditor</a>";
 
     ui->setupUi(this);
     glWidget = new GLWidget;    
@@ -126,7 +127,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->horizontalSlider->setPageStep(2);
     ui->horizontalSlider->setValue(100);
 
-    autosave.start();
+    autosave.start(); //Start timer for autosave
+
+    ui->treeWidget->header()->resizeSection(0,75); //Make node ID colum narrower in nodes tree widget
+
+    //Swap editor axis names
+    if(AppSettings->readsetting("editor_mode")=="2")
+    {
+        glWidget->EditorAxisMode = 1;
+    }
+    else
+    {
+        glWidget->EditorAxisMode = 0;
+    }
 
 }
 
@@ -270,9 +283,9 @@ void MainWindow::on_treeWidget_itemSelectionChanged()
         }
         else
         {
-            if(CurrentNodeBeam->Nodes.size()>ui->treeWidget->currentItem()->text(1).toInt())
+            if(CurrentNodeBeam->Nodes.size()>ui->treeWidget->currentItem()->text(0).toInt())
             {
-                int TempNodeID = ui->treeWidget->currentItem()->text(1).toInt();
+                int TempNodeID = ui->treeWidget->currentItem()->text(0).toInt();
                 ui->lineEdit_2->setText(CurrentNodeBeam->Nodes[TempNodeID].Properties);
                 ui->lineEdit_3->setText(QString::number(CurrentNodeBeam->Nodes[TempNodeID].locX));
                 ui->lineEdit_4->setText(QString::number(CurrentNodeBeam->Nodes[TempNodeID].locY));
@@ -297,8 +310,8 @@ void MainWindow::on_treeWidget_itemSelectionChanged()
         {
             if(ui->treeWidget->selectedItems()[i]->text(2) != "Group")
             {
-                CurrentNodeBeam->SelectedNodes.append(ui->treeWidget->selectedItems()[i]->text(1).toInt());
-                qDebug() << ui->treeWidget->selectedItems()[i]->text(1);
+                CurrentNodeBeam->SelectedNodes.append(ui->treeWidget->selectedItems()[i]->text(0).toInt());
+                qDebug() << ui->treeWidget->selectedItems()[i]->text(0);
                 qDebug() << CurrentNodeBeam->SelectedNodes[i];
             }
         }
@@ -410,14 +423,14 @@ void MainWindow::MainNodeBeamUpdated()
     {
 
         item2 = new QTreeWidgetItem();
-        item2->setText(0, CurrentNodeBeam->NodeGroups[i2].NodeGroupName);
+        item2->setText(1, CurrentNodeBeam->NodeGroups[i2].NodeGroupName);
         item2->setText(2, "Group");
         item2->setText(3, QString::number(CurrentNodeBeam->NodeGroups[i2].NodeGroupID));
         for(int i=0; i<CurrentNodeBeam->NodeGroups[i2].NodeAmount; i++)
         {
             item = new QTreeWidgetItem();
-            item->setText(1, QString::number(CurrentNodeBeam->Nodes[i3].GlobalID));
-            item->setText(0, CurrentNodeBeam->Nodes[i3].NodeName);
+            item->setText(0, QString::number(CurrentNodeBeam->Nodes[i3].GlobalID));
+            item->setText(1, CurrentNodeBeam->Nodes[i3].NodeName);
             item2->addChild(item);
             qDebug() << CurrentNodeBeam->Nodes[i3].GlobalID << ", " << CurrentNodeBeam->Nodes[i3].NodeName;
             i3++;
@@ -958,9 +971,13 @@ void MainWindow::on_toolButton_clicked()
     {
         if(OpenGLViews->currentIndex()!=1) OpenGLViews->setCurrentIndex(1);
         glWidgetO->AddingNodes=1;
-        ui->stackedWidget->setCurrentIndex(0);
+        ui->stackedWidget->setCurrentIndex(1);
     }
-    else glWidgetO->AddingNodes=0;
+    else
+    {
+        ui->stackedWidget->setCurrentIndex(0);
+        glWidgetO->AddingNodes=0;
+    }
 }
 
 /* Move nodes */
@@ -971,12 +988,13 @@ void MainWindow::on_toolButton_2_clicked()
     {
         glWidgetO->MovingNodes = 1;
         glWidget->MovingNodes=1;
-        ui->stackedWidget->setCurrentIndex(1);
+        ui->stackedWidget->setCurrentIndex(2);
     }
     else
     {
         glWidgetO->MovingNodes = 0;
         glWidget->MovingNodes=0;
+        ui->stackedWidget->setCurrentIndex(0);
     }
 
 
@@ -1037,12 +1055,14 @@ void MainWindow::on_toolButton_3_clicked()
     {
         glWidgetO->ScalingNodes = 1;
         ui->statusBar->showMessage("Press X, Y or Z to choose lock scaling axis");
+        ui->stackedWidget->setCurrentIndex(3);
     }
 
     else
     {
         glWidgetO->ScalingNodes = 0;
         ui->statusBar->clearMessage();
+        ui->stackedWidget->setCurrentIndex(0);
     }
 
 }
@@ -1055,13 +1075,113 @@ void MainWindow::on_toolButton_4_clicked()
     {
         glWidgetO->RotatingNodes = 1;
         ui->statusBar->showMessage("Press X, Y or Z to choose lock rotating axis");
+        ui->stackedWidget->setCurrentIndex(4);
     }
 
     else
     {
         glWidgetO->RotatingNodes = 0;
         ui->statusBar->clearMessage();
+        ui->stackedWidget->setCurrentIndex(0);
     }
+}
+
+/* Rotate buttons */
+void MainWindow::on_toolButton_26_clicked()
+{
+    bool NumberTest = 1;
+    float RotateAngX;
+    float RotateAngY;
+    float RotateAngZ;
+    if(ui->lineEdit_rotatex->text() == "") RotateAngX = 0;
+    else RotateAngX = ui->lineEdit_rotatex->text().toFloat(&NumberTest);
+    if(NumberTest)
+    {
+        if(ui->lineEdit_rotatey->text() == "") RotateAngY = 0;
+        else RotateAngY = ui->lineEdit_rotatey->text().toFloat(&NumberTest);
+        if(NumberTest)
+        {
+            if(ui->lineEdit_rotatez->text() == "") RotateAngZ = 0;
+            else RotateAngZ = ui->lineEdit_rotatez->text().toFloat(&NumberTest);
+        }
+    }
+    if(!NumberTest)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("The rotating angle must be in degrees.");
+        msgBox.exec();
+    }
+    else
+    {
+        float a1, b1, a2, b2;
+
+        if(RotateAngX!=0)
+        {
+            //X-Rotation
+            //Calculating rotation matrix
+            // cos a1 | -sin b1
+            // sin a2 |  cos b2
+            a1 = qCos(qDegreesToRadians(RotateAngX));
+            b1 = qSin(qDegreesToRadians(RotateAngX));
+            a2 = qSin(qDegreesToRadians(RotateAngX));
+            b2 = qCos(qDegreesToRadians(RotateAngX));
+
+            for(int i2=0; i2<CurrentNodeBeam->SelectedNodes.size();i2++)
+            {
+                float XCoordinate = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY;
+                float YCoordinate = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ;
+                CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY = a1*XCoordinate - b1*YCoordinate;
+                CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ = a2*XCoordinate + b2*YCoordinate;
+            }
+        }
+        if(RotateAngY!=0)
+        {
+            //Y-Rotation
+            //Calculating rotation matrix
+            // cos a1 | -sin b1
+            // sin a2 |  cos b2
+            a1 = qCos(qDegreesToRadians(RotateAngY));
+            b1 = qSin(qDegreesToRadians(RotateAngY));
+            a2 = qSin(qDegreesToRadians(RotateAngY));
+            b2 = qCos(qDegreesToRadians(RotateAngY));
+
+            for(int i2=0; i2<CurrentNodeBeam->SelectedNodes.size();i2++)
+            {
+                float XCoordinate = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX;
+                float YCoordinate = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ;
+                CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX = a1*XCoordinate - b1*YCoordinate;
+                CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ = a2*XCoordinate + b2*YCoordinate;
+            }
+        }
+        if(RotateAngZ!=0)
+        {
+            //Z-Rotation
+            //Calculating rotation matrix
+            // cos a1 | -sin b1
+            // sin a2 |  cos b2
+            a1 = qCos(qDegreesToRadians(RotateAngZ));
+            b1 = qSin(qDegreesToRadians(RotateAngZ));
+            a2 = qSin(qDegreesToRadians(RotateAngZ));
+            b2 = qCos(qDegreesToRadians(RotateAngZ));
+
+            for(int i2=0; i2<CurrentNodeBeam->SelectedNodes.size();i2++)
+            {
+                float XCoordinate = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX;
+                float YCoordinate = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY;
+                CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX = a1*XCoordinate - b1*YCoordinate;
+                CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY = a2*XCoordinate + b2*YCoordinate;
+            }
+        }
+    }
+    glWidget->updateGL();
+    glWidgetO->updateGL();
+}
+//Rotate - clear text boxes
+void MainWindow::on_toolButton_25_clicked()
+{
+    ui->lineEdit_rotatex->clear();
+    ui->lineEdit_rotatey->clear();
+    ui->lineEdit_rotatez->clear();
 }
 
 /* Key press events */
@@ -1362,7 +1482,7 @@ void MainWindow::UpdateSelection()
         {
             if((*iterator)->text(2) != "Group")
             {
-                if((*iterator)->text(1).toInt() == CurrentNodeBeam->SelectedNodes2[i3])
+                if((*iterator)->text(0).toInt() == CurrentNodeBeam->SelectedNodes2[i3])
                 {
                     (*iterator)->setSelected(1);
                     //(*iterator)->setCheckState(0,Qt::Checked);
@@ -1753,7 +1873,9 @@ void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox* about = new QMessageBox;
     about->setText(AboutBox);
-    about->setWindowTitle("About");
+    about->setWindowTitle("About NodeBeam Editor");
+    about->setStyleSheet("QMessageBox {background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgba(201, 201, 201, 255), stop:1 rgba(227, 227, 227, 255));}");
+    about->setIconPixmap(QPixmap(":/images/images/logo.png"));
     about->show();
 }
 
@@ -1771,3 +1893,29 @@ void MainWindow::on_doubleSpinBox_valueChanged(double arg1)
 }
 
 
+/* Create duplicating array */
+void MainWindow::on_toolButton_16_clicked()
+{
+    if(ui->toolButton_16->isEnabled())
+    {
+        ui->stackedWidget->setCurrentIndex(5);
+    }
+    else
+    {
+        ui->stackedWidget->setCurrentIndex(0);
+    }
+}
+
+
+/* Launch Rigs of Rods with command line parameters */
+void MainWindow::on_toolButton_27_clicked()
+{
+    QString program = AppSettings->readsetting("rorlocation");
+    QProcess *myProcess = new QProcess(this);
+    QString arguments = "-map ";
+    arguments.append(AppSettings->readsetting("rormap"));
+    arguments.append(" -truck ");
+    arguments.append(AppSettings->readsetting("rorveh"));
+    myProcess->setNativeArguments(arguments);
+    myProcess->start(program);
+}

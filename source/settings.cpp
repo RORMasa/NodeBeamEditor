@@ -18,6 +18,23 @@ settings::settings(QWidget *parent) :
     ui->lineEdit_2->setText(appsett->value("beamnglocation").toString());
     ui->lineEdit_3->setText(appsett->value("currentvehicle").toString());
     ui->lineEdit_4->setText(appsett->value("currentlevel").toString());
+    ui->lineEdit_5->setText(appsett->value("rorlocation").toString());
+    ui->lineEdit_6->setText(appsett->value("rorveh").toString());
+    ui->lineEdit_7->setText(appsett->value("rormap").toString());
+
+
+
+    //EditorMode
+    if(appsett->value("editor_mode") == "1")
+    {
+        ui->radioButton->setChecked(1);
+        ui->radioButton_2->setChecked(0);
+    }
+    else if(appsett->value("editor_mode") == "2")
+    {
+        ui->radioButton->setChecked(0);
+        ui->radioButton_2->setChecked(1);
+    }
 
 
     //Color buttons
@@ -68,6 +85,18 @@ void settings::SaveSettings()
     appsett->setValue("grid_color_r", grid_color.red());
     appsett->setValue("grid_color_g", grid_color.green());
     appsett->setValue("grid_color_b", grid_color.blue());
+    if(ui->radioButton->isChecked())
+    {
+        appsett->setValue("editor_mode", "1");
+    }
+    else if(ui->radioButton_2->isChecked())
+    {
+        appsett->setValue("editor_mode", "2");
+    }
+
+    appsett->setValue("rorlocation", ui->lineEdit_5->text());
+    appsett->setValue("rorveh", ui->lineEdit_6->text());
+    appsett->setValue("rormap", ui->lineEdit_7->text());
 }
 
 void settings::on_buttonBox_accepted()
@@ -76,6 +105,7 @@ void settings::on_buttonBox_accepted()
     emit SettingsUpdated();
 }
 
+/* Locate BeamNG exe */
 void settings::on_pushButton_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this);
@@ -125,5 +155,9 @@ void settings::on_pushButton_3_clicked()
 /* Locate RoR exe */
 void settings::on_pushButton_4_clicked()
 {
-
+    QString fileName = QFileDialog::getOpenFileName(this);
+    if (!fileName.isEmpty())
+    {
+        ui->lineEdit_5->setText(fileName);
+    }
 }

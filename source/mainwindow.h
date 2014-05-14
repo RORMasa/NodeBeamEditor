@@ -193,6 +193,14 @@ private slots:
 
     void on_toolButton_22_clicked();
 
+    void on_toolButton_16_clicked();
+
+    void on_toolButton_26_clicked();
+
+    void on_toolButton_25_clicked();
+
+    void on_toolButton_27_clicked();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;

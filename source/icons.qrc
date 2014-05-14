@@ -11,4 +11,7 @@
         <file>icons/RotateNode.png</file>
         <file>icons/ScaleNode.png</file>
     </qresource>
+    <qresource prefix="/images">
+        <file>images/logo.png</file>
+    </qresource>
 </RCC>

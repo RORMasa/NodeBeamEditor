@@ -26,7 +26,10 @@
    <double>1.000000000000000</double>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true"> QMessageBox {
+    background-color: rgb(111, 154, 255)
+
+}</string>
   </property>
   <property name="dockNestingEnabled">
    <bool>false</bool>
@@ -541,7 +544,7 @@ QTabWidget::tab-bar {
           </widget>
           <widget class="QToolButton" name="toolButton_16">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="geometry">
             <rect>
@@ -554,19 +557,59 @@ QTabWidget::tab-bar {
            <property name="text">
             <string>Array</string>
            </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
           </widget>
           <widget class="QStackedWidget" name="stackedWidget">
            <property name="geometry">
             <rect>
              <x>580</x>
              <y>-1</y>
-             <width>301</width>
+             <width>361</width>
              <height>101</height>
             </rect>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>4</number>
            </property>
+           <widget class="QWidget" name="page_3">
+            <widget class="QSpinBox" name="spinBox_grids">
+             <property name="geometry">
+              <rect>
+               <x>80</x>
+               <y>20</y>
+               <width>61</width>
+               <height>22</height>
+              </rect>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="singleStep">
+              <number>5</number>
+             </property>
+             <property name="value">
+              <number>25</number>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_7grids">
+             <property name="geometry">
+              <rect>
+               <x>20</x>
+               <y>20</y>
+               <width>61</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Grid size</string>
+             </property>
+            </widget>
+           </widget>
            <widget class="QWidget" name="page">
             <widget class="QComboBox" name="comboBox_2">
              <property name="geometry">
@@ -638,41 +681,6 @@ QTabWidget::tab-bar {
              </property>
              <property name="text">
               <string>Z coordinate</string>
-             </property>
-            </widget>
-            <widget class="QSpinBox" name="spinBox_grids">
-             <property name="geometry">
-              <rect>
-               <x>230</x>
-               <y>30</y>
-               <width>61</width>
-               <height>22</height>
-              </rect>
-             </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>100</number>
-             </property>
-             <property name="singleStep">
-              <number>5</number>
-             </property>
-             <property name="value">
-              <number>25</number>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_7grids">
-             <property name="geometry">
-              <rect>
-               <x>170</x>
-               <y>30</y>
-               <width>61</width>
-               <height>21</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Grid size</string>
              </property>
             </widget>
             <widget class="QLabel" name="label_zcoordinate_3">
@@ -791,6 +799,282 @@ QTabWidget::tab-bar {
                <x>120</x>
                <y>30</y>
                <width>51</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Reset</string>
+             </property>
+            </widget>
+           </widget>
+           <widget class="QWidget" name="page_4"/>
+           <widget class="QWidget" name="page_5">
+            <widget class="QLineEdit" name="lineEdit_rotatez">
+             <property name="geometry">
+              <rect>
+               <x>30</x>
+               <y>70</y>
+               <width>81</width>
+               <height>22</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_zcoordinate_8">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>5</y>
+               <width>161</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Rotate (degrees)</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_zcoordinate_9">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>31</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>X</string>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="lineEdit_rotatex">
+             <property name="geometry">
+              <rect>
+               <x>30</x>
+               <y>30</y>
+               <width>81</width>
+               <height>22</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_zcoordinate_10">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>70</y>
+               <width>31</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Z</string>
+             </property>
+            </widget>
+            <widget class="QToolButton" name="toolButton_25">
+             <property name="geometry">
+              <rect>
+               <x>120</x>
+               <y>30</y>
+               <width>51</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Reset</string>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="lineEdit_rotatey">
+             <property name="geometry">
+              <rect>
+               <x>30</x>
+               <y>50</y>
+               <width>81</width>
+               <height>22</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QToolButton" name="toolButton_26">
+             <property name="geometry">
+              <rect>
+               <x>120</x>
+               <y>60</y>
+               <width>51</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Rotate</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_zcoordinate_11">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>50</y>
+               <width>31</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Y</string>
+             </property>
+            </widget>
+           </widget>
+           <widget class="QWidget" name="page_6">
+            <widget class="QSpinBox" name="spinBox_2">
+             <property name="geometry">
+              <rect>
+               <x>190</x>
+               <y>60</y>
+               <width>61</width>
+               <height>21</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_11">
+             <property name="geometry">
+              <rect>
+               <x>140</x>
+               <y>60</y>
+               <width>53</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Count</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_12">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>0</y>
+               <width>101</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Array - Offset</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_13">
+             <property name="geometry">
+              <rect>
+               <x>20</x>
+               <y>30</y>
+               <width>21</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>X:</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_14">
+             <property name="geometry">
+              <rect>
+               <x>20</x>
+               <y>50</y>
+               <width>21</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Y:</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_15">
+             <property name="geometry">
+              <rect>
+               <x>20</x>
+               <y>70</y>
+               <width>21</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Z:</string>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="lineEdit_9">
+             <property name="geometry">
+              <rect>
+               <x>40</x>
+               <y>30</y>
+               <width>81</width>
+               <height>21</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="lineEdit_10">
+             <property name="geometry">
+              <rect>
+               <x>40</x>
+               <y>50</y>
+               <width>81</width>
+               <height>21</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="lineEdit_11">
+             <property name="geometry">
+              <rect>
+               <x>40</x>
+               <y>70</y>
+               <width>81</width>
+               <height>21</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QCheckBox" name="checkBox_4">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="geometry">
+              <rect>
+               <x>230</x>
+               <y>30</y>
+               <width>21</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_16">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="geometry">
+              <rect>
+               <x>140</x>
+               <y>30</y>
+               <width>81</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Merge nodes</string>
+             </property>
+            </widget>
+            <widget class="QToolButton" name="toolButton_23">
+             <property name="geometry">
+              <rect>
+               <x>270</x>
+               <y>60</y>
+               <width>81</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Apply array</string>
+             </property>
+            </widget>
+            <widget class="QToolButton" name="toolButton_24">
+             <property name="geometry">
+              <rect>
+               <x>270</x>
+               <y>30</y>
+               <width>81</width>
                <height>31</height>
               </rect>
              </property>
@@ -1144,6 +1428,19 @@ QTabWidget::tab-bar {
             <bool>true</bool>
            </property>
           </widget>
+          <widget class="QToolButton" name="toolButton_27">
+           <property name="geometry">
+            <rect>
+             <x>410</x>
+             <y>60</y>
+             <width>121</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Test in RoR</string>
+           </property>
+          </widget>
          </widget>
          <widget class="QWidget" name="tab_6">
           <attribute name="title">
@@ -1322,7 +1619,12 @@ QTabWidget::tab-bar {
                  </property>
                  <column>
                   <property name="text">
-                   <string notr="true">1</string>
+                   <string>Name</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string notr="true">ID</string>
                   </property>
                  </column>
                 </widget>
