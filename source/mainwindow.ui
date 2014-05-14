@@ -571,7 +571,7 @@ QTabWidget::tab-bar {
             </rect>
            </property>
            <property name="currentIndex">
-            <number>4</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="page_3">
             <widget class="QSpinBox" name="spinBox_grids">
@@ -698,224 +698,256 @@ QTabWidget::tab-bar {
             </widget>
            </widget>
            <widget class="QWidget" name="page_2">
-            <widget class="QLineEdit" name="lineEdit_movex">
-             <property name="geometry">
-              <rect>
-               <x>30</x>
-               <y>30</y>
-               <width>81</width>
-               <height>22</height>
-              </rect>
-             </property>
-            </widget>
-            <widget class="QLineEdit" name="lineEdit_movey">
-             <property name="geometry">
-              <rect>
-               <x>30</x>
-               <y>50</y>
-               <width>81</width>
-               <height>22</height>
-              </rect>
-             </property>
-            </widget>
-            <widget class="QLineEdit" name="lineEdit_movez">
-             <property name="geometry">
-              <rect>
-               <x>30</x>
-               <y>70</y>
-               <width>81</width>
-               <height>22</height>
-              </rect>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_zcoordinate_4">
+            <widget class="QFrame" name="frame_7">
              <property name="geometry">
               <rect>
                <x>10</x>
-               <y>30</y>
-               <width>31</width>
-               <height>21</height>
+               <y>0</y>
+               <width>171</width>
+               <height>101</height>
               </rect>
              </property>
-             <property name="text">
-              <string>X</string>
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
              </property>
-            </widget>
-            <widget class="QLabel" name="label_zcoordinate_5">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>50</y>
-               <width>31</width>
-               <height>21</height>
-              </rect>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
              </property>
-             <property name="text">
-              <string>Y</string>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_zcoordinate_6">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>70</y>
-               <width>31</width>
-               <height>21</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Z</string>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_zcoordinate_7">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>5</y>
-               <width>91</width>
-               <height>21</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Move (meters)</string>
-             </property>
-            </widget>
-            <widget class="QToolButton" name="toolButton_21">
-             <property name="geometry">
-              <rect>
-               <x>120</x>
-               <y>60</y>
-               <width>51</width>
-               <height>31</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Move</string>
-             </property>
-            </widget>
-            <widget class="QToolButton" name="toolButton_22">
-             <property name="geometry">
-              <rect>
-               <x>120</x>
-               <y>30</y>
-               <width>51</width>
-               <height>31</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Reset</string>
-             </property>
+             <widget class="QLineEdit" name="lineEdit_movex">
+              <property name="geometry">
+               <rect>
+                <x>20</x>
+                <y>30</y>
+                <width>81</width>
+                <height>22</height>
+               </rect>
+              </property>
+             </widget>
+             <widget class="QLineEdit" name="lineEdit_movey">
+              <property name="geometry">
+               <rect>
+                <x>20</x>
+                <y>50</y>
+                <width>81</width>
+                <height>22</height>
+               </rect>
+              </property>
+             </widget>
+             <widget class="QLineEdit" name="lineEdit_movez">
+              <property name="geometry">
+               <rect>
+                <x>20</x>
+                <y>70</y>
+                <width>81</width>
+                <height>22</height>
+               </rect>
+              </property>
+             </widget>
+             <widget class="QLabel" name="label_zcoordinate_4">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>30</y>
+                <width>31</width>
+                <height>21</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>X</string>
+              </property>
+             </widget>
+             <widget class="QLabel" name="label_zcoordinate_5">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>50</y>
+                <width>31</width>
+                <height>21</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Y</string>
+              </property>
+             </widget>
+             <widget class="QLabel" name="label_zcoordinate_6">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>70</y>
+                <width>31</width>
+                <height>21</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Z</string>
+              </property>
+             </widget>
+             <widget class="QLabel" name="label_zcoordinate_7">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>91</width>
+                <height>31</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Move (meters)</string>
+              </property>
+             </widget>
+             <widget class="QToolButton" name="toolButton_21">
+              <property name="geometry">
+               <rect>
+                <x>110</x>
+                <y>60</y>
+                <width>51</width>
+                <height>31</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Move</string>
+              </property>
+             </widget>
+             <widget class="QToolButton" name="toolButton_22">
+              <property name="geometry">
+               <rect>
+                <x>110</x>
+                <y>30</y>
+                <width>51</width>
+                <height>31</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Reset</string>
+              </property>
+             </widget>
             </widget>
            </widget>
            <widget class="QWidget" name="page_4"/>
            <widget class="QWidget" name="page_5">
-            <widget class="QLineEdit" name="lineEdit_rotatez">
-             <property name="geometry">
-              <rect>
-               <x>30</x>
-               <y>70</y>
-               <width>81</width>
-               <height>22</height>
-              </rect>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_zcoordinate_8">
+            <widget class="QFrame" name="frame_8">
              <property name="geometry">
               <rect>
                <x>10</x>
-               <y>5</y>
-               <width>161</width>
-               <height>21</height>
+               <y>0</y>
+               <width>171</width>
+               <height>101</height>
               </rect>
              </property>
-             <property name="text">
-              <string>Rotate (degrees)</string>
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
              </property>
-            </widget>
-            <widget class="QLabel" name="label_zcoordinate_9">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>30</y>
-               <width>31</width>
-               <height>21</height>
-              </rect>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
              </property>
-             <property name="text">
-              <string>X</string>
-             </property>
-            </widget>
-            <widget class="QLineEdit" name="lineEdit_rotatex">
-             <property name="geometry">
-              <rect>
-               <x>30</x>
-               <y>30</y>
-               <width>81</width>
-               <height>22</height>
-              </rect>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_zcoordinate_10">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>70</y>
-               <width>31</width>
-               <height>21</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Z</string>
-             </property>
-            </widget>
-            <widget class="QToolButton" name="toolButton_25">
-             <property name="geometry">
-              <rect>
-               <x>120</x>
-               <y>30</y>
-               <width>51</width>
-               <height>31</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-            <widget class="QLineEdit" name="lineEdit_rotatey">
-             <property name="geometry">
-              <rect>
-               <x>30</x>
-               <y>50</y>
-               <width>81</width>
-               <height>22</height>
-              </rect>
-             </property>
-            </widget>
-            <widget class="QToolButton" name="toolButton_26">
-             <property name="geometry">
-              <rect>
-               <x>120</x>
-               <y>60</y>
-               <width>51</width>
-               <height>31</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Rotate</string>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_zcoordinate_11">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>50</y>
-               <width>31</width>
-               <height>21</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Y</string>
-             </property>
+             <widget class="QLabel" name="label_zcoordinate_8">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>131</width>
+                <height>31</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Rotate (degrees)</string>
+              </property>
+             </widget>
+             <widget class="QLineEdit" name="lineEdit_rotatex">
+              <property name="geometry">
+               <rect>
+                <x>20</x>
+                <y>30</y>
+                <width>81</width>
+                <height>22</height>
+               </rect>
+              </property>
+             </widget>
+             <widget class="QLineEdit" name="lineEdit_rotatey">
+              <property name="geometry">
+               <rect>
+                <x>20</x>
+                <y>50</y>
+                <width>81</width>
+                <height>22</height>
+               </rect>
+              </property>
+             </widget>
+             <widget class="QLineEdit" name="lineEdit_rotatez">
+              <property name="geometry">
+               <rect>
+                <x>20</x>
+                <y>70</y>
+                <width>81</width>
+                <height>22</height>
+               </rect>
+              </property>
+             </widget>
+             <widget class="QLabel" name="label_zcoordinate_9">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>30</y>
+                <width>31</width>
+                <height>21</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>X</string>
+              </property>
+             </widget>
+             <widget class="QLabel" name="label_zcoordinate_11">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>50</y>
+                <width>31</width>
+                <height>21</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Y</string>
+              </property>
+             </widget>
+             <widget class="QLabel" name="label_zcoordinate_10">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>70</y>
+                <width>31</width>
+                <height>21</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Z</string>
+              </property>
+             </widget>
+             <widget class="QToolButton" name="toolButton_26">
+              <property name="geometry">
+               <rect>
+                <x>110</x>
+                <y>60</y>
+                <width>51</width>
+                <height>31</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Rotate</string>
+              </property>
+             </widget>
+             <widget class="QToolButton" name="toolButton_25">
+              <property name="geometry">
+               <rect>
+                <x>110</x>
+                <y>30</y>
+                <width>51</width>
+                <height>31</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Reset</string>
+              </property>
+             </widget>
             </widget>
            </widget>
            <widget class="QWidget" name="page_6">
@@ -2345,6 +2377,9 @@ QTabWidget::tab-bar {
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionBeamNG_Wiki"/>
+    <addaction name="actionRigs_of_Rods_Wiki"/>
+    <addaction name="separator"/>
     <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuFile"/>
@@ -2434,6 +2469,16 @@ QTabWidget::tab-bar {
   <action name="actionSettings">
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionRigs_of_Rods_Wiki">
+   <property name="text">
+    <string>Rigs of Rods wiki</string>
+   </property>
+  </action>
+  <action name="actionBeamNG_Wiki">
+   <property name="text">
+    <string>BeamNG wiki</string>
    </property>
   </action>
  </widget>

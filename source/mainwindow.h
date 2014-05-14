@@ -8,6 +8,7 @@
 #include "beamdefaultsdialog.h"
 #include "settings.h"
 #include <QTime>
+#include <QLabel>
 
 namespace Ui {
 class MainWindow;
@@ -26,6 +27,9 @@ public:
 
 //    NodeBeam *ActiveNodeBeams;
     settings * AppSettings;
+    QLabel * StatusBar_info;
+    QLabel * StatusBar_mode;
+
 public slots:
     void MainNodeBeamUpdated();
     void SettingsUpdated();
@@ -201,6 +205,10 @@ private slots:
 
     void on_toolButton_27_clicked();
 
+    void on_actionRigs_of_Rods_Wiki_triggered();
+
+    void on_actionBeamNG_Wiki_triggered();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
@@ -225,5 +233,7 @@ private:
     void ButtsUp(int buttoni);
 
     QString AboutBox;
+
+    bool EditorMode; //BeamNG or RoR Axises in use
 };
 

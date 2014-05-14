@@ -17,7 +17,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    AboutBox = "<br><br><br><b>Version: 0.26</b><br><br>Built on May 14 2014, 04:00<br><br><a href='https://github.com/RORMasa/NodeBeamEditor'>https://github.com/RORMasa/NodeBeamEditor</a>";
+    /* About box : Version and compliation time , link to GitHub */
+    AboutBox = "<br><br><br><b>Version: 0.26</b><br><br>Built on ";
+    AboutBox.append(__DATE__);
+    AboutBox.append(", ");
+    AboutBox.append(__TIME__);
+    AboutBox.append("<br><br><a href='https://github.com/RORMasa/NodeBeamEditor'>https://github.com/RORMasa/NodeBeamEditor</a>");
 
     ui->setupUi(this);
     glWidget = new GLWidget;    
@@ -131,15 +136,38 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->treeWidget->header()->resizeSection(0,75); //Make node ID colum narrower in nodes tree widget
 
-    //Swap editor axis names
+    //init StatusBar
+    StatusBar_info = new QLabel();
+    StatusBar_info->setToolTip("Node counter");
+    StatusBar_mode = new QLabel();
+    StatusBar_mode->setToolTip("Coordinate system");
+    ui->statusBar->addWidget(StatusBar_info);
+    ui->statusBar->addWidget(StatusBar_mode, 1);
+
+    //Swap editor axises for RoR if necessary
     if(AppSettings->readsetting("editor_mode")=="2")
     {
+        EditorMode = 1;
         glWidget->EditorAxisMode = 1;
+        ui->lineEdit_3->move(80,90);
+        ui->lineEdit_4->move(80,50);
+        ui->lineEdit_5->move(80,70);
+        ui->lineEdit_movex->move(20,70);
+        ui->lineEdit_movey->move(20,30);
+        ui->lineEdit_movez->move(20,50);
+        ui->lineEdit_rotatex->move(20,70);
+        ui->lineEdit_rotatey->move(20,30);
+        ui->lineEdit_rotatez->move(20,50);
+        StatusBar_mode->setText("ROR");
     }
     else
     {
+        EditorMode = 0;
         glWidget->EditorAxisMode = 0;
+        StatusBar_mode->setText("BeamNG");
     }
+
+
 
 }
 
@@ -1243,19 +1271,50 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
     {
         if(glWidgetO->ScalingNodes>0)
         {
-            glWidgetO->ScalingNodes=2;
-            ui->statusBar->showMessage("Scaling X");
+            if(EditorMode == 1)
+            {
+                //RoR axises
+                glWidgetO->ScalingNodes=3;
+                ui->statusBar->showMessage("Scaling X");
+            }
+            else
+            {
+                //BeamNG axises
+                glWidgetO->ScalingNodes=2;
+                ui->statusBar->showMessage("Scaling X");
+            }
         }
         else if(glWidgetO->MovingNodes>0)
         {
-            glWidgetO->MovingNodes=2;
-            glWidget->MovingNodes=2;
-            ui->statusBar->showMessage("Moving X");
+            if(EditorMode == 1)
+            {
+                //RoR axises
+                glWidgetO->MovingNodes=3;
+                glWidget->MovingNodes=3;
+                ui->statusBar->showMessage("Moving X");
+            }
+            else
+            {
+                //BeamNG axises
+                glWidgetO->MovingNodes=2;
+                glWidget->MovingNodes=2;
+                ui->statusBar->showMessage("Moving X");
+            }
         }
         else if(glWidgetO->RotatingNodes>0)
         {
-            glWidgetO->RotatingNodes=1;
-            ui->statusBar->showMessage("Rotating X");
+            if(EditorMode == 1)
+            {
+                //RoR axises
+                glWidgetO->RotatingNodes=2;
+                ui->statusBar->showMessage("Rotating X");
+            }
+            else
+            {
+                //BeamNG axises
+                glWidgetO->RotatingNodes=1;
+                ui->statusBar->showMessage("Rotating X");
+            }
         }
     }
     /* Choose Y-axis */
@@ -1263,19 +1322,50 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
     {
         if(glWidgetO->ScalingNodes>0)
         {
-            glWidgetO->ScalingNodes=3;
-            ui->statusBar->showMessage("Scaling Y");
+            if(EditorMode == 1)
+            {
+                //RoR axises
+                glWidgetO->ScalingNodes=4;
+                ui->statusBar->showMessage("Scaling Y");
+            }
+            else
+            {
+                //BeamNG axises
+                glWidgetO->ScalingNodes=3;
+                ui->statusBar->showMessage("Scaling Y");
+            }
         }
         else if(glWidgetO->MovingNodes>0)
         {
-            glWidgetO->MovingNodes=3;
-            glWidget->MovingNodes=3;
-            ui->statusBar->showMessage("Moving Y");
+            if(EditorMode == 1)
+            {
+                //RoR axises
+                glWidgetO->MovingNodes=4;
+                glWidget->MovingNodes=4;
+                ui->statusBar->showMessage("Moving Y");
+            }
+            else
+            {
+                //BeamNG axises
+                glWidgetO->MovingNodes=3;
+                glWidget->MovingNodes=3;
+                ui->statusBar->showMessage("Moving Y");
+            }
         }
         else if(glWidgetO->RotatingNodes>0)
         {
-            glWidgetO->RotatingNodes=2;
-            ui->statusBar->showMessage("Rotating Y");
+            if(EditorMode == 1)
+            {
+                //RoR axises
+                glWidgetO->RotatingNodes=3;
+                ui->statusBar->showMessage("Rotating Y");
+            }
+            else
+            {
+                //BeamNG axises
+                glWidgetO->RotatingNodes=2;
+                ui->statusBar->showMessage("Rotating Y");
+            }
         }
     }
     /* Choose Z-axis */
@@ -1283,19 +1373,50 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
     {
         if(glWidgetO->ScalingNodes>0)
         {
-            glWidgetO->ScalingNodes=4;
-            ui->statusBar->showMessage("Scaling Z");
+            if(EditorMode == 1)
+            {
+                //RoR axises
+                glWidgetO->ScalingNodes=2;
+                ui->statusBar->showMessage("Scaling Z");
+            }
+            else
+            {
+                //BeamNG axises
+                glWidgetO->ScalingNodes=4;
+                ui->statusBar->showMessage("Scaling Z");
+            }
         }
         else if(glWidgetO->MovingNodes>0)
         {
-            glWidgetO->MovingNodes=4;
-            glWidget->MovingNodes=4;
-            ui->statusBar->showMessage("Moving Z");
+            if(EditorMode == 1)
+            {
+                //RoR axises
+                glWidgetO->MovingNodes=2;
+                glWidget->MovingNodes=2;
+                ui->statusBar->showMessage("Moving Z");
+            }
+            else
+            {
+                //BeamNG axises
+                glWidgetO->MovingNodes=4;
+                glWidget->MovingNodes=4;
+                ui->statusBar->showMessage("Moving Z");
+            }
         }
         else if(glWidgetO->RotatingNodes>0)
         {
-            glWidgetO->RotatingNodes=3;
-            ui->statusBar->showMessage("Rotating Z");
+            if(EditorMode == 1)
+            {
+                //RoR axises
+                glWidgetO->RotatingNodes=1;
+                ui->statusBar->showMessage("Rotating Z");
+            }
+            else
+            {
+                //BeamNG axises
+                glWidgetO->RotatingNodes=3;
+                ui->statusBar->showMessage("Rotating Z");
+            }
         }
     }
     /* Rotate */
@@ -1918,4 +2039,16 @@ void MainWindow::on_toolButton_27_clicked()
     arguments.append(AppSettings->readsetting("rorveh"));
     myProcess->setNativeArguments(arguments);
     myProcess->start(program);
+}
+
+void MainWindow::on_actionRigs_of_Rods_Wiki_triggered()
+{
+    QString wiki = "http://www.rigsofrods.com/wiki/pages/Main_Page";
+    QDesktopServices::openUrl(QUrl(wiki));
+}
+
+void MainWindow::on_actionBeamNG_Wiki_triggered()
+{
+    QString wiki = "http://wiki.beamng.com/";
+    QDesktopServices::openUrl(QUrl(wiki));
 }
