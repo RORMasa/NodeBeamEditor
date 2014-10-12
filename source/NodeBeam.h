@@ -5,6 +5,15 @@
 #include <QObject>
 #include <QXmlStreamReader>
 
+/*LUA*/
+extern "C"
+{
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+}
+#include "LuaBridge/LuaBridge.h"
+
 /**Node Beam Editor **/
 
 struct Node
@@ -255,6 +264,10 @@ public:
     void AddHubWheel(); //put values in temphubwheel before calling this
     void CalcHubWheelRotation(int wheelid);
     double calculate_length(double x, double y);
+
+    /* LUA Script */
+    void RunLUAScript();
+    int LUAtesti(lua_State *L);
 
 private:
 

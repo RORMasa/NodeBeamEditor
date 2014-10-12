@@ -2368,10 +2368,11 @@ QTabWidget::tab-bar {
    </widget>
    <widget class="QMenu" name="menuGenerate">
     <property name="title">
-     <string>Generate</string>
+     <string>Scripts</string>
     </property>
     <addaction name="actionChassis_Generator"/>
     <addaction name="actionTracks"/>
+    <addaction name="actionRun"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -2479,6 +2480,11 @@ QTabWidget::tab-bar {
   <action name="actionBeamNG_Wiki">
    <property name="text">
     <string>BeamNG wiki</string>
+   </property>
+  </action>
+  <action name="actionRun">
+   <property name="text">
+    <string>Run</string>
    </property>
   </action>
  </widget>

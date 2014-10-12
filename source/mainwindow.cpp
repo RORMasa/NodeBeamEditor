@@ -454,6 +454,7 @@ void MainWindow::MainNodeBeamUpdated()
         item2->setText(1, CurrentNodeBeam->NodeGroups[i2].NodeGroupName);
         item2->setText(2, "Group");
         item2->setText(3, QString::number(CurrentNodeBeam->NodeGroups[i2].NodeGroupID));
+        qDebug() << "lisätään node " << CurrentNodeBeam->NodeGroups[i2].NodeAmount;
         for(int i=0; i<CurrentNodeBeam->NodeGroups[i2].NodeAmount; i++)
         {
             item = new QTreeWidgetItem();
@@ -2055,4 +2056,10 @@ void MainWindow::on_actionBeamNG_Wiki_triggered()
 {
     QString wiki = "http://wiki.beamng.com/";
     QDesktopServices::openUrl(QUrl(wiki));
+}
+
+void MainWindow::on_actionRun_triggered()
+{
+    QString tiedostonimi = "luascripts/testi.lua";
+    CurrentNodeBeam->RunLUAScript();
 }

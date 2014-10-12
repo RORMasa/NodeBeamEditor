@@ -193,11 +193,7 @@ private:
     float blueprint_w[6]; //width in pixels
     QVector <QVector3D> blueprint_viewrot;
 
-    /* Light positions */
-    const GLfloat first_pos[4] = {0.0f, 0.0f, 50.0f, 0.0f};
-    const GLfloat first_dir[4] = {0.0f, 0.0f, -1.0f, 0.0f};
-    const GLfloat second_pos[4] = {0.0f, 0.0f, -50.0f, 0.0f};
-    const GLfloat second_dir[4] = {0.0f, 0.0f, 1.0f, 0.0f};
+
 
 };
 

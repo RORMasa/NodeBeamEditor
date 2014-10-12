@@ -225,7 +225,7 @@ void NodeBeam::ParseLine(QString line, int ParsingMode)
                             NodeGroups[NodeGroups.size()-1].NodeGroupID = 0;
                             Nodes[(Nodes.size()-1)].GroupID = 0;
                             NodeGroups[NodeGroups.size()-1].draw=1;
-                            NodeGroups[NodeGroups.size()-1].NodeAmount++;
+                            NodeGroups[NodeGroups.size()-1].NodeAmount=1;
                         }
 
                         //Setting node color for 3D picking feature
@@ -1416,12 +1416,14 @@ int NodeBeam::AddNode(int NodeGroupID)
         NodeGroups[NodeGroups.size()-1].NodeGroupName = "Node Group 1.";
         NodeGroups[NodeGroups.size()-1].NodeGroupID = 0;
         NodeGroups[NodeGroups.size()-1].draw=1;
-        NodeGroups[NodeGroups.size()-1].NodeAmount++;
+        NodeGroups[NodeGroups.size()-1].NodeAmount = 1;
 
         int activenode=0;
         TempNode.GlobalID = activenode;
         TempNode.GroupID = 0;
         Nodes.insert(activenode, TempNode);
+        qDebug() << "Adding node " << TempNode.GlobalID << " " << TempNode.locX;
+        qDebug() << Nodes[0].locX;
 
 
     }
@@ -1530,7 +1532,7 @@ void NodeBeam::AddBeam(int Node1ID, int Node2ID, int BeamGroup)
         BeamGroups[BeamGroups.size()-1].BeamGroupName = "Beam Group 1.";
         BeamGroups[BeamGroups.size()-1].BeamGroupID = 0;
         BeamGroups[BeamGroups.size()-1].draw=1;
-        BeamGroups[BeamGroups.size()-1].BeamAmount++;
+        BeamGroups[BeamGroups.size()-1].BeamAmount = 1;
         TempBeam.BeamGroupID = 0;
         Beams.insert(0,TempBeam);
     }
@@ -2734,3 +2736,27 @@ void NodeBeam::DeleteNodeGroup(int NodeGroupID)
         }
     }
 }
+
+
+static void LUAtesti(lua_State *L)
+{
+
+    //int n = lua_gettop(L);
+    qDebug() << "toimii! ";
+
+}
+
+void NodeBeam::RunLUAScript()
+{
+
+    qDebug() << "hello world!";
+    /* register our function */
+    lua_State *L = luaL_newstate();
+    luaL_openlibs(L);
+
+    lua_setglobal(L,"testi");
+    luaL_dofile(L, "testi.lua");
+    lua_close(L);
+}
+
+

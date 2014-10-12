@@ -16,7 +16,8 @@ TEMPLATE = app
 #CONFIG += build_all
 
 INCLUDEPATH += . \
-    Generators
+    Generators \
+    "F:\Program Files (x86)\Lua\5.1\include" \
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -30,7 +31,8 @@ SOURCES += main.cpp\
     jbeam.cpp \
     jbeam_object.cpp \
     beamdefaultsdialog.cpp \
-    settings.cpp
+    settings.cpp \
+    NodeBeam_LUA.cpp
 
 HEADERS  += mainwindow.h \
     glwidget.h \
@@ -57,3 +59,5 @@ FORMS    += mainwindow.ui \
 RESOURCES += \
     icons.qrc
 
+LIBS += \
+    -L"F:\Program Files (x86)\Lua\5.1\lib\lua5.1.lib" -llua51

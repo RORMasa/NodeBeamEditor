@@ -209,6 +209,8 @@ private slots:
 
     void on_actionBeamNG_Wiki_triggered();
 
+    void on_actionRun_triggered();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;

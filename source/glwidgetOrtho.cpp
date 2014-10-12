@@ -69,6 +69,9 @@ GLWidgetOrtho::GLWidgetOrtho(QWidget *parent)
     CurrentNodeGroup=0;
     ShowArrows=1;
     MeasuringDistance=0;
+    ViewOffsetX = 0;
+    ViewOffsetY = 0;
+    ViewOffsetZ = 0;
 
     /*For scaling tool*/
     StartDistanceFromOrigin.resize(2);
@@ -248,6 +251,11 @@ void GLWidgetOrtho::setViewLeft()
 //! [6]
 void GLWidgetOrtho::draw()
 {
+    /* Light positions */
+    const GLfloat first_pos[4] = {0.0f, 0.0f, 50.0f, 0.0f};
+    const GLfloat first_dir[4] = {0.0f, 0.0f, -1.0f, 0.0f};
+    const GLfloat second_pos[4] = {0.0f, 0.0f, -50.0f, 0.0f};
+    const GLfloat second_dir[4] = {0.0f, 0.0f, 1.0f, 0.0f};
 
     glLightfv(GL_LIGHT0, GL_POSITION, first_pos);
     glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, first_dir);
@@ -1211,17 +1219,17 @@ void GLWidgetOrtho::DrawAxisArrows()
     glBegin(GL_TRIANGLES);
     glColor3f(1.0, 0.0, 0.0);
     //X-Arrow
-    glVertex3f(0.9, -0.05, 0.05);
+    glVertex3f(0.9f, -0.05f, 0.05f);
     glVertex3f(1, 0, 0);
-    glVertex3f(0.9, 0.05, 0.05);
+    glVertex3f(0.9f, 0.05f, 0.05f);
 
-    glVertex3f(0.9, 0.05, -0.05);
+    glVertex3f(0.9f, 0.05f, -0.05f);
     glVertex3f(1, 0, 0);
-    glVertex3f(0.9, -0.05, -0.05);
+    glVertex3f(0.9f, -0.05f, -0.05f);
 
-    glVertex3f(0.9, -0.05, -0.05);
+    glVertex3f(0.9f, -0.05f, -0.05f);
     glVertex3f(1, 0, 0);
-    glVertex3f(0.9, -0.05, 0.05);
+    glVertex3f(0.9f, -0.05f, 0.05f);
 
     glVertex3f(0.9, 0.05, 0.05);
     glVertex3f(1, 0, 0);
@@ -1296,7 +1304,7 @@ void GLWidgetOrtho::DrawAxisArrows()
     glBegin(GL_TRIANGLES);
     glColor3f(0.0, 1.0, 0.0);
 
-    glVertex3f(0.05, 0.1, 0.05);
+    glVertex3f(0.05f, 0.1f, 0.05f);
     glVertex3f(0, 1, 0);
     glVertex3f(-0.05, 0.1, 0.05);
 

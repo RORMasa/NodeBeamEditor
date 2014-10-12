@@ -2,6 +2,8 @@
 #include <QApplication>
 #include "NodeBeam.h"
 #include <QSplashScreen>
+
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -14,6 +16,7 @@ int main(int argc, char *argv[])
     w.show();
 
     splash.finish(&w);
+
 
     return a.exec();
 
