@@ -6,13 +6,13 @@
 #include <QXmlStreamReader>
 
 /*LUA*/
-extern "C"
-{
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
-#include "LuaBridge/LuaBridge.h"
+//extern "C"
+//{
+//#include "lua.h"
+//#include "lualib.h"
+//#include "lauxlib.h"
+//}
+//#include "LuaBridge/LuaBridge.h"
 
 /**Node Beam Editor **/
 
@@ -57,6 +57,7 @@ struct Beam
     int BeamGroupID;
     int BeamDefsID;
     bool HasBeamDefs;
+    bool draw;
 
 };
 
@@ -114,22 +115,6 @@ struct Hubwheel
     float radius;
 };
 
-class node
-{
-    QString NodeName;
-    float locX;
-    float locY;
-    float locZ;
-    QString Properties;
-
-    //The number of group in which this node belongs to
-    int GroupID;
-
-    //for color picking feature values between 0-255
-    int green;
-    int blue;
-};
-
 class NodeBeam
 {
 
@@ -153,6 +138,9 @@ public:
     int ActiveBeam;
     int ActiveNodeGroup;
     int ActiveBeamGroup;
+
+    /* Clear nodebeam, deletes all contents */
+    void clear();
 
     /*File import from Rigs of Rods */
     void ImportNBFile(const QString &fileName);
@@ -266,8 +254,11 @@ public:
     double calculate_length(double x, double y);
 
     /* LUA Script */
-    void RunLUAScript();
-    int LUAtesti(lua_State *L);
+    //void RunLUAScript();
+    //int LUAtesti(lua_State *L);
+
+    /* JBEAM TextEdit parsing functions */
+    bool ParseJBEAM_TextEdit(QByteArray JbeamInputText);
 
 private:
 
@@ -275,8 +266,13 @@ private:
     is the current position, for example in nodes section */
     int grid_index;
 
-
-
+    /* JBEAM TextEdit parsing functions */
+    void JBEAM_FixCommas_NextChar(QString &sample, QChar &nextchar, int &nextchar_i);
+    void JBEAM_FixCommas_PrevChar(QString &sample, QChar &prevchar, int &prevchar_i);
+    QByteArray JBEAM_FixCommas(QByteArray JbeamText);
+    bool JBEAM_ParseNodesArray(QJsonArray JbeamNodesArray);
+    bool JBEAM_ParseBeamsArray(QJsonArray JbeamBeamsArray);
+    QByteArray JBEAM_RemoveComments(QByteArray JbeamText);
 
 };
 

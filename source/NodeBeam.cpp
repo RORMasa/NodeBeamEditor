@@ -12,17 +12,17 @@
 #include <jbeam.h>
 #include "NodeBeam.h"
 
-//NB Editoria varten
-//static const qreal node_size = 0.10;
-//static const int num_divisions = 32;
-
+#include <QJsonValue>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 NodeBeam::NodeBeam()
 {
-    VehicleName = "Newvehicle";
-    VehicleInGameName = "New vehicle";
+    VehicleName = "";
+    VehicleInGameName = "";
     VehicleAuthors.resize(1);
-    VehicleAuthors[0] = "Editor";
+    VehicleAuthors[0] = "";
     green=0;
     blue=0;
     ActiveNodeGroup=-1;
@@ -1336,6 +1336,7 @@ void NodeBeam::ExportRoR(const QString &fileName)
     }
 }
 
+/* EDITOR TOOLS */
 /* Add node, input values as argument */
 void NodeBeam::AddNodeT(float locx, float locy, float locz, int NodeGroupID, QString NodeName)
 {
@@ -1506,6 +1507,7 @@ void NodeBeam::AddBeam(int Node1ID, int Node2ID, int BeamGroup)
     TempBeam.Node1Name = Nodes[Node1ID].NodeName;
     TempBeam.Node2Name = Nodes[Node2ID].NodeName;
     TempBeam.HasBeamDefs=0;
+    TempBeam.draw=1;
 
     //Adding to group
     //If beam group exists, add in that
@@ -1640,6 +1642,7 @@ void NodeBeam::DuplicateNodes()
                         TempBeam.Node1Name = Nodes[TempBeam.Node1GlobalID].NodeName;
                         TempBeam.Node2Name = Nodes[TempBeam.Node2GlobalID].NodeName;
                         TempBeam.Properties = TempBeam.Properties;
+                        TempBeam.draw = 1;
                         TempBeams.append(TempBeam);
                     }
                 }
@@ -1692,6 +1695,7 @@ void NodeBeam::ExtrudeNodes()
                             TempBeam.Node1Name = Nodes[TempBeam.Node1GlobalID].NodeName;
                             TempBeam.Node2Name = Nodes[TempBeam.Node2GlobalID].NodeName;
                             TempBeam.Properties = TempBeam.Properties;
+                            TempBeam.draw = 1;
                             TempBeams.append(TempBeam);
 
 
@@ -1703,6 +1707,7 @@ void NodeBeam::ExtrudeNodes()
                             TempBeam.Node1Name = Nodes[TempBeam.Node1GlobalID].NodeName;
                             TempBeam.Node2Name = Nodes[TempBeam.Node2GlobalID].NodeName;
                             TempBeam.Properties = TempBeam.Properties;
+                            TempBeam.draw = 1;
                             TempBeams.append(TempBeam);
                         }
                     }
@@ -2737,7 +2742,292 @@ void NodeBeam::DeleteNodeGroup(int NodeGroupID)
     }
 }
 
+/* Delete nodebeam contents */
+void NodeBeam::clear()
+{
+    Nodes.clear();
+    Beams.clear();
 
+    Hubwheels.clear();
+    NodeGroups.clear();
+    BeamGroups.clear();
+    NodeArguments.clear();
+    BeamDefaults.clear();
+    HWArguments.clear();
+
+    ActiveNode = 0;
+    ActiveBeam = 0;
+    ActiveNodeGroup = 0;
+    ActiveBeamGroup = 0;
+
+    green = 0;
+    blue = 0;
+
+    SelectedNodes.clear();
+    SelectedNodes2.clear();
+    SelectedBeams.clear();
+
+    ActiveNodeGroup=-1;
+    ActiveBeamGroup=-1;
+}
+
+/* Parse contents of the JBEAM text edit box */
+bool NodeBeam::ParseJBEAM_TextEdit(QByteArray JbeamInputText)
+{
+    //Clear the active nodebeam
+    clear();
+
+    //Fix commas to make valid JSON
+    JbeamInputText = JBEAM_FixCommas(JbeamInputText);
+
+    //Remove C style comments
+    //JbeamInputText = JBEAM_RemoveComments(JbeamInputText);
+
+    //Parse error
+    QJsonParseError virhe;
+
+    //Parse textbox text to JSON
+    QJsonDocument Jbeam = QJsonDocument::fromJson(JbeamInputText, &virhe);
+
+    //Error messages
+    qDebug() << "JSON parsing result: " << ", " << virhe.errorString();
+
+    QJsonObject JbeamObject = Jbeam.object();
+
+    qDebug() << "Object is empty:" << Jbeam.object().isEmpty();
+
+    if(!JbeamObject.isEmpty())
+    {
+        for(int i=0; i<JbeamObject.keys().length(); i++)
+        {
+            qDebug() << "Parsing slot " << JbeamObject.keys()[i];
+            QJsonObject JbeamObject_slot;
+            QJsonValue slot = JbeamObject.value(JbeamObject.keys()[i]);
+
+            if(slot.isObject())
+            {
+                JbeamObject_slot = slot.toObject();
+                qDebug() << "Keys in slot: " << JbeamObject_slot.keys();
+
+                //Get nodes from slot
+                QJsonObject::iterator slot_iterator = JbeamObject_slot.find("nodes");
+                if (slot_iterator != JbeamObject_slot.end())
+                {
+                    QJsonArray Jbeam_nodes;
+                    Jbeam_nodes = JbeamObject_slot.value("nodes").toArray();
+                    qDebug() << "nodes found " << Jbeam_nodes.count();
+                    JBEAM_ParseNodesArray(Jbeam_nodes);
+
+                }
+
+                //Get beams from slot
+                slot_iterator = JbeamObject_slot.find("beams");
+                if (slot_iterator != JbeamObject_slot.end())
+                {
+                    QJsonArray Jbeam_beams;
+                    Jbeam_beams = JbeamObject_slot.value("beams").toArray();
+                    qDebug() << "beams found " << Jbeam_beams.count();
+                    JBEAM_ParseBeamsArray(Jbeam_beams);
+
+                }
+
+            }
+
+
+
+        }
+    }
+    else qDebug() << "JBEAM object not found.";
+
+
+}
+
+bool NodeBeam::JBEAM_ParseNodesArray(QJsonArray JbeamNodesArray)
+{
+    for(int i=0; i<JbeamNodesArray.count();i++)
+    {
+        //If it's an array, it's a node
+        if(JbeamNodesArray.at(i).isArray())
+        {
+            QJsonArray Jnode;
+            Jnode = JbeamNodesArray.at(i).toArray();
+
+            if(Jnode.at(0).isString()) TempNode.NodeName = Jnode.at(0).toString();
+            if(Jnode.at(1).isDouble()) TempNode.locX = Jnode.at(1).toDouble();
+            if(Jnode.at(2).isDouble()) TempNode.locY = Jnode.at(2).toDouble();
+            if(Jnode.at(3).isDouble())
+            {
+                TempNode.locZ = Jnode.at(3).toDouble();
+                AddNode();
+                qDebug() << "Adding node from JBEAM text box";
+            }
+
+        }
+    }
+}
+
+bool NodeBeam::JBEAM_ParseBeamsArray(QJsonArray JbeamBeamsArray)
+{
+    for(int i=0; i<JbeamBeamsArray.count();i++)
+    {
+        //If it's an array, it's a beam
+        if(JbeamBeamsArray.at(i).isArray())
+        {
+            QJsonArray Jbeam;
+            Jbeam = JbeamBeamsArray.at(i).toArray();
+
+            if(Jbeam.at(0).isString()) TempBeam.Node1Name = Jbeam.at(0).toString();
+            if(Jbeam.at(1).isString())
+            {
+                TempBeam.Node2Name = Jbeam.at(1).toString();
+                TempBeam.Node1GlobalID = FindNodeByName(TempBeam.Node1Name);
+                TempBeam.Node2GlobalID = FindNodeByName(TempBeam.Node2Name);
+                if((TempBeam.Node1GlobalID<0)||(TempBeam.Node2GlobalID<0)) TempBeam.draw=0;
+                else TempBeam.draw=1;
+
+                AddBeamT();
+                qDebug() << "Adding node from JBEAM text box";
+            }
+
+        }
+    }
+}
+
+/* Functions to fix JBEAM to valid JSON */
+void NodeBeam::JBEAM_FixCommas_NextChar(QString &sample, QChar &nextchar, int &nextchar_i)
+{
+    //Find the next character other than comma, space, or line change
+    for(int i=nextchar_i; i<sample.length();i++)
+    {
+        if(sample[i] == ' ');
+        else if(sample[i] == '\n');
+        else if(sample[i] == '	');
+        else
+        {
+            nextchar = sample[i];
+            nextchar_i = i;
+            break;
+        }
+    }
+}
+
+void NodeBeam::JBEAM_FixCommas_PrevChar(QString &sample, QChar &prevchar, int &prevchar_i)
+{
+    //Find the previous character other than space, or line change
+    for(int i=prevchar_i; i>0;i--)
+    {
+        qDebug() << "checking p " << sample[i];
+        if(sample[i] == ' ');
+        else if(sample[i] == '\n');
+        else if(sample[i] == '	');
+        else
+        {
+            prevchar = sample[i];
+            prevchar_i = i;
+            break;
+        }
+    }
+}
+
+QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
+{
+    QString temp1;
+    bool checking = 0;
+
+    QString JbeamTextSTR = JbeamText.constData();
+
+    for(int i=0; i<JbeamTextSTR.length(); i++)
+    {
+        if((JbeamTextSTR[i] == ']')||(JbeamTextSTR[i] == '}'))
+        {
+            QChar nextchar = 'ö';
+            int nextchar_i = i+1;
+            JBEAM_FixCommas_NextChar(JbeamTextSTR, nextchar, nextchar_i);
+            qDebug() << JbeamTextSTR[nextchar_i];
+            qDebug() << "next char is " << nextchar;
+            if((nextchar == '[')||(nextchar == '{'))
+            {
+                JbeamTextSTR.insert(i+1,',');
+                i++;
+                qDebug() << "Inserting letter";
+            }
+            else if(nextchar == '"')
+            {
+                JbeamTextSTR.insert(i+1,',');
+                i++;
+                qDebug() << "Inserting letter";
+            }
+        }
+
+    }
+
+    for(int i=0; i<JbeamTextSTR.length(); i++)
+    {
+        if((JbeamTextSTR[i] == ']')||(JbeamTextSTR[i] == '}'))
+        {
+            QChar prevchar = 'ö';
+            int prevchar_i=0;
+            if (i>0) prevchar_i = i-1;
+            qDebug() << "aloituspiste " << JbeamTextSTR[i-1]<<JbeamTextSTR[prevchar_i]<<JbeamTextSTR[i+1];
+            JBEAM_FixCommas_PrevChar(JbeamTextSTR, prevchar, prevchar_i);
+            if(prevchar == ',')
+            {
+                int comma_i = prevchar_i;
+                prevchar_i--;
+
+                JBEAM_FixCommas_PrevChar(JbeamTextSTR, prevchar, prevchar_i);
+                qDebug() << JbeamTextSTR[prevchar_i];
+                qDebug() << "prev char is " << prevchar;
+                /*
+                if((prevchar == ']') || (prevchar == '}'))
+                {
+                    JbeamTextSTR.replace(comma_i, 1, " ");
+                    qDebug() << "Removing letter";
+                }
+                */
+                JbeamTextSTR.replace(comma_i, 1, " ");
+
+            }
+        }
+
+    }
+
+    JbeamText.clear();
+    JbeamText.append(JbeamTextSTR);
+    return JbeamText;
+}
+
+QByteArray NodeBeam::JBEAM_RemoveComments(QByteArray JbeamText)
+{
+    QString JbeamTextSTR = JbeamText.constData();
+
+    bool commentfound=0;
+    int commentcheck = 0;
+    for(int i=0; i<JbeamTextSTR.length(); i++)
+    {
+        if(JbeamTextSTR[i] == '/') commentcheck++;
+        if(commentcheck==2)
+        {
+            commentcheck=0;
+            commentfound=1;
+            int i2;
+            for(i2=i; i2<JbeamTextSTR.length();i2++)
+            {
+                if(JbeamTextSTR[i2]=='\n') break;
+            }
+            JbeamTextSTR.replace(i-1,i2-i,' ');
+        }
+
+    }
+    if(commentfound)
+    {
+        JbeamText.clear();
+        JbeamText.append(JbeamTextSTR);
+        return JbeamText;
+    }
+}
+
+/*
 static void LUAtesti(lua_State *L)
 {
 
@@ -2750,7 +3040,7 @@ void NodeBeam::RunLUAScript()
 {
 
     qDebug() << "hello world!";
-    /* register our function */
+    //register our function
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
 
@@ -2758,5 +3048,5 @@ void NodeBeam::RunLUAScript()
     luaL_dofile(L, "testi.lua");
     lua_close(L);
 }
-
+*/
 

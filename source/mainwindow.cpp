@@ -168,6 +168,10 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
 
+    //Set smaller TAB width
+    ui->textEdit_JBEAM->setTabStopWidth(15);
+
+
 
 }
 
@@ -923,13 +927,20 @@ void MainWindow::on_actionTracks_triggered()
 /* Delete beams */
 void MainWindow::on_pushButton_3_clicked()
 {
-
+    QByteArray textbox;
+    textbox.append(ui->textEdit_JBEAM->toPlainText());
+    CurrentNodeBeam->ParseJBEAM_TextEdit(textbox);
+    MainNodeBeamUpdated();
 
 }
 
-/* Delete nodes */
+/* Parse JBEAM widget */
 void MainWindow::on_pushButton_DeleteNode_clicked()
 {
+    //Text from text browser to QByteArray
+    QByteArray JBeamInputText;
+    JBeamInputText.append(ui->textEdit_JBEAM->toPlainText());
+
 
 }
 
@@ -2061,5 +2072,5 @@ void MainWindow::on_actionBeamNG_Wiki_triggered()
 void MainWindow::on_actionRun_triggered()
 {
     QString tiedostonimi = "luascripts/testi.lua";
-    CurrentNodeBeam->RunLUAScript();
+    //CurrentNodeBeam->RunLUAScript();
 }

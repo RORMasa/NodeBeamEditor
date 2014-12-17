@@ -60,4 +60,4 @@ RESOURCES += \
     icons.qrc
 
 LIBS += \
-    -L"F:\Program Files (x86)\Lua\5.1\lib\lua5.1.lib" -llua51
+    #-L"F:\Program Files (x86)\Lua\5.1\lib\lua5.1.lib" -llua51

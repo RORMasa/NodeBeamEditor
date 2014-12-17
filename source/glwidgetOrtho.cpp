@@ -350,24 +350,28 @@ void GLWidgetOrtho::draw()
     int NodeAmount = NBPointer->Nodes.size();
     for(int i=0; i<NBPointer->Beams.size(); i++)
     {
-        if(NBPointer->Beams[i].HasBeamDefs)
+        if(NBPointer->Beams[i].draw)
         {
-            float beamred = NBPointer->BeamDefaults[NBPointer->Beams[i].BeamDefsID].RGB_Color[0]/255.0f;
-            float beamgre = NBPointer->BeamDefaults[NBPointer->Beams[i].BeamDefsID].RGB_Color[1]/255.0f;
-            float beamblu = NBPointer->BeamDefaults[NBPointer->Beams[i].BeamDefsID].RGB_Color[2]/255.0f;
-            glColor4f(beamred,beamgre,beamblu,1.0f);
-        }
-        else
-        {
-            glColor4f(0.0f,0.4f,0.6f,1.0f);
-        }
-        int Bnode1 = NBPointer->Beams[i].Node1GlobalID;
-        int Bnode2 = NBPointer->Beams[i].Node2GlobalID;
+            if(NBPointer->Beams[i].HasBeamDefs)
+            {
+                float beamred = NBPointer->BeamDefaults[NBPointer->Beams[i].BeamDefsID].RGB_Color[0]/255.0f;
+                float beamgre = NBPointer->BeamDefaults[NBPointer->Beams[i].BeamDefsID].RGB_Color[1]/255.0f;
+                float beamblu = NBPointer->BeamDefaults[NBPointer->Beams[i].BeamDefsID].RGB_Color[2]/255.0f;
+                glColor4f(beamred,beamgre,beamblu,1.0f);
+            }
+            else
+            {
+                glColor4f(0.0f,0.4f,0.6f,1.0f);
+            }
+            int Bnode1 = NBPointer->Beams[i].Node1GlobalID;
+            int Bnode2 = NBPointer->Beams[i].Node2GlobalID;
 
-        if((Bnode1<NodeAmount) && (Bnode2<NodeAmount))
-        {
-            glVertex3f(NBPointer->Nodes[Bnode1].locX, NBPointer->Nodes[Bnode1].locY, NBPointer->Nodes[Bnode1].locZ);
-            glVertex3f(NBPointer->Nodes[Bnode2].locX, NBPointer->Nodes[Bnode2].locY, NBPointer->Nodes[Bnode2].locZ);
+            if((Bnode1<NodeAmount) && (Bnode2<NodeAmount))
+            {
+                glVertex3f(NBPointer->Nodes[Bnode1].locX, NBPointer->Nodes[Bnode1].locY, NBPointer->Nodes[Bnode1].locZ);
+                glVertex3f(NBPointer->Nodes[Bnode2].locX, NBPointer->Nodes[Bnode2].locY, NBPointer->Nodes[Bnode2].locZ);
+            }
+
         }
 
     }
