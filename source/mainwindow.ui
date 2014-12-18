@@ -571,7 +571,7 @@ QTabWidget::tab-bar {
             </rect>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="page_3">
             <widget class="QSpinBox" name="spinBox_grids">
@@ -694,6 +694,22 @@ QTabWidget::tab-bar {
              </property>
              <property name="text">
               <string>Node group</string>
+             </property>
+            </widget>
+            <widget class="QCheckBox" name="checkBox_5">
+             <property name="geometry">
+              <rect>
+               <x>160</x>
+               <y>10</y>
+               <width>161</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add node in JBEAM box at text cursor location. Notice to position your text cursor in the position where you want your nodes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>Add in JBEAM</string>
              </property>
             </widget>
            </widget>

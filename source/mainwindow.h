@@ -35,6 +35,7 @@ public slots:
     void SettingsUpdated();
     void UpdateSelection();
     void ShowContextMenu_Beams(const QPoint &position);
+    void JBEAM_AddNode();
 
 signals:
     void ZoomChanged();
@@ -210,6 +211,8 @@ private slots:
     void on_actionBeamNG_Wiki_triggered();
 
     void on_actionRun_triggered();
+
+    void on_checkBox_5_clicked();
 
 private:
     Ui::MainWindow *ui;

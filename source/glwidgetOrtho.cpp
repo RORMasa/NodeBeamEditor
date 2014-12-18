@@ -588,8 +588,9 @@ void GLWidgetOrtho::mousePressEvent(QMouseEvent *event)
                 YPointer1 = &locy;
                 ZPointer1 = &Zcoordinate;
 
-                NBPointer->AddNodeT(**XPointer2, **YPointer2, **ZPointer2,CurrentNodeGroup, NBPointer->CurrentNamePrefix);
+                int Node_id = NBPointer->AddNodeT(**XPointer2, **YPointer2, **ZPointer2,CurrentNodeGroup, NBPointer->CurrentNamePrefix);
                 emit NodeBeamUpdated();
+                emit JBEAM_AddNodeO();
                 updateGL();
 
             }
@@ -607,8 +608,9 @@ void GLWidgetOrtho::mousePressEvent(QMouseEvent *event)
                 YPointer1 = &locy;
                 ZPointer1 = &Zcoordinate;
 
-                NBPointer->AddNodeT(**XPointer2, **YPointer2, **ZPointer2,CurrentNodeGroup, NBPointer->CurrentNamePrefix);
+                int Node_id = NBPointer->AddNodeT(**XPointer2, **YPointer2, **ZPointer2,CurrentNodeGroup, NBPointer->CurrentNamePrefix);
                 emit NodeBeamUpdated();
+                emit JBEAM_AddNodeO();
                 updateGL();
 
             }

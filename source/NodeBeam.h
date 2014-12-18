@@ -199,7 +199,7 @@ public:
     QVector <int> SelectedBeams;
 
     /* Add node functions */
-    void AddNodeT(float locx, float locy, float locz, int NodeGroupID, QString NodeName);
+    int AddNodeT(float locx, float locy, float locz, int NodeGroupID, QString NodeName);
     int AddNode();
     int AddNode(int NodeGroupID);
     void ExtrudeNodes();

@@ -105,6 +105,7 @@ public slots:
 signals:
     void NodeBeamUpdated();
     void SelectionUpdated();
+    void JBEAM_AddNodeO();
 
 
 protected:

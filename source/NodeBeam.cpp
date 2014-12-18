@@ -1338,7 +1338,7 @@ void NodeBeam::ExportRoR(const QString &fileName)
 
 /* EDITOR TOOLS */
 /* Add node, input values as argument */
-void NodeBeam::AddNodeT(float locx, float locy, float locz, int NodeGroupID, QString NodeName)
+int NodeBeam::AddNodeT(float locx, float locy, float locz, int NodeGroupID, QString NodeName)
 {
     TempNode.locX = locx;
     TempNode.locY = locy;
@@ -1356,7 +1356,7 @@ void NodeBeam::AddNodeT(float locx, float locy, float locz, int NodeGroupID, QSt
         NodeName.append(char(NodeGroupID+97));
         TempNode.NodeName = NewNodeName(NodeName);
     }
-    AddNode(NodeGroupID);
+    return AddNode(NodeGroupID);
 }
 
 /* Add node to last group */

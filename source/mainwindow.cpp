@@ -97,6 +97,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(glWidgetO, SIGNAL(SelectionUpdated()), this, SLOT(UpdateSelection()));
     QObject::connect(AppSettings, SIGNAL(SettingsUpdated()), this, SLOT(SettingsUpdated()));
 
+    QObject::connect(glWidgetO, SIGNAL(JBEAM_AddNodeO()), this, SLOT(JBEAM_AddNode()));
 
     CurrentBeamGroupi=0;
     RefreshLock=0;
@@ -1018,6 +1019,7 @@ void MainWindow::on_toolButton_clicked()
         ui->stackedWidget->setCurrentIndex(0);
         glWidgetO->AddingNodes=0;
     }
+
 }
 
 /* Move nodes */
@@ -2073,4 +2075,31 @@ void MainWindow::on_actionRun_triggered()
 {
     QString tiedostonimi = "luascripts/testi.lua";
     //CurrentNodeBeam->RunLUAScript();
+}
+
+/* Toggle add nodes in the JBEAM edit widget at text cursor position on/off */
+void MainWindow::on_checkBox_5_clicked()
+{
+
+}
+
+/* Add node in JBEAM edit widget at text cursor position */
+void MainWindow::JBEAM_AddNode()
+{
+    int node_id = CurrentNodeBeam->TempNode.GlobalID;
+    QString nodeline = "            [";
+    nodeline+= '"' + CurrentNodeBeam->Nodes[node_id].NodeName + '"';
+    nodeline+= ", ";
+    nodeline+= QString::number(CurrentNodeBeam->Nodes[node_id].locX);
+    nodeline+= ", ";
+    nodeline+= QString::number(CurrentNodeBeam->Nodes[node_id].locY);
+    nodeline+= ", ";
+    nodeline+= QString::number(CurrentNodeBeam->Nodes[node_id].locZ);
+    nodeline.append("],\n");
+    qDebug() << "adding node to JBEAM widget";
+    QString teksti = nodeline;
+    QTextCursor textcursor = ui->textEdit_JBEAM->textCursor();
+    textcursor.insertText(teksti);
+    ui->textEdit_JBEAM->setTextCursor(textcursor);
+
 }
