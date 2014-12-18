@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     /* About box : Version and compliation time , link to GitHub */
-    AboutBox = "<br><br><br><b>Version: 0.26</b><br><br>Built on ";
+    AboutBox = "<br><br><br><b>Version: 0.3</b><br><br>Built on ";
     AboutBox.append(__DATE__);
     AboutBox.append(", ");
     AboutBox.append(__TIME__);
@@ -2105,6 +2105,8 @@ void MainWindow::on_actionRun_triggered()
 /* Parse JBEAM widget */
 void MainWindow::on_pushButton_3_clicked()
 {
+    JBEAM_UpdateSelectedNodes();
+
     QByteArray textbox;
     textbox.append(ui->textEdit_JBEAM->toPlainText());
     QJsonParseError ParseError;
@@ -2156,4 +2158,178 @@ void MainWindow::JBEAM_AddBeam()
     QTextCursor textcursor = ui->textEdit_JBEAM->textCursor();
     textcursor.insertText(beamline);
     ui->textEdit_JBEAM->setTextCursor(textcursor);
+}
+
+/* Update selected nodes in JBEAM edit widget */
+void MainWindow::JBEAM_UpdateSelectedNodes()
+{
+    int pos1; //Position containers for parsing the textbox
+    int pos2;
+
+    QString TextBoxText = ui->textEdit_JBEAM->toPlainText();
+    for(int i=0; i<CurrentNodeBeam->SelectedNodes.size();i++)
+    {
+        QString NodeName = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].NodeName;
+
+        //Find node from textbox by nodename
+        if(FindNodeContainer(TextBoxText, NodeName, pos1, pos2))
+        {
+            QString nodeline = '"' + NodeName + '"';
+            nodeline+= ", ";
+            nodeline+= QString::number(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].locX);
+            nodeline+= ", ";
+            nodeline+= QString::number(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].locY);
+            nodeline+= ", ";
+            nodeline+= QString::number(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].locZ);
+
+            TextBoxText.replace(pos1,pos2-pos1+1,nodeline);
+        }
+        else qDebug() << "Node not found";
+
+    }
+    ui->textEdit_JBEAM->setText(TextBoxText);
+}
+
+/* This function will find, where the node and it's 3 coordinates are in the JBEAM string.
+Results will be returned in NodeBegin and NodeEnd integer values.
+Bool will be false, if node was not found.*/
+bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd)
+{
+    int NodeFound = 0;
+    int linenumber=0;
+
+    QString temp = "";
+    int i=0;
+    for(i; i<JBEAM_box.length();i++)
+    {
+        if(JBEAM_box[i] == ' ');
+        else if (JBEAM_box[i] == '\u0009');
+        else if (JBEAM_box[i] == '\n')linenumber++;
+        else
+        {
+            temp.append(JBEAM_box[i]);
+            if(temp.indexOf("\"nodes\":") >= 0)
+            {
+                break;
+            }
+        }
+    }
+    int nodes_begin = i;
+
+    //Find nodes section container END
+    int listlevel = 0;
+    for(i; i<JBEAM_box.length();i++)
+    {
+        if (JBEAM_box[i] == '\n')linenumber++;
+        else if (JBEAM_box[i] == '[') listlevel++;
+        else if (JBEAM_box[i] == ']')
+        {
+            listlevel--;
+            if(listlevel == 0) break;
+        }
+    }
+
+    int nodes_end = i;
+    temp.clear();
+    QString NodeLost = "[\"";
+    NodeLost+=nodename;
+    NodeLost+="\"";
+
+    //Find node
+    for(i=nodes_begin; i<nodes_end;i++)
+    {
+        if(JBEAM_box[i] == ' ');
+        else if (JBEAM_box[i] == '\u0009');
+        else if (JBEAM_box[i] == '\n')linenumber++;
+        else
+        {
+            temp.append(JBEAM_box[i]);
+            if(temp.indexOf(NodeLost) >= 0)
+            {
+                NodeFound++;
+                break;
+            }
+        }
+    }
+
+    //Find node begin
+    for(i; i>nodes_begin; i--)
+    {
+        if(JBEAM_box[i] == '[') break;
+    }
+
+
+    int node_begin = i;
+
+    listlevel = 0;
+    //Find node end
+    for(i; i<nodes_end; i++)
+    {
+        if(JBEAM_box[i] == '[') listlevel++;
+        else if(JBEAM_box[i] == ']')
+        {
+            listlevel--;
+            if(listlevel == 0)
+            {
+                break;
+            }
+        }
+    }
+
+    int node_end = i;
+
+    //Find the location of the last node coordinate.
+    int grid_id = 0;
+    bool valuefound = 0;
+    int nodenamecalc = 0;
+    for(i=node_begin+1; i<node_end+1; i++)
+    {
+        if(grid_id == 0)
+        {
+            if(JBEAM_box[i] == '"') nodenamecalc++;
+            if(nodenamecalc==2)
+            {
+                valuefound=1;
+            }
+        }
+        else if(grid_id > 0)
+        {
+            if(JBEAM_box[i].isDigit())
+            {
+                valuefound = 1;
+            }
+        }
+
+        if(valuefound)
+        {
+            if((JBEAM_box[i] == ' ') || (JBEAM_box[i] == ',') || (JBEAM_box[i] == '\u0009') || (JBEAM_box[i] == '\n') || (JBEAM_box[i] == ']'))
+            {
+                valuefound=0;
+                grid_id++;
+            }
+        }
+        if(grid_id == 4)
+        {
+            NodeFound++;
+            break;
+        }
+    }
+
+    //int node_end_real = i-1;
+
+    NodeBegin = node_begin+1;
+    NodeEnd = i-1;
+
+    if(NodeFound == 2)  return true;
+    else return false;
+
+    /* Test */
+    /*
+    temp.clear();
+    temp = JBEAM_box.right(JBEAM_box.length()-node_begin-1);
+    temp = temp.left(node_end_real - node_begin);
+
+    qDebug() << temp;
+    */
+
 }

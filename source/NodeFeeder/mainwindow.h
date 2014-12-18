@@ -22,6 +22,10 @@ public:
     //Comment remove
     QByteArray JBEAM_RemoveComments(QByteArray JbeamText);
 
+    //
+    //Find JBEAM node from string
+    bool FindNodeContainer(QString JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd);
+
 private slots:
     void on_pushButton_clicked();
 

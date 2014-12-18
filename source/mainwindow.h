@@ -38,6 +38,7 @@ public slots:
     void ShowContextMenu_Beams(const QPoint &position);
     void JBEAM_AddNode();
     void JBEAM_AddBeam();
+    void JBEAM_UpdateSelectedNodes();
 
 signals:
     void ZoomChanged();
@@ -242,5 +243,8 @@ private:
     QString AboutBox;
 
     bool EditorMode; //BeamNG or RoR Axises in use
+
+    //Find JBEAM node from string
+    bool FindNodeContainer(QString JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd);
 };
 

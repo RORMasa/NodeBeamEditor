@@ -664,9 +664,8 @@ void GLWidget::paintGL()
         glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
         glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
         glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
-        //Move 3D view around
-        glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ);
-        drawpicking();
+        glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
+        drawpicking(); //Draw nodes in buffer, each with individual color
         //QGLWidget::swapBuffers();
     }
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -675,8 +674,7 @@ void GLWidget::paintGL()
     glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
     glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
     glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
-    //Move 3D view around
-    glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ);
+    glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
     draw(); //draw nodes, beams, wheels, lines
     if(ShowArrows) DrawAxisArrows();
     glColor3f(0.6, 0.6, 0.6);
