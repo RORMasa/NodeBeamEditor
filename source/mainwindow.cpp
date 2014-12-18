@@ -12,6 +12,7 @@
 #include "settings.h"
 #include <QTimerEvent>
 #include <QPixmap>
+#include <QJsonDocument>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -97,7 +98,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(glWidgetO, SIGNAL(SelectionUpdated()), this, SLOT(UpdateSelection()));
     QObject::connect(AppSettings, SIGNAL(SettingsUpdated()), this, SLOT(SettingsUpdated()));
 
+    //JBEAM widget
     QObject::connect(glWidgetO, SIGNAL(JBEAM_AddNodeO()), this, SLOT(JBEAM_AddNode()));
+    QObject::connect(glWidget, SIGNAL(JBEAM_AddBeamO()), this, SLOT(JBEAM_AddBeam()));
 
     CurrentBeamGroupi=0;
     RefreshLock=0;
@@ -138,12 +141,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeWidget->header()->resizeSection(0,75); //Make node ID colum narrower in nodes tree widget
 
     //init StatusBar
-    StatusBar_info = new QLabel();
-    StatusBar_info->setToolTip("Node counter");
+    StatusBar_nodecount = new QLabel();
+    StatusBar_nodecount->setToolTip("Node counter");
     StatusBar_mode = new QLabel();
     StatusBar_mode->setToolTip("Coordinate system");
-    ui->statusBar->addWidget(StatusBar_info);
+    StatusBar_info = new QLabel();
+    ui->statusBar->addWidget(StatusBar_nodecount);
     ui->statusBar->addWidget(StatusBar_mode, 1);
+    ui->statusBar->addWidget(StatusBar_info);
 
     //Swap editor axises for RoR if necessary
     if(AppSettings->readsetting("editor_mode")=="2")
@@ -282,7 +287,7 @@ void MainWindow::on_actionExport_to_BeamNG_triggered()
         QString resultt = "File exporting finished in ";
         resultt.append(QString::number(result));
         resultt.append(" ms !");
-        ui->statusBar->showMessage(resultt);
+        ui->statusBar->showMessage(resultt,10000);
     }
 
 //    CurrentNodeBeam->WriteInJBeamTree("pickup_fueltank");
@@ -422,7 +427,7 @@ void MainWindow::on_treeWidget_2_itemSelectionChanged()
         {
             QString message = "Beam arguments are : ";
             message.append(CurrentNodeBeam->BeamDefaults[CurrentNodeBeam->Beams[CurrentNodeBeam->ActiveBeam].BeamDefsID].Name);
-            ui->statusBar->showMessage(message);
+            ui->statusBar->showMessage(message,10000);
         }
     }
 
@@ -925,16 +930,6 @@ void MainWindow::on_actionTracks_triggered()
     trackgen.exec();
 }
 
-/* Delete beams */
-void MainWindow::on_pushButton_3_clicked()
-{
-    QByteArray textbox;
-    textbox.append(ui->textEdit_JBEAM->toPlainText());
-    CurrentNodeBeam->ParseJBEAM_TextEdit(textbox);
-    MainNodeBeamUpdated();
-
-}
-
 /* Parse JBEAM widget */
 void MainWindow::on_pushButton_DeleteNode_clicked()
 {
@@ -1289,13 +1284,13 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
             {
                 //RoR axises
                 glWidgetO->ScalingNodes=3;
-                ui->statusBar->showMessage("Scaling X");
+                ui->statusBar->showMessage("Scaling X",10000);
             }
             else
             {
                 //BeamNG axises
                 glWidgetO->ScalingNodes=2;
-                ui->statusBar->showMessage("Scaling X");
+                ui->statusBar->showMessage("Scaling X",10000);
             }
         }
         else if(glWidgetO->MovingNodes>0)
@@ -1305,14 +1300,14 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
                 //RoR axises
                 glWidgetO->MovingNodes=3;
                 glWidget->MovingNodes=3;
-                ui->statusBar->showMessage("Moving X");
+                ui->statusBar->showMessage("Moving X",10000);
             }
             else
             {
                 //BeamNG axises
                 glWidgetO->MovingNodes=2;
                 glWidget->MovingNodes=2;
-                ui->statusBar->showMessage("Moving X");
+                ui->statusBar->showMessage("Moving X",10000);
             }
         }
         else if(glWidgetO->RotatingNodes>0)
@@ -1321,13 +1316,13 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
             {
                 //RoR axises
                 glWidgetO->RotatingNodes=2;
-                ui->statusBar->showMessage("Rotating X");
+                ui->statusBar->showMessage("Rotating X",10000);
             }
             else
             {
                 //BeamNG axises
                 glWidgetO->RotatingNodes=1;
-                ui->statusBar->showMessage("Rotating X");
+                ui->statusBar->showMessage("Rotating X",10000);
             }
         }
     }
@@ -1628,7 +1623,7 @@ void MainWindow::UpdateSelection()
                     i3++;
                     if(i3==selectionsize) break;
                 }
-                ui->statusBar->showMessage(QString::number(myTimer.elapsed()));
+                ui->statusBar->showMessage(QString::number(myTimer.elapsed()),10000);
 
             }
             ++iterator;
@@ -2077,6 +2072,23 @@ void MainWindow::on_actionRun_triggered()
     //CurrentNodeBeam->RunLUAScript();
 }
 
+/* Parse JBEAM widget */
+void MainWindow::on_pushButton_3_clicked()
+{
+    QByteArray textbox;
+    textbox.append(ui->textEdit_JBEAM->toPlainText());
+    QJsonParseError ParseError;
+    ParseError = CurrentNodeBeam->ParseJBEAM_TextEdit(textbox);
+    if(ParseError.offset>0)
+    {
+        QString errormsg = "JBEAM read error: ";
+        errormsg+= ParseError.errorString();
+        StatusBar_info->setText(errormsg);
+    }
+    else StatusBar_info->clear();
+    MainNodeBeamUpdated();
+}
+
 /* Toggle add nodes in the JBEAM edit widget at text cursor position on/off */
 void MainWindow::on_checkBox_5_clicked()
 {
@@ -2087,7 +2099,7 @@ void MainWindow::on_checkBox_5_clicked()
 void MainWindow::JBEAM_AddNode()
 {
     int node_id = CurrentNodeBeam->TempNode.GlobalID;
-    QString nodeline = "            [";
+    QString nodeline = "           [";
     nodeline+= '"' + CurrentNodeBeam->Nodes[node_id].NodeName + '"';
     nodeline+= ", ";
     nodeline+= QString::number(CurrentNodeBeam->Nodes[node_id].locX);
@@ -2097,9 +2109,21 @@ void MainWindow::JBEAM_AddNode()
     nodeline+= QString::number(CurrentNodeBeam->Nodes[node_id].locZ);
     nodeline.append("],\n");
     qDebug() << "adding node to JBEAM widget";
-    QString teksti = nodeline;
     QTextCursor textcursor = ui->textEdit_JBEAM->textCursor();
-    textcursor.insertText(teksti);
+    textcursor.insertText(nodeline);
     ui->textEdit_JBEAM->setTextCursor(textcursor);
 
+}
+
+/* Add beam, in JBEAM edit widget at text cursor position */
+void MainWindow::JBEAM_AddBeam()
+{
+    QString beamline = "           [";
+    beamline+= '"' + CurrentNodeBeam->TempBeam.Node1Name + '"';
+    beamline+= ", ";
+    beamline+= '"' + CurrentNodeBeam->TempBeam.Node2Name + '"';
+    beamline+=("],\n");
+    QTextCursor textcursor = ui->textEdit_JBEAM->textCursor();
+    textcursor.insertText(beamline);
+    ui->textEdit_JBEAM->setTextCursor(textcursor);
 }

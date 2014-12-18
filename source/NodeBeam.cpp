@@ -14,7 +14,7 @@
 
 #include <QJsonValue>
 #include <QJsonArray>
-#include <QJsonDocument>
+
 #include <QJsonObject>
 
 NodeBeam::NodeBeam()
@@ -2772,30 +2772,32 @@ void NodeBeam::clear()
 }
 
 /* Parse contents of the JBEAM text edit box */
-bool NodeBeam::ParseJBEAM_TextEdit(QByteArray JbeamInputText)
+QJsonParseError NodeBeam::ParseJBEAM_TextEdit(QByteArray JbeamInputText)
 {
     //Clear the active nodebeam
     clear();
 
+    //Remove C style comments
+    JbeamInputText = JBEAM_RemoveComments(JbeamInputText);
+
     //Fix commas to make valid JSON
     JbeamInputText = JBEAM_FixCommas(JbeamInputText);
 
-    //Remove C style comments
-    //JbeamInputText = JBEAM_RemoveComments(JbeamInputText);
-
     //Parse error
-    QJsonParseError virhe;
+    QJsonParseError JBEAM_ParseError;
 
     //Parse textbox text to JSON
-    QJsonDocument Jbeam = QJsonDocument::fromJson(JbeamInputText, &virhe);
+    QJsonDocument Jbeam = QJsonDocument::fromJson(JbeamInputText, &JBEAM_ParseError);
 
     //Error messages
-    qDebug() << "JSON parsing result: " << ", " << virhe.errorString();
+    qDebug() << "JSON parsing result: " << ", " << JBEAM_ParseError.errorString();
 
+    //Convert Json document to json object
     QJsonObject JbeamObject = Jbeam.object();
 
     qDebug() << "Object is empty:" << Jbeam.object().isEmpty();
 
+    //Parse JSON object, find nodes and beams.
     if(!JbeamObject.isEmpty())
     {
         for(int i=0; i<JbeamObject.keys().length(); i++)
@@ -2830,15 +2832,12 @@ bool NodeBeam::ParseJBEAM_TextEdit(QByteArray JbeamInputText)
                     JBEAM_ParseBeamsArray(Jbeam_beams);
 
                 }
-
             }
-
-
-
         }
     }
     else qDebug() << "JBEAM object not found.";
 
+    return JBEAM_ParseError;
 
 }
 
@@ -2999,6 +2998,7 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
 
 QByteArray NodeBeam::JBEAM_RemoveComments(QByteArray JbeamText)
 {
+
     QString JbeamTextSTR = JbeamText.constData();
 
     bool commentfound=0;
@@ -3006,6 +3006,7 @@ QByteArray NodeBeam::JBEAM_RemoveComments(QByteArray JbeamText)
     for(int i=0; i<JbeamTextSTR.length(); i++)
     {
         if(JbeamTextSTR[i] == '/') commentcheck++;
+        else commentcheck = 0;
         if(commentcheck==2)
         {
             commentcheck=0;
@@ -3015,7 +3016,7 @@ QByteArray NodeBeam::JBEAM_RemoveComments(QByteArray JbeamText)
             {
                 if(JbeamTextSTR[i2]=='\n') break;
             }
-            JbeamTextSTR.replace(i-1,i2-i,' ');
+            JbeamTextSTR.replace(i-1,i2-i+1,' ');
         }
 
     }
@@ -3025,6 +3026,7 @@ QByteArray NodeBeam::JBEAM_RemoveComments(QByteArray JbeamText)
         JbeamText.append(JbeamTextSTR);
         return JbeamText;
     }
+    else return JbeamText;
 }
 
 /*

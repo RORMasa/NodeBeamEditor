@@ -741,6 +741,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
                     PickedNode1=9999;
                     qDebug() << "Beam added";
                     emit NodeBeamUpdated();
+                    emit JBEAM_AddBeamO();
                 }
                 else
                 {
@@ -773,6 +774,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
                     BeamNode1=BeamNode2;
                     qDebug() << "Beam added";
                     emit NodeBeamUpdated();
+                    emit JBEAM_AddBeamO();
                 }
                 else
                 {

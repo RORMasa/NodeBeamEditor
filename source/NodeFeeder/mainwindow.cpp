@@ -5,6 +5,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDebug>
+#include <QTextCursor>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -127,11 +128,12 @@ QByteArray MainWindow::FixCommas(QByteArray JbeamText)
 
 void MainWindow::on_pushButton_clicked()
 {
-
-
     //Text from text browser to QByteArray
     QByteArray JBeamInputText;
     JBeamInputText.append(ui->textEdit->toPlainText());
+
+    //Remove comments
+    JBeamInputText = JBEAM_RemoveComments(JBeamInputText);
 
     //Fix commas to make valid JSON
     JBeamInputText = FixCommas(JBeamInputText);
@@ -185,6 +187,40 @@ void MainWindow::on_pushButton_clicked()
 
     QJsonValue arvo;
 
+}
 
+/* Comment filter */
+QByteArray MainWindow::JBEAM_RemoveComments(QByteArray JbeamText)
+{
 
+    QString JbeamTextSTR = JbeamText.constData();
+
+    bool commentfound=0;
+    int commentcheck = 0;
+    for(int i=0; i<JbeamTextSTR.length(); i++)
+    {
+        qDebug() << "removing comments" << i;
+        if(JbeamTextSTR[i] == '/') commentcheck++;
+        else commentcheck = 0;
+        if(commentcheck==2)
+        {
+            qDebug() << "removing commentrrs";
+            commentcheck=0;
+            commentfound=1;
+            int i2;
+            for(i2=i; i2<JbeamTextSTR.length();i2++)
+            {
+                if(JbeamTextSTR[i2]=='\n') break;
+            }
+            JbeamTextSTR.replace(i-1,i2-i+1,' ');
+        }
+
+    }
+    if(commentfound)
+    {
+        JbeamText.clear();
+        JbeamText.append(JbeamTextSTR);
+        return JbeamText;
+    }
+    else return JbeamText;
 }

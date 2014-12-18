@@ -4,6 +4,7 @@
 #include <QVector>
 #include <QObject>
 #include <QXmlStreamReader>
+#include <QJsonDocument>
 
 /*LUA*/
 //extern "C"
@@ -258,7 +259,7 @@ public:
     //int LUAtesti(lua_State *L);
 
     /* JBEAM TextEdit parsing functions */
-    bool ParseJBEAM_TextEdit(QByteArray JbeamInputText);
+    QJsonParseError ParseJBEAM_TextEdit(QByteArray JbeamInputText);
 
 private:
 

@@ -101,6 +101,7 @@ signals:
     void yRotationChanged(int angle);
     void zRotationChanged(int angle);
     void NodeBeamUpdated();
+    void JBEAM_AddBeamO();
 
 protected:
     void draw();

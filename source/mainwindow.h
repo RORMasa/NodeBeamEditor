@@ -29,6 +29,7 @@ public:
     settings * AppSettings;
     QLabel * StatusBar_info;
     QLabel * StatusBar_mode;
+    QLabel * StatusBar_nodecount;
 
 public slots:
     void MainNodeBeamUpdated();
@@ -36,6 +37,7 @@ public slots:
     void UpdateSelection();
     void ShowContextMenu_Beams(const QPoint &position);
     void JBEAM_AddNode();
+    void JBEAM_AddBeam();
 
 signals:
     void ZoomChanged();
