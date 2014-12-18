@@ -85,6 +85,10 @@ public:
     QVector <float >backgroundcolor;
     QVector <float> gridcolor;
 
+    float ViewOffsetX;
+    float ViewOffsetY;
+    float ViewOffsetZ;
+
 
 public slots:
     void setXRotation(int angle);

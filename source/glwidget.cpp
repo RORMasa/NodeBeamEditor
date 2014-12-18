@@ -91,6 +91,11 @@ GLWidget::GLWidget(QWidget *parent)
     gridcolor.resize(4);
     gridcolor[3] = 1.0;
 
+    //View offset in begin
+    ViewOffsetX = 0;
+    ViewOffsetY = 0;
+    ViewOffsetZ = 0;
+
 }
 
 GLWidget::~GLWidget()
@@ -659,6 +664,8 @@ void GLWidget::paintGL()
         glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
         glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
         glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
+        //Move 3D view around
+        glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ);
         drawpicking();
         //QGLWidget::swapBuffers();
     }
@@ -668,6 +675,8 @@ void GLWidget::paintGL()
     glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
     glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
     glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
+    //Move 3D view around
+    glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ);
     draw(); //draw nodes, beams, wheels, lines
     if(ShowArrows) DrawAxisArrows();
     glColor3f(0.6, 0.6, 0.6);

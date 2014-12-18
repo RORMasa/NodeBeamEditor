@@ -548,7 +548,7 @@ void MainWindow::MainNodeBeamUpdated()
     if(autosave.elapsed()>60000)
     {
         CurrentNodeBeam->SaveAs("autosave.beamproj");
-        ui->statusBar->showMessage("Autosave: vehicle saved", 10000);
+        ui->statusBar->showMessage("Autosave: vehicle saved", 1000);
         autosave.restart();
     }
 
@@ -1502,6 +1502,36 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
                 }
             }
         }
+    }
+    else if(eventti->key() == Qt::Key_4)
+    {
+        glWidget->ViewOffsetX = glWidget->ViewOffsetX - 0.10;
+        glWidget->updateGL();
+    }
+    else if(eventti->key() == Qt::Key_6)
+    {
+        glWidget->ViewOffsetX = glWidget->ViewOffsetX + 0.10;
+        glWidget->updateGL();
+    }
+    else if(eventti->key() == Qt::Key_2)
+    {
+        glWidget->ViewOffsetY = glWidget->ViewOffsetY - 0.10;
+        glWidget->updateGL();
+    }
+    else if(eventti->key() == Qt::Key_8)
+    {
+        glWidget->ViewOffsetY = glWidget->ViewOffsetY + 0.10;
+        glWidget->updateGL();
+    }
+    else if(eventti->key() == Qt::Key_1)
+    {
+        glWidget->ViewOffsetZ = glWidget->ViewOffsetZ - 0.10;
+        glWidget->updateGL();
+    }
+    else if(eventti->key() == Qt::Key_7)
+    {
+        glWidget->ViewOffsetZ = glWidget->ViewOffsetZ + 0.10;
+        glWidget->updateGL();
     }
 }
 
