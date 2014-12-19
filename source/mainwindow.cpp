@@ -1110,7 +1110,19 @@ void MainWindow::on_toolButton_4_clicked()
     ButtsUp(3);
     if(ui->toolButton_4->isChecked())
     {
-        glWidgetO->RotatingNodes = 1;
+        enum viewmodes {VIEW_TOP, VIEW_RIGHT, VIEW_LEFT, VIEW_BACK, VIEW_FRONT, VIEW_BOTTOM};
+        if((glWidgetO->CurrentViewMode == VIEW_TOP) || (glWidgetO->CurrentViewMode == VIEW_BOTTOM))
+        {
+            glWidgetO->RotatingNodes = 3;
+        }
+        else if((glWidgetO->CurrentViewMode == VIEW_FRONT) || (glWidgetO->CurrentViewMode == VIEW_BACK))
+        {
+            glWidgetO->RotatingNodes = 2;
+        }
+        else if((glWidgetO->CurrentViewMode == VIEW_RIGHT) || (glWidgetO->CurrentViewMode == VIEW_LEFT))
+        {
+            glWidgetO->RotatingNodes = 1;
+        }
         ui->statusBar->showMessage("Press X, Y or Z to choose lock rotating axis");
         ui->stackedWidget->setCurrentIndex(4);
     }
@@ -1523,12 +1535,12 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
         glWidget->ViewOffsetY = glWidget->ViewOffsetY + 0.10;
         glWidget->updateGL();
     }
-    else if(eventti->key() == Qt::Key_1)
+    else if(eventti->key() == Qt::Key_7)
     {
         glWidget->ViewOffsetZ = glWidget->ViewOffsetZ - 0.10;
         glWidget->updateGL();
     }
-    else if(eventti->key() == Qt::Key_7)
+    else if(eventti->key() == Qt::Key_1)
     {
         glWidget->ViewOffsetZ = glWidget->ViewOffsetZ + 0.10;
         glWidget->updateGL();

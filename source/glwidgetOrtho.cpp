@@ -1075,6 +1075,8 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
 
             angle = StartDistanceFromOrigin[0] - angle;
 
+            if(CurrentViewMode == VIEW_LEFT) angle = -angle;
+
             //Rounding to 0.1 degrees resolution
             angle = angle*(360.0f/(2*pii));
             QString angle2 = QString::number(angle, 'f', 1);
@@ -1122,6 +1124,8 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
 
             angle = StartDistanceFromOrigin[0] - angle;
 
+            if(CurrentViewMode == VIEW_FRONT) angle = -angle;
+
             //Rounding to 0.1 degrees resolution
             angle = angle*(360.0f/(2*pii));
             QString angle2 = QString::number(angle, 'f', 1);
@@ -1150,7 +1154,6 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
         {
             float distance_x = event->x()-(xWidth*0.5f);
             float distance_y = event->y()-(yHeight*0.5f);
-
             float distance_t = sqrt((distance_x*distance_x+distance_y*distance_y));
 
             float cos_alfa = qAcos(distance_x/distance_t);
@@ -1169,6 +1172,8 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             }
 
             angle = StartDistanceFromOrigin[0] - angle;
+
+            if(CurrentViewMode == VIEW_BOTTOM) angle = -angle;
 
             //Rounding to 0.1 degrees resolution
             angle = angle*(360.0f/(2*pii));

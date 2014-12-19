@@ -4,8 +4,8 @@
       <node>
          <NodeID>0</NodeID>
          <name>a0</name>
-         <locx>-0.75</locx>
-         <locy>2.75</locy>
+         <locx>0.468144</locx>
+         <locy>0.910867</locy>
          <locz>0</locz>
          <group>0</group>
          <properties></properties>
@@ -14,8 +14,8 @@
       <node>
          <NodeID>1</NodeID>
          <name>a1</name>
-         <locx>-0.25</locx>
-         <locy>2.75</locy>
+         <locx>-0.0617809</locx>
+         <locy>1.08885</locy>
          <locz>0</locz>
          <group>0</group>
          <properties></properties>
@@ -24,8 +24,8 @@
       <node>
          <NodeID>2</NodeID>
          <name>a2</name>
-         <locx>0.25</locx>
-         <locy>2.75</locy>
+         <locx>-0.37893</locx>
+         <locy>1.5492</locy>
          <locz>0</locz>
          <group>0</group>
          <properties></properties>
@@ -34,8 +34,48 @@
       <node>
          <NodeID>3</NodeID>
          <name>a3</name>
-         <locx>0.75</locx>
-         <locy>2.75</locy>
+         <locx>-0.200954</locx>
+         <locy>2.07912</locy>
+         <locz>0</locz>
+         <group>0</group>
+         <properties></properties>
+         <ror>0</ror>
+      </node>
+      <node>
+         <NodeID>4</NodeID>
+         <name>a4</name>
+         <locx>0.22459</locx>
+         <locy>2.64385</locy>
+         <locz>0</locz>
+         <group>0</group>
+         <properties></properties>
+         <ror>0</ror>
+      </node>
+      <node>
+         <NodeID>5</NodeID>
+         <name>a5</name>
+         <locx>0.789318</locx>
+         <locy>2.21829</locy>
+         <locz>0</locz>
+         <group>0</group>
+         <properties></properties>
+         <ror>0</ror>
+      </node>
+      <node>
+         <NodeID>6</NodeID>
+         <name>a6</name>
+         <locx>1.35404</locx>
+         <locy>1.79275</locy>
+         <locz>0</locz>
+         <group>0</group>
+         <properties></properties>
+         <ror>0</ror>
+      </node>
+      <node>
+         <NodeID>7</NodeID>
+         <name>a7</name>
+         <locx>0.928491</locx>
+         <locy>1.22803</locy>
          <locz>0</locz>
          <group>0</group>
          <properties></properties>
@@ -45,7 +85,7 @@
    <node_groups>
       <node_group>
          <draw>1</draw>
-         <NodeAmount>4</NodeAmount>
+         <NodeAmount>8</NodeAmount>
          <GroupID>0</GroupID>
          <GroupName>Node Group 1.</GroupName>
       </node_group>
@@ -55,46 +95,16 @@
          <beamdefsID>0</beamdefsID>
          <beamgroup>0</beamgroup>
          <hasbeamdefs>0</hasbeamdefs>
-         <N1ID>1</N1ID>
-         <N1N>a1</N1N>
-         <N2ID>0</N2ID>
-         <N2N>a0</N2N>
-         <properties></properties>
-      </beam>
-      <beam>
-         <beamdefsID>0</beamdefsID>
-         <beamgroup>0</beamgroup>
-         <hasbeamdefs>0</hasbeamdefs>
-         <N1ID>2</N1ID>
-         <N1N>a2</N1N>
-         <N2ID>1</N2ID>
-         <N2N>a1</N2N>
-         <properties></properties>
-      </beam>
-      <beam>
-         <beamdefsID>0</beamdefsID>
-         <beamgroup>0</beamgroup>
-         <hasbeamdefs>0</hasbeamdefs>
-         <N1ID>3</N1ID>
-         <N1N>a3</N1N>
-         <N2ID>2</N2ID>
-         <N2N>a2</N2N>
-         <properties></properties>
-      </beam>
-      <beam>
-         <beamdefsID>0</beamdefsID>
-         <beamgroup>0</beamgroup>
-         <hasbeamdefs>0</hasbeamdefs>
          <N1ID>-1</N1ID>
-         <N1N>node1</N1N>
+         <N1N>id1:</N1N>
          <N2ID>-1</N2ID>
-         <N2N>node2</N2N>
+         <N2N>id2:</N2N>
          <properties></properties>
       </beam>
    </beams>
    <beam_groups>
       <beam_group>
-         <BeamAmount>4</BeamAmount>
+         <BeamAmount>1</BeamAmount>
          <BeamGroupID>0</BeamGroupID>
          <GroupName>Beam Group 1.</GroupName>
          <draw>1</draw>
