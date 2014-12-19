@@ -250,6 +250,9 @@ private:
 
     bool EditorMode; //BeamNG or RoR Axises in use
 
+    //Parse JBEAM TextEdit Box
+    void JBEAM_ParseTextEdit();
+
     //Find JBEAM node from string
     bool FindNodeContainer(QString JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd);
 

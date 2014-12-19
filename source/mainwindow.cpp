@@ -877,8 +877,39 @@ void MainWindow::on_actionImport_BeamNG_triggered()
 
     QString fileName = QFileDialog::getOpenFileName(this);
     if (!fileName.isEmpty())
-        CurrentNodeBeam->ReadJBeamTree(fileName);
+    {
+        //CurrentNodeBeam->ReadJBeamTree(fileName);
         //CurrentNodeBeam->ImportBeamNG(fileName);
+
+        /*New JBEAM input system trough textbox */
+
+        QFile file(fileName);
+        if (!file.open(QFile::ReadOnly | QFile::Text)) {
+            QMessageBox msgBox;
+            msgBox.setText("Error opening file.");
+            msgBox.exec();
+        }
+        else
+        {
+            QTextStream in(&file);
+
+            #ifndef QT_NO_CURSOR
+                QApplication::setOverrideCursor(Qt::WaitCursor);
+            #endif
+
+            QString FileContents = in.readAll();
+
+
+            #ifndef QT_NO_CURSOR
+                QApplication::restoreOverrideCursor();
+            #endif
+            file.close();
+
+            //Put file contents in JBEAM TextBox
+            ui->textEdit_JBEAM->setText(FileContents);
+            JBEAM_ParseTextEdit();
+        }
+    }
 
     MainNodeBeamUpdated();
 
@@ -2173,8 +2204,14 @@ void MainWindow::on_actionRun_triggered()
     //CurrentNodeBeam->RunLUAScript();
 }
 
-/* Parse JBEAM widget */
+/* Parse JBEAM widget refresh button clicked */
 void MainWindow::on_pushButton_3_clicked()
+{
+    JBEAM_ParseTextEdit();
+}
+
+/* Parse JBEAM widget */
+void MainWindow::JBEAM_ParseTextEdit()
 {
     JBEAM_UpdateSelectedNodes();
     JBEAM_UpdateCursors(ui->textEdit_JBEAM->toPlainText());
