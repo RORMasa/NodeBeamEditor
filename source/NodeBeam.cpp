@@ -2889,6 +2889,13 @@ bool NodeBeam::JBEAM_ParseBeamsArray(QJsonArray JbeamBeamsArray)
             }
 
         }
+        else if(JbeamBeamsArray.at(i).isObject())
+        {
+            if(JbeamBeamsArray.at(i).toObject().contains("BNE"))
+            {
+                JBEAM_ParseComment(JbeamBeamsArray.at(i).toObject().value("BNE").toString());
+            }
+        }
     }
 }
 
@@ -2915,7 +2922,7 @@ void NodeBeam::JBEAM_FixCommas_PrevChar(QString &sample, QChar &prevchar, int &p
     //Find the previous character other than space, or line change
     for(int i=prevchar_i; i>0;i--)
     {
-        qDebug() << "checking p " << sample[i];
+        //qDebug() << "checking p " << sample[i];
         if(sample[i] == ' ');
         else if(sample[i] == '\n');
         else if(sample[i] == '	');
@@ -2942,19 +2949,19 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
             QChar nextchar = 'ö';
             int nextchar_i = i+1;
             JBEAM_FixCommas_NextChar(JbeamTextSTR, nextchar, nextchar_i);
-            qDebug() << JbeamTextSTR[nextchar_i];
-            qDebug() << "next char is " << nextchar;
+            //qDebug() << JbeamTextSTR[nextchar_i];
+            //qDebug() << "next char is " << nextchar;
             if((nextchar == '[')||(nextchar == '{'))
             {
                 JbeamTextSTR.insert(i+1,',');
                 i++;
-                qDebug() << "Inserting letter";
+                //qDebug() << "Inserting letter";
             }
             else if(nextchar == '"')
             {
                 JbeamTextSTR.insert(i+1,',');
                 i++;
-                qDebug() << "Inserting letter";
+                //qDebug() << "Inserting letter";
             }
         }
 
@@ -2967,7 +2974,7 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
             QChar prevchar = 'ö';
             int prevchar_i=0;
             if (i>0) prevchar_i = i-1;
-            qDebug() << "aloituspiste " << JbeamTextSTR[i-1]<<JbeamTextSTR[prevchar_i]<<JbeamTextSTR[i+1];
+            //qDebug() << "aloituspiste " << JbeamTextSTR[i-1]<<JbeamTextSTR[prevchar_i]<<JbeamTextSTR[i+1];
             JBEAM_FixCommas_PrevChar(JbeamTextSTR, prevchar, prevchar_i);
             if(prevchar == ',')
             {
@@ -2975,8 +2982,8 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
                 prevchar_i--;
 
                 JBEAM_FixCommas_PrevChar(JbeamTextSTR, prevchar, prevchar_i);
-                qDebug() << JbeamTextSTR[prevchar_i];
-                qDebug() << "prev char is " << prevchar;
+                //qDebug() << JbeamTextSTR[prevchar_i];
+                //qDebug() << "prev char is " << prevchar;
                 /*
                 if((prevchar == ']') || (prevchar == '}'))
                 {
@@ -2985,10 +2992,8 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
                 }
                 */
                 JbeamTextSTR.replace(comma_i, 1, " ");
-
             }
         }
-
     }
 
     JbeamText.clear();
@@ -2998,17 +3003,25 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
 
 QByteArray NodeBeam::JBEAM_RemoveComments(QByteArray JbeamText)
 {
-
+    qDebug() << "removing comments";
     QString JbeamTextSTR = JbeamText.constData();
 
     bool commentfound=0;
     int commentcheck = 0;
+    bool parsecomments=0;
+    QStringList comments;
+    QList <int> commentlocations;
+    int commentstotallength = 0;
+
+    if(JbeamTextSTR.contains("//BNE")) parsecomments=1; //Parse comments only if needed
+
     for(int i=0; i<JbeamTextSTR.length(); i++)
     {
         if(JbeamTextSTR[i] == '/') commentcheck++;
         else commentcheck = 0;
         if(commentcheck==2)
         {
+            qDebug() << "possible comment";
             commentcheck=0;
             commentfound=1;
             int i2;
@@ -3016,17 +3029,59 @@ QByteArray NodeBeam::JBEAM_RemoveComments(QByteArray JbeamText)
             {
                 if(JbeamTextSTR[i2]=='\n') break;
             }
-            JbeamTextSTR.replace(i-1,i2-i+1,' ');
+            if(parsecomments)
+            {
+                //Change to comment to JSON for JSON parser
+                QString Comment = JbeamTextSTR.mid(i-1,i2-i+1);
+                if(Comment.contains("//BNE"))
+                {
+                    Comment = "{\"BNE\":\"" + Comment + "\"},";
+                    commentlocations.append(i-1+commentstotallength);
+                    commentstotallength+= Comment.length();
+                    comments.append(Comment);
+                }
+                JbeamTextSTR.replace(i-1,i2-i+1,' ');
+            }
+            else JbeamTextSTR.replace(i-1,i2-i+1,' ');
         }
 
     }
     if(commentfound)
     {
+        if(parsecomments)
+        {
+            for(int i=0; i<commentlocations.length();i++)
+            {
+                JbeamTextSTR.insert(commentlocations[i],comments[i]);
+            }
+        }
         JbeamText.clear();
         JbeamText.append(JbeamTextSTR);
+        qDebug() << "koko paska tulee tässä :" << JbeamText;
         return JbeamText;
     }
     else return JbeamText;
+}
+
+/* Parse the C comment, to find possible editor groups and colors */
+void NodeBeam::JBEAM_ParseComment(QString comment)
+{
+    if(comment.contains("//BNEcolor:"))
+    {
+        comment.replace("//BNEcolor:","");
+
+        QStringList values = comment.split(',');
+        if(values.length()==3)
+        {
+            //qDebug() << "colors are RED:" << values[0] << ", GREEN:" << values[1] << ", BLUE:" << values[2];
+            NewBeamArguments();
+            TempBeam.BeamDefsID = BeamDefaults.size()-1;
+            TempBeam.HasBeamDefs=1;
+            BeamDefaults[BeamDefaults.size()-1].RGB_Color[0]= values[0].toInt();
+            BeamDefaults[BeamDefaults.size()-1].RGB_Color[1]= values[1].toInt();
+            BeamDefaults[BeamDefaults.size()-1].RGB_Color[2]= values[2].toInt();
+        }
+    }
 }
 
 /*

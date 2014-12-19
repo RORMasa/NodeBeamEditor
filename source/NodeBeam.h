@@ -274,6 +274,7 @@ private:
     bool JBEAM_ParseNodesArray(QJsonArray JbeamNodesArray);
     bool JBEAM_ParseBeamsArray(QJsonArray JbeamBeamsArray);
     QByteArray JBEAM_RemoveComments(QByteArray JbeamText);
+    void JBEAM_ParseComment(QString comment);
 
 };
 
