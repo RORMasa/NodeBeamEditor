@@ -464,14 +464,14 @@ void MainWindow::MainNodeBeamUpdated()
         item2->setText(1, CurrentNodeBeam->NodeGroups[i2].NodeGroupName);
         item2->setText(2, "Group");
         item2->setText(3, QString::number(CurrentNodeBeam->NodeGroups[i2].NodeGroupID));
-        qDebug() << "lisätään node " << CurrentNodeBeam->NodeGroups[i2].NodeAmount;
+        //qDebug() << "lisätään node " << CurrentNodeBeam->NodeGroups[i2].NodeAmount;
         for(int i=0; i<CurrentNodeBeam->NodeGroups[i2].NodeAmount; i++)
         {
             item = new QTreeWidgetItem();
             item->setText(0, QString::number(CurrentNodeBeam->Nodes[i3].GlobalID));
             item->setText(1, CurrentNodeBeam->Nodes[i3].NodeName);
             item2->addChild(item);
-            qDebug() << CurrentNodeBeam->Nodes[i3].GlobalID << ", " << CurrentNodeBeam->Nodes[i3].NodeName;
+            //qDebug() << CurrentNodeBeam->Nodes[i3].GlobalID << ", " << CurrentNodeBeam->Nodes[i3].NodeName;
             i3++;
 
         }
@@ -1622,8 +1622,6 @@ void MainWindow::ButtsUp(int buttoni)
  nodes must be highlighted in the tree widget */
 void MainWindow::UpdateSelection()
 {
-    qDebug()<< "Updating treewidget selected items";
-    ui->treeWidget->clearSelection();
 //    for(int i3=0; i3<CurrentNodeBeam->SelectedNodes2.size(); i3++)
 //    {
 //        QTreeWidgetItemIterator iterator(ui->treeWidget);
@@ -1643,36 +1641,42 @@ void MainWindow::UpdateSelection()
 //        }
 //    }
 
-    int i3=0;
-    int selectionsize = CurrentNodeBeam->SelectedNodes2.size();
-    QTreeWidgetItemIterator iterator(ui->treeWidget);
+/* This system has performance issues.
+        int i3=0;
+        int selectionsize = CurrentNodeBeam->SelectedNodes2.size();
+        QTreeWidgetItemIterator iterator(ui->treeWidget);
 
-    QTime myTimer;
-    myTimer.start();
+        qDebug()<< "Updating treewidget selected items";
+        ui->treeWidget->setUpdatesEnabled(false);
+        ui->treeWidget->clearSelection();
+        RefreshLock=1;
 
-    ui->treeWidget->setUpdatesEnabled(false);
+        QTime myTimer;
+        myTimer.start();
 
-    if(selectionsize>0)
-    {
-        while(*iterator)
+        if(selectionsize>0)
         {
-            if((*iterator)->text(2) != "Group")
+            while(*iterator)
             {
-                if((*iterator)->text(0).toInt() == CurrentNodeBeam->SelectedNodes2[i3])
+                if((*iterator)->text(2) != "Group")
                 {
-                    (*iterator)->setSelected(1);
-                    //(*iterator)->setCheckState(0,Qt::Checked);
-                    i3++;
-                    if(i3==selectionsize) break;
-                }
-                ui->statusBar->showMessage(QString::number(myTimer.elapsed()),10000);
+                    if((*iterator)->text(0).toInt() == CurrentNodeBeam->SelectedNodes2[i3])
+                    {
+                        (*iterator)->setSelected(1);
+                        //(*iterator)->setCheckState(0,Qt::Checked);
+                        i3++;
+                        if(i3==selectionsize) break;
+                    }
+                    ui->statusBar->showMessage(QString::number(myTimer.elapsed()),10000);
 
+                }
+                ++iterator;
             }
-            ++iterator;
         }
-    }
-    ui->treeWidget->setUpdatesEnabled(true);
-    qDebug() << "iterating took " << myTimer.elapsed() << " ms";
+        ui->treeWidget->setUpdatesEnabled(true);
+        RefreshLock=0;
+        qDebug() << "iterating took " << myTimer.elapsed() << " ms";
+*/
 
 
 }

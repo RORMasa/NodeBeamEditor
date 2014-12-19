@@ -1412,7 +1412,7 @@ int NodeBeam::AddNode(int NodeGroupID)
     //else create empty group.
     else
     {
-        qDebug()<<"Creating 1.st node group.";
+        //qDebug()<<"Creating 1.st node group.";
         NodeGroups.resize(NodeGroups.size()+1);
         NodeGroups[NodeGroups.size()-1].NodeGroupName = "Node Group 1.";
         NodeGroups[NodeGroups.size()-1].NodeGroupID = 0;
@@ -1423,8 +1423,8 @@ int NodeBeam::AddNode(int NodeGroupID)
         TempNode.GlobalID = activenode;
         TempNode.GroupID = 0;
         Nodes.insert(activenode, TempNode);
-        qDebug() << "Adding node " << TempNode.GlobalID << " " << TempNode.locX;
-        qDebug() << Nodes[0].locX;
+        //qDebug() << "Adding node " << TempNode.GlobalID << " " << TempNode.locX;
+        //qDebug() << Nodes[0].locX;
 
 
     }
@@ -2292,7 +2292,7 @@ void NodeBeam::SaveAs(const QString &fileName)
 //Selects all nodes inside the box that is between point 0 and 1
 void NodeBeam::SelectNodesLoc(float x0, float y0, float z0, float x1, float y1, float z1)
 {
-    SelectedNodes2.clear();
+    SelectedNodes.clear();
     for(int i=0; i<Nodes.size(); i++)
     {
         if((Nodes[i].locX>= x0) && (Nodes[i].locX<= x1))
@@ -2301,12 +2301,12 @@ void NodeBeam::SelectNodesLoc(float x0, float y0, float z0, float x1, float y1, 
             {
                 if((Nodes[i].locZ>= z0) && (Nodes[i].locZ<= z1))
                 {
-                    SelectedNodes2.append(Nodes[i].GlobalID);
+                    SelectedNodes.append(Nodes[i].GlobalID);
                 }
             }
         }
     }
-    qDebug()<< SelectedNodes2;
+    qDebug()<< SelectedNodes;
 
 }
 
@@ -2484,7 +2484,6 @@ void NodeBeam::NewBeamArguments()
 
 void NodeBeam::NewBeamArgumentsFromPrevious()
 {
-    qDebug()<<"huhuu";
     KeyValue Argument;
     NewBeamArguments();
     if(BeamDefaults.size()>1)
@@ -2858,7 +2857,7 @@ bool NodeBeam::JBEAM_ParseNodesArray(QJsonArray JbeamNodesArray)
             {
                 TempNode.locZ = Jnode.at(3).toDouble();
                 AddNode();
-                qDebug() << "Adding node from JBEAM text box";
+                //qDebug() << "Adding node from JBEAM text box";
             }
 
         }
@@ -3003,7 +3002,7 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
 
 QByteArray NodeBeam::JBEAM_RemoveComments(QByteArray JbeamText)
 {
-    qDebug() << "removing comments";
+    qDebug() << "Removing comments";
     QString JbeamTextSTR = JbeamText.constData();
 
     bool commentfound=0;
@@ -3021,7 +3020,6 @@ QByteArray NodeBeam::JBEAM_RemoveComments(QByteArray JbeamText)
         else commentcheck = 0;
         if(commentcheck==2)
         {
-            qDebug() << "possible comment";
             commentcheck=0;
             commentfound=1;
             int i2;
@@ -3057,7 +3055,6 @@ QByteArray NodeBeam::JBEAM_RemoveComments(QByteArray JbeamText)
         }
         JbeamText.clear();
         JbeamText.append(JbeamTextSTR);
-        qDebug() << "koko paska tulee tässä :" << JbeamText;
         return JbeamText;
     }
     else return JbeamText;

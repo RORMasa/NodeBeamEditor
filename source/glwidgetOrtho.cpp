@@ -745,7 +745,6 @@ void GLWidgetOrtho::mouseReleaseEvent(QMouseEvent *event)
             Ry0=tempf;
 
         }
-        NBPointer->SelectedNodes2.clear();
 
         float depth = -99;
         XPointer1 = &Rx0;
@@ -771,7 +770,6 @@ void GLWidgetOrtho::mouseReleaseEvent(QMouseEvent *event)
         Ry0=0;
         Rx1=0;
         Ry1=0;
-        qDebug()<< "Selection area is" << Rx0 << ", " << Ry0 << ", " << Rx1 << ", " <<Ry1;
     }
     else if(MeasuringDistance)
     {
@@ -895,8 +893,8 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
         {
             double viewscalefactor = ViewHeight/yHeight;
 
-            Rx1 = 2*viewscalefactor*(event->x()-(xWidth*0.5));
-            Ry1 = 2*viewscalefactor*(event->y()-(yHeight*0.5));
+            Rx1 = 2*viewscalefactor*(event->x()-(xWidth*0.5))-ViewOffsetX;
+            Ry1 = 2*viewscalefactor*(event->y()-(yHeight*0.5))+ViewOffsetY;
             if(inverse_X) Rx1 = -Rx1;
             if(inverse_Y) Ry1 = -Ry1;
 
@@ -923,7 +921,6 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                 NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY += -viewscalefactor*(**YPointer2);
                 NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ += -viewscalefactor*(**ZPointer2);
             }
-
             updateGL();
         }
         else if(MovingNodes==2)
