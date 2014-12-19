@@ -1622,7 +1622,7 @@ void NodeBeam::DuplicateNodes()
 
     //List of copied nodes
     SelectedNodes2 = Copied;
-    QVector <Beam> TempBeams;
+    TempBeams.clear();
 
     for(int i=0; i<SelectedNodes.size(); i++)
     {
@@ -1662,8 +1662,8 @@ void NodeBeam::ExtrudeNodes()
 {
     if(SelectedNodes.size()>0)
     {
-        QVector <Beam> TempBeams;
-
+        TempBeams2.clear();
+        TempBeams3.clear();
         //Copying selected nodes
         DuplicateNodes();
 
@@ -1674,7 +1674,10 @@ void NodeBeam::ExtrudeNodes()
         if(ActiveBeamGroup < 0) ActiveBeamGroup = NewBeamGroup("Extruded");
         for(int i=0; i<SelectedNodes.size(); i++)
         {
+
             AddBeam(SelectedNodes[i], SelectedNodes2[i], ActiveBeamGroup);
+            TempBeams3.append(TempBeam); //Add beam in tempbeams, to append later in JBEAM text window
+
         }
 
         for(int i=0; i<SelectedNodes.size(); i++)
@@ -1696,7 +1699,7 @@ void NodeBeam::ExtrudeNodes()
                             TempBeam.Node2Name = Nodes[TempBeam.Node2GlobalID].NodeName;
                             TempBeam.Properties = TempBeam.Properties;
                             TempBeam.draw = 1;
-                            TempBeams.append(TempBeam);
+                            TempBeams2.append(TempBeam);
 
 
                             TempBeam.BeamDefsID = Beams[i2].BeamDefsID;
@@ -1708,7 +1711,7 @@ void NodeBeam::ExtrudeNodes()
                             TempBeam.Node2Name = Nodes[TempBeam.Node2GlobalID].NodeName;
                             TempBeam.Properties = TempBeam.Properties;
                             TempBeam.draw = 1;
-                            TempBeams.append(TempBeam);
+                            TempBeams2.append(TempBeam);
                         }
                     }
                 }
@@ -1716,9 +1719,9 @@ void NodeBeam::ExtrudeNodes()
             }
         }
 
-        for(int i=0; i<TempBeams.size(); i++)
+        for(int i=0; i<TempBeams2.size(); i++)
         {
-            TempBeam = TempBeams[i];
+            TempBeam = TempBeams2[i];
             AddBeamT();
         }
     }

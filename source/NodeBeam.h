@@ -185,6 +185,9 @@ public:
 
     //Temprorary values can be saved in these
     Beam TempBeam;
+    QVector <Beam> TempBeams;
+    QVector <Beam> TempBeams2;
+    QVector <Beam> TempBeams3;
     Node TempNode;
     Hubwheel TempHubwheel;
     NodeGroup TempNodeGroup;

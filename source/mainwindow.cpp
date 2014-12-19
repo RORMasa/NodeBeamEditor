@@ -101,6 +101,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //JBEAM widget
     QObject::connect(glWidgetO, SIGNAL(JBEAM_AddNodeO()), this, SLOT(JBEAM_AddNode()));
     QObject::connect(glWidget, SIGNAL(JBEAM_AddBeamO()), this, SLOT(JBEAM_AddBeam()));
+    JBEAM_NodeCursor = -1;
+    JBEAM_BeamCursor = -1;
 
     CurrentBeamGroupi=0;
     RefreshLock=0;
@@ -173,11 +175,11 @@ MainWindow::MainWindow(QWidget *parent) :
         StatusBar_mode->setText("BeamNG");
     }
 
-
     //Set smaller TAB width
     ui->textEdit_JBEAM->setTabStopWidth(15);
 
-
+    //Update JBEAM textbox cursor locations
+    JBEAM_UpdateCursors(ui->textEdit_JBEAM->toPlainText());
 
 }
 
@@ -247,17 +249,36 @@ void MainWindow::ShowContextMenu_Beams(const QPoint& position)
 //Start new file
 void MainWindow::on_actionNew_triggered()
 {
-    delete CurrentNodeBeam;
-    CurrentNodeBeam = new NodeBeam;
-    glWidget->setNBPointer(CurrentNodeBeam);
-    glWidgetO->setNBPointer(CurrentNodeBeam);
+    CurrentNodeBeam->clear();
     glWidget->updateGL();
     glWidgetO->updateGL();
     ui->treeWidget->clear();
     ui->treeWidget_2->clear();
 
-    NewProjectDialog Dialog;
-    Dialog.exec();
+    QString EmptyTemplate = "{\n"
+                   "    \"Vehicle\":{\n"
+                   "        \"information\":{\n"
+                   "            \"authors\":\"Your name\"      \n"
+                   "        },\n"
+                   "        \"nodes\":[\n"
+                   "            [\"id\", \"posX\", \"posY\", \"posZ\"],\n"
+                   "            //BNEnodes\n"
+                   "   \n"
+                   "        ],\n"
+                   "        \"beams\":[\n"
+                   "            [\"id1:\", \"id2:\"],\n"
+                   "            //BNEbeams\n"
+                   "   \n"
+                   "   \n"
+                   "        ],\n"
+                   "   }\n"
+                   "}\n";
+
+
+
+    ui->textEdit_JBEAM->setText(EmptyTemplate);
+    //NewProjectDialog Dialog;
+    //Dialog.exec();
 }
 
 /* File menu / Import RoR NB triggered */
@@ -1622,6 +1643,10 @@ void MainWindow::ButtsUp(int buttoni)
  nodes must be highlighted in the tree widget */
 void MainWindow::UpdateSelection()
 {
+    CurrentNodeBeam->SelectedNodes.clear();
+    CurrentNodeBeam->SelectedNodes = CurrentNodeBeam->SelectedNodes2;
+
+
 //    for(int i3=0; i3<CurrentNodeBeam->SelectedNodes2.size(); i3++)
 //    {
 //        QTreeWidgetItemIterator iterator(ui->treeWidget);
@@ -1687,6 +1712,16 @@ void MainWindow::on_toolButton_5_clicked()
     CurrentNodeBeam->DuplicateNodes();
     MainNodeBeamUpdated();
     UpdateSelection();
+    for(int i=0; i< CurrentNodeBeam->SelectedNodes2.size();i++)
+    {
+        CurrentNodeBeam->TempNode = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes2[i]];
+        JBEAM_AddNode();
+    }
+    for(int i=0; i< CurrentNodeBeam->TempBeams.size();i++)
+    {
+        CurrentNodeBeam->TempBeam = CurrentNodeBeam->TempBeams[i];
+        JBEAM_AddBeam();
+    }
 }
 
 
@@ -1771,6 +1806,26 @@ void MainWindow::on_toolButton_14_clicked()
     CurrentNodeBeam->ExtrudeNodes();
     MainNodeBeamUpdated();
     UpdateSelection();
+    for(int i=0; i< CurrentNodeBeam->SelectedNodes2.size();i++)
+    {
+        CurrentNodeBeam->TempNode = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes2[i]];
+        JBEAM_AddNode();
+    }
+    for(int i=0; i< CurrentNodeBeam->TempBeams.size();i++)
+    {
+        CurrentNodeBeam->TempBeam = CurrentNodeBeam->TempBeams[i];
+        JBEAM_AddBeam();
+    }
+    for(int i=0; i< CurrentNodeBeam->TempBeams2.size();i++)
+    {
+        CurrentNodeBeam->TempBeam = CurrentNodeBeam->TempBeams2[i];
+        JBEAM_AddBeam();
+    }
+    for(int i=0; i< CurrentNodeBeam->TempBeams3.size();i++)
+    {
+        CurrentNodeBeam->TempBeam = CurrentNodeBeam->TempBeams3[i];
+        JBEAM_AddBeam();
+    }
 
 }
 
@@ -2122,6 +2177,7 @@ void MainWindow::on_actionRun_triggered()
 void MainWindow::on_pushButton_3_clicked()
 {
     JBEAM_UpdateSelectedNodes();
+    JBEAM_UpdateCursors(ui->textEdit_JBEAM->toPlainText());
 
     QByteArray textbox;
     textbox.append(ui->textEdit_JBEAM->toPlainText());
@@ -2158,6 +2214,10 @@ void MainWindow::JBEAM_AddNode()
     nodeline.append("],\n");
     qDebug() << "adding node to JBEAM widget";
     QTextCursor textcursor = ui->textEdit_JBEAM->textCursor();
+    if(JBEAM_NodeCursor >= 0)
+    {
+        textcursor.setPosition(JBEAM_NodeCursor);
+    }
     textcursor.insertText(nodeline);
     ui->textEdit_JBEAM->setTextCursor(textcursor);
 
@@ -2172,6 +2232,10 @@ void MainWindow::JBEAM_AddBeam()
     beamline+= '"' + CurrentNodeBeam->TempBeam.Node2Name + '"';
     beamline+=("],\n");
     QTextCursor textcursor = ui->textEdit_JBEAM->textCursor();
+    if(JBEAM_BeamCursor >= 0)
+    {
+        textcursor.setPosition(JBEAM_BeamCursor);
+    }
     textcursor.insertText(beamline);
     ui->textEdit_JBEAM->setTextCursor(textcursor);
 }
@@ -2348,4 +2412,77 @@ bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &Nod
     qDebug() << temp;
     */
 
+}
+
+/* Place new nodes at current text cursor location */
+void MainWindow::on_pushButton_SetNodeCursor_clicked()
+{
+    //Prepare new cursor
+    int CurrentCursorPos = ui->textEdit_JBEAM->textCursor().position();
+    //Remove old cursor
+    QString JBEAM_text = ui->textEdit_JBEAM->toPlainText();
+    JBEAM_text.replace("\u0009\u0009\u0009//BNEnodes\n", "             \n");
+    ui->textEdit_JBEAM->setText(JBEAM_text);
+
+    QTextCursor cursor = ui->textEdit_JBEAM->textCursor();
+    cursor.setPosition(CurrentCursorPos);
+    cursor.insertText("\u0009\u0009\u0009//BNEnodes\n");
+    ui->textEdit_JBEAM->setTextCursor(cursor);
+
+}
+/* Place new beams at current text cursor location */
+void MainWindow::on_pushButton_SetBeamCursor_clicked()
+{
+    //Prepare new cursor
+    int CurrentCursorPos = ui->textEdit_JBEAM->textCursor().position();
+    //Remove old cursor
+    QString JBEAM_text = ui->textEdit_JBEAM->toPlainText();
+    JBEAM_text.replace("\u0009\u0009\u0009//BNEbeams\n", "             \n");
+    ui->textEdit_JBEAM->setText(JBEAM_text);
+
+    QTextCursor cursor = ui->textEdit_JBEAM->textCursor();
+    cursor.setPosition(CurrentCursorPos);
+    cursor.insertText("\u0009\u0009\u0009//BNEbeams\n");
+    ui->textEdit_JBEAM->setTextCursor(cursor);
+
+}
+
+/* Find node and beam cursors from JBEAM string in JBEAM textbox */
+void MainWindow::JBEAM_UpdateCursors(QString JBEAM_box)
+{
+    QString JBEAM_texti = ui->textEdit_JBEAM->toPlainText();
+    JBEAM_NodeCursor = JBEAM_box.indexOf("//BNEnodes");
+    if(JBEAM_NodeCursor>=0)
+    {
+        for(int i=JBEAM_NodeCursor; i<JBEAM_texti.length();i++)
+        {
+            if(JBEAM_texti[i] == '\n')
+            {
+                JBEAM_NodeCursor += i+2;
+                break;
+            }
+            else JBEAM_NodeCursor = -1;
+        }
+    }
+
+    JBEAM_BeamCursor = JBEAM_box.indexOf("//BNEbeams");
+    if(JBEAM_BeamCursor>=0)
+    {
+        for(int i=JBEAM_BeamCursor; i<JBEAM_texti.length();i++)
+        {
+            if(JBEAM_texti[i] == '\n')
+            {
+                JBEAM_BeamCursor += i+2;
+                break;
+            }
+            else JBEAM_BeamCursor = -1;
+        }
+    }
+    qDebug() << "JBEAM CURSORI" << JBEAM_BeamCursor;
+}
+
+/* JBEAM text edit box Text changed event */
+void MainWindow::on_textEdit_JBEAM_textChanged()
+{
+    JBEAM_UpdateCursors(ui->textEdit_JBEAM->toPlainText());
 }

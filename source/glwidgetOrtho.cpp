@@ -764,7 +764,7 @@ void GLWidgetOrtho::mouseReleaseEvent(QMouseEvent *event)
 
         NBPointer->SelectNodesLoc(correctedX0,correctedY0,correctedZ0,correctedX1,correctedY1,correctedZ1);
 
-        emit SelectionUpdated();
+        //emit SelectionUpdated();
 
         Rx0=0;
         Ry0=0;

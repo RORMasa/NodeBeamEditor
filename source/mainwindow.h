@@ -217,6 +217,12 @@ private slots:
 
     void on_checkBox_5_clicked();
 
+    void on_pushButton_SetNodeCursor_clicked();
+
+    void on_pushButton_SetBeamCursor_clicked();
+
+    void on_textEdit_JBEAM_textChanged();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
@@ -246,5 +252,13 @@ private:
 
     //Find JBEAM node from string
     bool FindNodeContainer(QString JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd);
+
+    void JBEAM_UpdateCursors(QString JBEAM_box);
+    //Node JBEAM cursor; if is set, add new nodes at cursor position. Value is -1 if not set
+    int JBEAM_NodeCursor;
+
+    //Beam JBEAM cursor; if is set, add new beams at cursor position. Value is -1 if not set
+    int JBEAM_BeamCursor;
+
 };
 

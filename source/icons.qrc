@@ -10,6 +10,7 @@
         <file>icons/RectSelNode.png</file>
         <file>icons/RotateNode.png</file>
         <file>icons/ScaleNode.png</file>
+        <file>icons/WheelAdd.png</file>
     </qresource>
     <qresource prefix="/images">
         <file>images/logo.png</file>
