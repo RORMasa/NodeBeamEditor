@@ -441,15 +441,12 @@ void NodeBeam::ParseLine(QString line, int ParsingMode)
 }
 
 /* Import nodes and beams from Wavefront OBJ file */
-void NodeBeam::ImportWavefrontOBJ(const QString &fileName)
+bool NodeBeam::ImportWavefrontOBJ(const QString &fileName)
 {
+    bool ImportComplete = 0;
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-//        QMessageBox::warning(this, tr("Application"),
-//                             tr("Cannot read file %1:\n%2.")
-//                             .arg(fileName)
-//                             .arg(file.errorString()));
-//        return;
+    if (file.open(QFile::ReadOnly | QFile::Text)) {
+        ImportComplete = 1;
     }
 
     QTextStream in(&file);
@@ -458,173 +455,59 @@ void NodeBeam::ImportWavefrontOBJ(const QString &fileName)
         QApplication::setOverrideCursor(Qt::WaitCursor);
     #endif
 
-    int ParsingMode = 0;
+    TempNodes.clear();
+    TempBeams.clear();
 
-    QString CurrentLine;
-    QString TempStr = "";
-    int NodeCounter = 0;
+    QString OBJfile = in.readAll();
+    QStringList OBJfile_lines = OBJfile.split("\n");
 
-    while(!in.atEnd())
+    QStringList OBJnodes;
+    QStringList OBJbeams;
+
+    for(int i=0; i< OBJfile_lines.length();i++)
     {
-        grid_index = 0;
-        CurrentLine = in.readLine();
-        if(CurrentLine[0]=='v')
+        if(OBJfile_lines[i][0]=='v') OBJnodes.append(OBJfile_lines[i]);
+        else if(OBJfile_lines[i][0]=='f') OBJbeams.append(OBJfile_lines[i]);
+    }
+
+    for(int i=0; i< OBJnodes.length();i++)
+    {
+        OBJnodes[i].replace("v","");
+        OBJnodes[i].replace("V","");
+        QStringList coordinates = OBJnodes[i].split(' ');
+        for(int i2=0; i2< coordinates.length() ;i2++)
         {
-            qDebug() << "node found";
-
-            Nodes.resize(Nodes.size()+1);
-            Nodes[(Nodes.size()-1)].GlobalID = (Nodes.size()-1);
-            Nodes[(Nodes.size()-1)].NodeName = QString::number(NodeCounter);
-
-            NodeCounter++;
-
-            //If node group exists, add in that
-            if(NodeGroups.size() > 0)
-            {
-                Nodes[(Nodes.size()-1)].GroupID = NodeGroups.size()-1;
-                NodeGroups[NodeGroups.size()-1].NodeAmount++;
-                qDebug()<<"Adding node to group :" << Nodes[(Nodes.size()-1)].GroupID << "Nodes in group: "<< NodeGroups[NodeGroups.size()-1].NodeAmount;
-            }
-            //else create empty group.
-            else
-            {
-                qDebug()<<"Creating 1.st node group.";
-                NodeGroups.resize(NodeGroups.size()+1);
-                NodeGroups[NodeGroups.size()-1].NodeGroupName = "Node Group 1.";
-                NodeGroups[NodeGroups.size()-1].NodeGroupID = 0;
-                Nodes[(Nodes.size()-1)].GroupID = 0;
-                NodeGroups[NodeGroups.size()-1].draw=1;
-                NodeGroups[NodeGroups.size()-1].NodeAmount++;
-            }
-
-            //Setting node color for 3D picking feature
-            Nodes[(Nodes.size()-1)].green=green;
-            Nodes[(Nodes.size()-1)].blue=blue;
-
-            if(green<255) green++;
-            else
-            {
-                green=0;
-                blue++;
-            }
-
-            /* Now parsing the rest of the line for node coordinates */
-            for(int i=1; i<CurrentLine.length();i++)
-            {
-                if(CurrentLine[i]==' ')
-                {
-                    if(grid_index==1)
-                    {
-                        qDebug()<<"Node x location:" << TempStr;
-                        Nodes[(Nodes.size()-1)].locX = TempStr.toFloat();
-
-                    }
-                    else if(grid_index==2)
-                    {
-                        qDebug()<<"Node y location:" << TempStr;
-                        Nodes[(Nodes.size()-1)].locY = TempStr.toFloat();
-                    }
-                    grid_index++;
-                    TempStr="";
-                }
-                else
-                {
-                    TempStr.append(CurrentLine[i]);
-                }
-            }
-            //save Z
-            qDebug()<<"Node z location:" << TempStr;
-            Nodes[(Nodes.size()-1)].locZ = TempStr.toFloat();
-            TempStr="";
-
+            if(coordinates[i2].length()==0) coordinates.removeAt(i2);
         }
-        else if(CurrentLine[0]=='f')
+        TempNode.NodeName = NewNodeName(CurrentNamePrefix);
+        TempNode.locX = coordinates[0].toFloat();
+        TempNode.locY = coordinates[1].toFloat();
+        TempNode.locZ = coordinates[2].toFloat();
+        TempNodes.append(TempNode);
+    }
+
+    for(int i=0; i< OBJbeams.length();i++)
+    {
+        OBJbeams[i].replace("f","");
+        OBJbeams[i].replace("F","");
+        QStringList beamnodes = OBJbeams[i].split(' ');
+        for(int i2=0; i2< beamnodes.length() ;i2++)
         {
-            /* OBJ file faces will be converted to beams */
-
-            Beams.resize(Beams.size()+1);
-
-//            //If a beam group exists, add in that
-            if(BeamGroups.size() > 0)
-            {
-                Beams[(Beams.size()-1)].BeamGroupID = BeamGroups.size()-1;
-                qDebug()<<"Adding beam to group :" << Beams[(Beams.size()-1)].BeamGroupID << "Beams in group: "<< BeamGroups[BeamGroups.size()-1].BeamAmount;
-            }
-//            //else create empty group.
-            else
-            {
-                qDebug()<<"Creating 1.st beam group.";
-                BeamGroups.resize(BeamGroups.size()+1);
-                BeamGroups[BeamGroups.size()-1].BeamGroupName = "Beam Group 1.";
-                BeamGroups[BeamGroups.size()-1].BeamGroupID = 0;
-                Beams[(Beams.size()-1)].BeamGroupID = 0;
-                BeamGroups[BeamGroups.size()-1].draw=1;
-            }
-            int even=0;
-            for(int i=1; i<CurrentLine.length();i++)
-            {
-
-                if(CurrentLine[i]==' ')
-                {
-                    if(grid_index>=1)
-                    {
-                        if(even==0)
-                        {
-                            BeamGroups[BeamGroups.size()-1].BeamAmount++;
-                            qDebug()<<"Beams n1:" << TempStr;
-                            qDebug()<<"Beams n1R:" << (Nodes.size()+ TempStr.toInt() - NodeCounter -1);
-                            Beams[(Beams.size()-1)].Node1GlobalID = (Nodes.size()+ TempStr.toInt() - NodeCounter -1);
-                            Beams[(Beams.size()-1)].Node1Name = QString::number( (Nodes.size()+ TempStr.toInt() - NodeCounter -1));
-                            even++;
-                        }
-                        else if(even==1)
-                        {
-                            Beams[(Beams.size()-1)].Node2GlobalID = (Nodes.size() + TempStr.toInt() - NodeCounter - 1);
-                            Beams[(Beams.size()-1)].Node2Name = QString::number( (Nodes.size()+ TempStr.toInt() - NodeCounter -1));
-                            qDebug()<<"Beams n2:" << TempStr;
-                            qDebug()<<"Beams n2R:" << (Nodes.size()+ TempStr.toInt() - NodeCounter -1);
-                            even++;
-                        }
-                        else
-                        {
-                            //joohoo
-                        }
-
-                    }
-                    grid_index++;
-                    TempStr="";
-                }
-                else
-                {
-                    TempStr.append(CurrentLine[i]);
-                }
-
-            }
-
-            if(even==1)
-            {
-                Beams[(Beams.size()-1)].Node2GlobalID = (Nodes.size() + TempStr.toInt() - NodeCounter - 1);
-                Beams[(Beams.size()-1)].Node2Name = QString::number( (Nodes.size()+ TempStr.toInt() - NodeCounter -1));
-                qDebug()<<"Beams n2:" << TempStr;
-                qDebug()<<"Beams n2R:" << (Nodes.size()+ TempStr.toInt() - NodeCounter -1);
-            }
-            else if(even > 1)
-            {
-
-            }
-
+            if(beamnodes[i2].length()==0) beamnodes.removeAt(i2);
         }
-
-
-
-
-
+        for(int i2=0; i2< beamnodes.length()-1 ;i2++)
+        {
+            TempBeam.Node1Name = TempNodes[beamnodes[i2].toInt()-1].NodeName;
+            TempBeam.Node2Name = TempNodes[beamnodes[i2+1].toInt()-1].NodeName;
+            TempBeams.append(TempBeam);
+        }
     }
     #ifndef QT_NO_CURSOR
         QApplication::restoreOverrideCursor();
     #endif
 
     file.close();
+    return ImportComplete;
 }
 
 
@@ -2869,6 +2752,7 @@ bool NodeBeam::JBEAM_ParseNodesArray(QJsonArray JbeamNodesArray)
 
 bool NodeBeam::JBEAM_ParseBeamsArray(QJsonArray JbeamBeamsArray)
 {
+    int BeamGroupID = NewBeamGroup("");
     for(int i=0; i<JbeamBeamsArray.count();i++)
     {
         //If it's an array, it's a beam
@@ -2883,6 +2767,7 @@ bool NodeBeam::JBEAM_ParseBeamsArray(QJsonArray JbeamBeamsArray)
                 TempBeam.Node2Name = Jbeam.at(1).toString();
                 TempBeam.Node1GlobalID = FindNodeByName(TempBeam.Node1Name);
                 TempBeam.Node2GlobalID = FindNodeByName(TempBeam.Node2Name);
+                TempBeam.BeamGroupID = BeamGroupID;
                 if((TempBeam.Node1GlobalID<0)||(TempBeam.Node2GlobalID<0)) TempBeam.draw=0;
                 else TempBeam.draw=1;
 
@@ -2896,6 +2781,7 @@ bool NodeBeam::JBEAM_ParseBeamsArray(QJsonArray JbeamBeamsArray)
             if(JbeamBeamsArray.at(i).toObject().contains("BNE"))
             {
                 JBEAM_ParseComment(JbeamBeamsArray.at(i).toObject().value("BNE").toString());
+                BeamGroupID = NewBeamGroup("");
             }
         }
     }
@@ -3082,6 +2968,32 @@ void NodeBeam::JBEAM_ParseComment(QString comment)
             BeamDefaults[BeamDefaults.size()-1].RGB_Color[2]= values[2].toInt();
         }
     }
+}
+
+/* Save JBEAM textbox contents in BeamNG JBEAM format */
+bool NodeBeam::JBEAM_SaveAs(const QString &fileName, QString JBEAM_Text)
+{
+    bool SaveComplete = 0;
+
+    /* Check that proposed file name has correct suffix */
+    QString suffixi = fileName.right(6);
+    QString FileName1 = fileName;
+    if(QString::compare(suffixi,".jbeam",Qt::CaseInsensitive) != 0) FileName1.append(".jbeam");
+
+    /* Open file */
+    QFile outputFile(FileName1);
+    outputFile.open(QIODevice::WriteOnly);
+
+    /* Check that file is open */
+    if(outputFile.isOpen())
+    {
+        /* Save JBEAM */
+        QTextStream outStream(&outputFile);
+        outStream << JBEAM_Text;
+        outputFile.close();
+        SaveComplete = 1;
+    }
+    return SaveComplete;
 }
 
 /*

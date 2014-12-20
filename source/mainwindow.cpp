@@ -293,7 +293,7 @@ void MainWindow::on_actionImport_Rigs_of_Rods_triggered()
     MainNodeBeamUpdated();
 }
 
-/* File menu / Export to BeamNG triggered */
+/* File menu / Save as BeamNG JBEAM triggered */
 void MainWindow::on_actionExport_to_BeamNG_triggered()
 {
     QTime Timer;
@@ -302,7 +302,9 @@ void MainWindow::on_actionExport_to_BeamNG_triggered()
     if (!fileName.isEmpty())
     {
         Timer.start();
-        CurrentNodeBeam->ExportBeamNG(fileName);
+        //CurrentNodeBeam->ExportBeamNG(fileName);
+
+        CurrentNodeBeam->JBEAM_SaveAs(fileName,ui->textEdit_JBEAM->toPlainText());
 
         int result = Timer.elapsed();
         QString resultt = "File exporting finished in ";
@@ -310,17 +312,6 @@ void MainWindow::on_actionExport_to_BeamNG_triggered()
         resultt.append(" ms !");
         ui->statusBar->showMessage(resultt,10000);
     }
-
-//    CurrentNodeBeam->WriteInJBeamTree("pickup_fueltank");
-
-
-//tosi vanha    QFileDialog SaveWindow;
-//    SaveWindow.setDirectory(QDir::currentPath());
-//    SaveWindow.setDefaultSuffix("jbeam");
-//    SaveWindow.setAcceptMode(QFileDialog::AcceptSave);
-//    SaveWindow.setViewMode(QFileDialog::Detail);
-//    SaveWindow.exec();
-
 }
 
 /* File menu / Export to RoR triggered */
@@ -920,9 +911,24 @@ void MainWindow::on_actionImport_OBJ_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(this);
     if (!fileName.isEmpty())
-        CurrentNodeBeam->ImportWavefrontOBJ(fileName);
-
-    MainNodeBeamUpdated();
+    {
+        if(CurrentNodeBeam->ImportWavefrontOBJ(fileName))
+        {
+            //Move contents from temp to JBEAM widget
+            for(int i=0; i< CurrentNodeBeam->TempNodes.size();i++)
+            {
+                CurrentNodeBeam->TempNode = CurrentNodeBeam->TempNodes[i];
+                JBEAM_AddNode();
+            }
+            for(int i=0; i< CurrentNodeBeam->TempBeams.size();i++)
+            {
+                CurrentNodeBeam->TempBeam = CurrentNodeBeam->TempBeams[i];
+                JBEAM_AddBeam();
+            }
+            JBEAM_ParseTextEdit(); //Visualize JBEAM widget
+            MainNodeBeamUpdated();
+        }
+    }
 }
 
 /* Chassis generator menu button triggered */
@@ -2241,13 +2247,13 @@ void MainWindow::JBEAM_AddNode()
 {
     int node_id = CurrentNodeBeam->TempNode.GlobalID;
     QString nodeline = "           [";
-    nodeline+= '"' + CurrentNodeBeam->Nodes[node_id].NodeName + '"';
+    nodeline+= '"' + CurrentNodeBeam->TempNode.NodeName + '"';
     nodeline+= ", ";
-    nodeline+= QString::number(CurrentNodeBeam->Nodes[node_id].locX);
+    nodeline+= QString::number(CurrentNodeBeam->TempNode.locX);
     nodeline+= ", ";
-    nodeline+= QString::number(CurrentNodeBeam->Nodes[node_id].locY);
+    nodeline+= QString::number(CurrentNodeBeam->TempNode.locY);
     nodeline+= ", ";
-    nodeline+= QString::number(CurrentNodeBeam->Nodes[node_id].locZ);
+    nodeline+= QString::number(CurrentNodeBeam->TempNode.locZ);
     nodeline.append("],\n");
     qDebug() << "adding node to JBEAM widget";
     QTextCursor textcursor = ui->textEdit_JBEAM->textCursor();

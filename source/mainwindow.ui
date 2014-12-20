@@ -2525,7 +2525,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionExport_to_BeamNG">
    <property name="text">
-    <string>Export to BeamNG ...</string>
+    <string>Save As  BeamNG JBEAM ...</string>
    </property>
   </action>
   <action name="actionExport_to_Rigs_of_Rods">

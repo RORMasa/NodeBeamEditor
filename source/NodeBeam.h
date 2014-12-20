@@ -162,8 +162,8 @@ public:
 
     void ImportJSON(const QString &fileName);
 
-    /*File import Wavefront OBJ*/
-    void ImportWavefrontOBJ(const QString &fileName);
+    /* File import Wavefront OBJ, places new nodes and beams in temp containers */
+    bool ImportWavefrontOBJ(const QString &fileName);
 
     /* Open and Save current vehicle project to Editors own file format*/
     void OpenProject(const QString &fileName);
@@ -189,6 +189,7 @@ public:
     QVector <Beam> TempBeams2;
     QVector <Beam> TempBeams3;
     Node TempNode;
+    QVector <Node> TempNodes;
     Hubwheel TempHubwheel;
     NodeGroup TempNodeGroup;
     BeamGroup TempBeamGroup;
@@ -263,6 +264,9 @@ public:
 
     /* JBEAM TextEdit parsing functions */
     QJsonParseError ParseJBEAM_TextEdit(QByteArray JbeamInputText);
+
+    /* JBEAM Save As */
+    bool JBEAM_SaveAs(const QString &fileName, QString JBEAM_Text);
 
 private:
 
