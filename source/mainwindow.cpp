@@ -309,7 +309,7 @@ void MainWindow::on_actionExport_to_BeamNG_triggered()
 
         if(CurrentNodeBeam->JBEAM_SaveAs(fileName,ui->textEdit_JBEAM->toPlainText()))
         {
-            QStringList filepath = fileName.split('.');
+            QStringList filepath = fileName.split('/');
             QString title = filepath.last() + " - " + EditorTitle;
             setWindowTitle(title);
         }
@@ -908,7 +908,7 @@ void MainWindow::on_actionImport_BeamNG_triggered()
             ui->textEdit_JBEAM->setText(FileContents);
             JBEAM_ParseTextEdit();
 
-            QStringList filepath = fileName.split('.');
+            QStringList filepath = fileName.split('/');
             QString title = filepath.last() + " - " + EditorTitle;
             setWindowTitle(title);
 
