@@ -106,6 +106,7 @@ signals:
     void NodeBeamUpdated();
     void SelectionUpdated();
     void JBEAM_AddNodeO();
+    void JBEAM_UpdateO();
 
 
 protected:

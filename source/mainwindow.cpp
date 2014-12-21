@@ -73,7 +73,8 @@ MainWindow::MainWindow(QWidget *parent) :
     HubWheelProperties->setNBPointer(&CurrentNodeBeam->HWArguments);
     HubWheelProperties->argumenttype = HubWheelProperties->HUBWHEEL_ARGUMENTS;
 
-    setWindowTitle(tr("NodeBeam Editor - New NodeBeam"));
+    EditorTitle = "NodeBEAM Editor";
+    setWindowTitle(EditorTitle);
 
     //Settings for the application
     AppSettings = new settings;
@@ -101,6 +102,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //JBEAM widget
     QObject::connect(glWidgetO, SIGNAL(JBEAM_AddNodeO()), this, SLOT(JBEAM_AddNode()));
     QObject::connect(glWidget, SIGNAL(JBEAM_AddBeamO()), this, SLOT(JBEAM_AddBeam()));
+    QObject::connect(glWidgetO, SIGNAL(JBEAM_UpdateO()), this, SLOT(JBEAM_Update()));
     JBEAM_NodeCursor = -1;
     JBEAM_BeamCursor = -1;
 
@@ -277,6 +279,7 @@ void MainWindow::on_actionNew_triggered()
 
 
     ui->textEdit_JBEAM->setText(EmptyTemplate);
+    setWindowTitle(EditorTitle);
     //NewProjectDialog Dialog;
     //Dialog.exec();
 }
@@ -304,7 +307,12 @@ void MainWindow::on_actionExport_to_BeamNG_triggered()
         Timer.start();
         //CurrentNodeBeam->ExportBeamNG(fileName);
 
-        CurrentNodeBeam->JBEAM_SaveAs(fileName,ui->textEdit_JBEAM->toPlainText());
+        if(CurrentNodeBeam->JBEAM_SaveAs(fileName,ui->textEdit_JBEAM->toPlainText()))
+        {
+            QStringList filepath = fileName.split('.');
+            QString title = filepath.last() + " - " + EditorTitle;
+            setWindowTitle(title);
+        }
 
         int result = Timer.elapsed();
         QString resultt = "File exporting finished in ";
@@ -899,6 +907,11 @@ void MainWindow::on_actionImport_BeamNG_triggered()
             //Put file contents in JBEAM TextBox
             ui->textEdit_JBEAM->setText(FileContents);
             JBEAM_ParseTextEdit();
+
+            QStringList filepath = fileName.split('.');
+            QString title = filepath.last() + " - " + EditorTitle;
+            setWindowTitle(title);
+
         }
     }
 
@@ -1052,7 +1065,7 @@ void MainWindow::on_actionOpen_triggered()
 /* Save current vehicle project to XML file */
 void MainWindow::on_actionSave_As_triggered()
 {   
-    QString fileName = QFileDialog::getSaveFileName(this, "Save As",QDir::currentPath(),"BeamNG vehicle editor file (*.beamproj);;All files (*.*)",0,QFileDialog::DontUseNativeDialog);
+    QString fileName = QFileDialog::getSaveFileName(this, "Save As",QDir::currentPath(),"Editor file (*.beamproj);;All files (*.*)",0,QFileDialog::DontUseNativeDialog);
     if (!fileName.isEmpty())
         CurrentNodeBeam->SaveAs(fileName);
 }
@@ -1140,6 +1153,54 @@ void MainWindow::on_toolButton_22_clicked()
     ui->lineEdit_movex->clear();
     ui->lineEdit_movey->clear();
     ui->lineEdit_movez->clear();
+}
+
+/* Scale by typing scaling factor, button clicked from top toolbar*/
+void MainWindow::on_toolButton_28_clicked()
+{
+    bool NumberTest = 1;
+    float ScaleFactorX;
+    float ScaleFactorY;
+    float ScaleFactorZ;
+    if(ui->lineEdit_scalex->text() == "") ScaleFactorX = 1;
+    else ScaleFactorX = ui->lineEdit_scalex->text().toFloat(&NumberTest);
+    if(NumberTest)
+    {
+        if(ui->lineEdit_scaley->text() == "") ScaleFactorY = 1;
+        else ScaleFactorY = ui->lineEdit_scaley->text().toFloat(&NumberTest);
+        if(NumberTest)
+        {
+            if(ui->lineEdit_scalez->text() == "") ScaleFactorZ = 1;
+            else ScaleFactorZ = ui->lineEdit_scalez->text().toFloat(&NumberTest);
+        }
+    }
+    if(!NumberTest)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("The scaling factor must be a number.");
+        msgBox.exec();
+    }
+    else
+    {
+        for(int i2=0; i2<CurrentNodeBeam->SelectedNodes.size();i2++)
+        {
+            CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX = ScaleFactorX*(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX);
+            CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY = ScaleFactorY*(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY);
+            CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ = ScaleFactorZ*(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ);
+
+        }
+    }
+    glWidget->updateGL();
+    glWidgetO->updateGL();
+}
+
+
+/* Scale - reset values in text boxes */
+void MainWindow::on_toolButton_29_clicked()
+{
+    ui->lineEdit_scalex->clear();
+    ui->lineEdit_scaley->clear();
+    ui->lineEdit_scalez->clear();
 }
 
 /* Scale nodes */
@@ -2145,9 +2206,10 @@ void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox* about = new QMessageBox;
     about->setText(AboutBox);
-    about->setWindowTitle("About NodeBeam Editor");
+    about->setWindowTitle("About NodeBEAM Editor");
     about->setStyleSheet("QMessageBox {background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgba(201, 201, 201, 255), stop:1 rgba(227, 227, 227, 255));}");
     about->setIconPixmap(QPixmap(":/images/images/logo.png"));
+    about->setWindowIcon(QPixmap(":/icons/icons/windowicon.png"));
     about->show();
 }
 
@@ -2213,13 +2275,13 @@ void MainWindow::on_actionRun_triggered()
 /* Parse JBEAM widget refresh button clicked */
 void MainWindow::on_pushButton_3_clicked()
 {
+    JBEAM_UpdateAllNodes();
     JBEAM_ParseTextEdit();
 }
 
 /* Parse JBEAM widget */
 void MainWindow::JBEAM_ParseTextEdit()
 {
-    JBEAM_UpdateSelectedNodes();
     JBEAM_UpdateCursors(ui->textEdit_JBEAM->toPlainText());
 
     QByteArray textbox;
@@ -2249,11 +2311,11 @@ void MainWindow::JBEAM_AddNode()
     QString nodeline = "           [";
     nodeline+= '"' + CurrentNodeBeam->TempNode.NodeName + '"';
     nodeline+= ", ";
-    nodeline+= QString::number(CurrentNodeBeam->TempNode.locX);
+    nodeline+= QString::number(CurrentNodeBeam->TempNode.locX,'f',5);
     nodeline+= ", ";
-    nodeline+= QString::number(CurrentNodeBeam->TempNode.locY);
+    nodeline+= QString::number(CurrentNodeBeam->TempNode.locY,'f',5);
     nodeline+= ", ";
-    nodeline+= QString::number(CurrentNodeBeam->TempNode.locZ);
+    nodeline+= QString::number(CurrentNodeBeam->TempNode.locZ,'f',5);
     nodeline.append("],\n");
     qDebug() << "adding node to JBEAM widget";
     QTextCursor textcursor = ui->textEdit_JBEAM->textCursor();
@@ -2286,6 +2348,7 @@ void MainWindow::JBEAM_AddBeam()
 /* Update selected nodes in JBEAM edit widget */
 void MainWindow::JBEAM_UpdateSelectedNodes()
 {
+
     int pos1; //Position containers for parsing the textbox
     int pos2;
 
@@ -2299,11 +2362,41 @@ void MainWindow::JBEAM_UpdateSelectedNodes()
         {
             QString nodeline = '"' + NodeName + '"';
             nodeline+= ", ";
-            nodeline+= QString::number(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].locX);
+            nodeline+= QString::number(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].locX,'f',5);
             nodeline+= ", ";
-            nodeline+= QString::number(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].locY);
+            nodeline+= QString::number(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].locY,'f',5);
             nodeline+= ", ";
-            nodeline+= QString::number(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].locZ);
+            nodeline+= QString::number(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].locZ,'f',5);
+
+            TextBoxText.replace(pos1,pos2-pos1+1,nodeline);
+        }
+        else qDebug() << "Node not found";
+
+    }
+    ui->textEdit_JBEAM->setText(TextBoxText);
+}
+
+/* Update all nodes */
+void MainWindow::JBEAM_UpdateAllNodes()
+{
+    int pos1; //Position containers for parsing the textbox
+    int pos2;
+
+    QString TextBoxText = ui->textEdit_JBEAM->toPlainText();
+    for(int i=0; i<CurrentNodeBeam->Nodes.size();i++)
+    {
+        QString NodeName = CurrentNodeBeam->Nodes[i].NodeName;
+
+        //Find node from textbox by nodename
+        if(FindNodeContainer(TextBoxText, NodeName, pos1, pos2))
+        {
+            QString nodeline = '"' + NodeName + '"';
+            nodeline+= ", ";
+            nodeline+= QString::number(CurrentNodeBeam->Nodes[i].locX,'f',5);
+            nodeline+= ", ";
+            nodeline+= QString::number(CurrentNodeBeam->Nodes[i].locY,'f',5);
+            nodeline+= ", ";
+            nodeline+= QString::number(CurrentNodeBeam->Nodes[i].locZ,'f',5);
 
             TextBoxText.replace(pos1,pos2-pos1+1,nodeline);
         }
@@ -2326,11 +2419,11 @@ bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &Nod
     for(i; i<JBEAM_box.length();i++)
     {
         if(JBEAM_box[i] == ' ');
-        else if (JBEAM_box[i] == '\u0009');
-        else if (JBEAM_box[i] == '\n')linenumber++;
+        else if (JBEAM_box.at(i) == '\u0009');
+        else if (JBEAM_box.at(i) == '\n')linenumber++;
         else
         {
-            temp.append(JBEAM_box[i]);
+            temp.append(JBEAM_box.at(i));
             if(temp.indexOf("\"nodes\":") >= 0)
             {
                 break;
@@ -2343,9 +2436,9 @@ bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &Nod
     int listlevel = 0;
     for(i; i<JBEAM_box.length();i++)
     {
-        if (JBEAM_box[i] == '\n')linenumber++;
-        else if (JBEAM_box[i] == '[') listlevel++;
-        else if (JBEAM_box[i] == ']')
+        if (JBEAM_box.at(i) == '\n')linenumber++;
+        else if (JBEAM_box.at(i) == '[') listlevel++;
+        else if (JBEAM_box.at(i) == ']')
         {
             listlevel--;
             if(listlevel == 0) break;
@@ -2361,12 +2454,12 @@ bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &Nod
     //Find node
     for(i=nodes_begin; i<nodes_end;i++)
     {
-        if(JBEAM_box[i] == ' ');
-        else if (JBEAM_box[i] == '\u0009');
-        else if (JBEAM_box[i] == '\n')linenumber++;
+        if(JBEAM_box.at(i) == ' ');
+        else if (JBEAM_box.at(i) == '\u0009');
+        else if (JBEAM_box.at(i) == '\n')linenumber++;
         else
         {
-            temp.append(JBEAM_box[i]);
+            temp.append(JBEAM_box.at(i));
             if(temp.indexOf(NodeLost) >= 0)
             {
                 NodeFound++;
@@ -2378,7 +2471,7 @@ bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &Nod
     //Find node begin
     for(i; i>nodes_begin; i--)
     {
-        if(JBEAM_box[i] == '[') break;
+        if(JBEAM_box.at(i) == '[') break;
     }
 
 
@@ -2388,8 +2481,8 @@ bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &Nod
     //Find node end
     for(i; i<nodes_end; i++)
     {
-        if(JBEAM_box[i] == '[') listlevel++;
-        else if(JBEAM_box[i] == ']')
+        if(JBEAM_box.at(i) == '[') listlevel++;
+        else if(JBEAM_box.at(i) == ']')
         {
             listlevel--;
             if(listlevel == 0)
@@ -2409,7 +2502,7 @@ bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &Nod
     {
         if(grid_id == 0)
         {
-            if(JBEAM_box[i] == '"') nodenamecalc++;
+            if(JBEAM_box.at(i) == '"') nodenamecalc++;
             if(nodenamecalc==2)
             {
                 valuefound=1;
@@ -2417,7 +2510,7 @@ bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &Nod
         }
         else if(grid_id > 0)
         {
-            if(JBEAM_box[i].isDigit())
+            if(JBEAM_box.at(i).isDigit())
             {
                 valuefound = 1;
             }
@@ -2425,7 +2518,7 @@ bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &Nod
 
         if(valuefound)
         {
-            if((JBEAM_box[i] == ' ') || (JBEAM_box[i] == ',') || (JBEAM_box[i] == '\u0009') || (JBEAM_box[i] == '\n') || (JBEAM_box[i] == ']'))
+            if((JBEAM_box.at(i) == ' ') || (JBEAM_box.at(i) == ',') || (JBEAM_box.at(i) == '\u0009') || (JBEAM_box.at(i) == '\n') || (JBEAM_box.at(i) == ']'))
             {
                 valuefound=0;
                 grid_id++;
@@ -2529,3 +2622,17 @@ void MainWindow::on_textEdit_JBEAM_textChanged()
 {
     JBEAM_UpdateCursors(ui->textEdit_JBEAM->toPlainText());
 }
+
+/* Signal from OpenGL view to update JBEAM */
+void MainWindow::JBEAM_Update()
+{
+    /*
+    QVector <int> tempselected = CurrentNodeBeam->SelectedNodes;
+    JBEAM_ParseTextEdit();
+    CurrentNodeBeam->SelectedNodes = tempselected;
+    */
+}
+
+
+
+

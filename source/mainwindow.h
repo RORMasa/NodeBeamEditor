@@ -39,6 +39,8 @@ public slots:
     void JBEAM_AddNode();
     void JBEAM_AddBeam();
     void JBEAM_UpdateSelectedNodes();
+    void JBEAM_UpdateAllNodes();
+    void JBEAM_Update();
 
 signals:
     void ZoomChanged();
@@ -223,6 +225,10 @@ private slots:
 
     void on_textEdit_JBEAM_textChanged();
 
+    void on_toolButton_29_clicked();
+
+    void on_toolButton_28_clicked();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
@@ -262,6 +268,8 @@ private:
 
     //Beam JBEAM cursor; if is set, add new beams at cursor position. Value is -1 if not set
     int JBEAM_BeamCursor;
+
+    QString EditorTitle;
 
 };
 

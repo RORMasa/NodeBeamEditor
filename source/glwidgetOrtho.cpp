@@ -824,8 +824,10 @@ void GLWidgetOrtho::mouseReleaseEvent(QMouseEvent *event)
 
             }
         }
-
-
+    }
+    else if(RotatingNodes>0)
+    {
+        emit JBEAM_UpdateO();
     }
 }
 
