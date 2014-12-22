@@ -396,31 +396,35 @@ void MainWindow::on_treeWidget_2_itemSelectionChanged()
         CurrentNodeBeam->ActiveBeam = ui->treeWidget_2->currentItem()->text(4).toInt();
 
         //For testing purposes, line where's beam information...
-        QString BeamIDs;
-        BeamIDs.clear();
-        BeamIDs.append(QString::number(CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node1GlobalID));
-        BeamIDs.append(", ");
-        BeamIDs.append(QString::number(CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node2GlobalID));
-        BeamIDs.append(", ");
-        if(CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node1GlobalID < CurrentNodeBeam->Nodes.size())
+        if(CurrentNodeBeam->Beams[CurrentNodeBeam->ActiveBeam].draw == 1)
         {
-            BeamIDs.append(CurrentNodeBeam->Nodes[CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node1GlobalID].NodeName);
-        }
-        else
-        {
-            BeamIDs.append(CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node1Name);
-        }
-        BeamIDs.append(", ");
-        if(CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node2GlobalID < CurrentNodeBeam->Nodes.size())
-        {
-            BeamIDs.append(CurrentNodeBeam->Nodes[CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node2GlobalID].NodeName);
-        }
-        else
-        {
-            BeamIDs.append(CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node2Name);
+            QString BeamIDs;
+            BeamIDs.clear();
+            BeamIDs.append(QString::number(CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node1GlobalID));
+            BeamIDs.append(", ");
+            BeamIDs.append(QString::number(CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node2GlobalID));
+            BeamIDs.append(", ");
+            if(CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node1GlobalID < CurrentNodeBeam->Nodes.size())
+            {
+                BeamIDs.append(CurrentNodeBeam->Nodes[CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node1GlobalID].NodeName);
+            }
+            else
+            {
+                BeamIDs.append(CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node1Name);
+            }
+            BeamIDs.append(", ");
+            if(CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node2GlobalID < CurrentNodeBeam->Nodes.size())
+            {
+                BeamIDs.append(CurrentNodeBeam->Nodes[CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node2GlobalID].NodeName);
+            }
+            else
+            {
+                BeamIDs.append(CurrentNodeBeam->Beams[ui->treeWidget_2->currentItem()->text(4).toInt()].Node2Name);
+            }
+
+            ui->label_9->setText(BeamIDs);
         }
 
-        ui->label_9->setText(BeamIDs);
         //qDebug()<< "Active beam is "<< CurrentNodeBeam->ActiveBeam;
         glWidget->updateGL();
         glWidgetO->updateGL();
@@ -436,9 +440,11 @@ void MainWindow::on_treeWidget_2_itemSelectionChanged()
         }
         else
         {
-
-            CurrentNodeBeam->SelectedBeams.append(ui->treeWidget_2->selectedItems()[i]->text(4).toInt());
-            qDebug() << CurrentNodeBeam->SelectedBeams[i];
+            if(CurrentNodeBeam->Beams[ui->treeWidget_2->selectedItems()[i]->text(4).toInt()].draw == 1)
+            {
+                CurrentNodeBeam->SelectedBeams.append(ui->treeWidget_2->selectedItems()[i]->text(4).toInt());
+                qDebug() << CurrentNodeBeam->SelectedBeams[i];
+            }
         }
     }
     if(CurrentNodeBeam->ActiveBeam < CurrentNodeBeam->Beams.size())
