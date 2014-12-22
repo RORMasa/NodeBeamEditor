@@ -92,6 +92,10 @@ public:
     /* 3D edit system */
     bool Move3DCursor; //If on, will pick 3D cursor.
     int Moving3D_Mode; //0:none, 1:x, 2:y, 3:z
+    bool Moving3D_ModeX;
+    bool Moving3D_ModeY;
+    bool Moving3D_ModeZ;
+    float DegreeToRadiansRatio;
 
 
 public slots:
@@ -120,6 +124,7 @@ protected:
     void resizeGL(int width, int height);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
     void DrawSphere(int segments, int diameter);
 
 

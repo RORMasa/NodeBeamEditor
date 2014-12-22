@@ -68,6 +68,7 @@ GLWidget::GLWidget(QWidget *parent)
     CurrentBeamGroup=0;
     ZoomFactor = 1.0;
     ShowNodeNumbers = 0;
+    ShowNodeNumbers1 = 0;
 
     qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
     qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
@@ -98,6 +99,10 @@ GLWidget::GLWidget(QWidget *parent)
 
     //3D Edit system
     Move3DCursor = 1;
+    Moving3D_ModeX = 0;
+    Moving3D_ModeY = 0;
+    Moving3D_ModeZ = 0;
+    DegreeToRadiansRatio = (2*pii)/360; //One degree is this many radians
 }
 
 GLWidget::~GLWidget()
@@ -160,7 +165,7 @@ void GLWidget::setDRotation(int angle)
     {
         dRot = angle;
 
-        yRot = dRot*(zRot/5760);
+        //yRot = dRot*(zRot/5760);
         xRot = dRot*(1-(zRot/5760));
         qDebug() << "kamera rotaatio " << xRot << ", " << yRot;
         updateGL();
@@ -665,7 +670,7 @@ void GLWidget::paintGL()
         glLoadIdentity();
         glTranslatef(0.0, 0.0, -10.0);
         glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
-        glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
+        //glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
         glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
         glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
         drawpicking(); //Draw nodes in buffer, each with individual color
@@ -677,17 +682,17 @@ void GLWidget::paintGL()
         glLoadIdentity();
         glTranslatef(0.0, 0.0, -10.0);
         glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
-        glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
+        //glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
         glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
         glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
-        Draw3DCursor_Picking();
+        Draw3DCursor_Picking(); //Draw 3D cursor in buffer
         //QGLWidget::swapBuffers();
     }
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glTranslatef(0.0, 0.0, -10.0);
     glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
-    glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
+    //glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
     glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
     glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
     draw(); //draw nodes, beams, wheels, lines
@@ -839,18 +844,19 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 
             }
         }
-
+        /* Check if user has dragged the move arrows */
+        //Lock the moving until mouse is released.
         if(Moving3D_Mode == 1)
         {
-            qDebug() << "MOVE X";
+            Moving3D_ModeX = 1;
         }
         else if(Moving3D_Mode == 2)
         {
-
+            Moving3D_ModeY = 1;
         }
         else if(Moving3D_Mode == 3)
         {
-
+            Moving3D_ModeZ = 1;
         }
 
     }
@@ -920,18 +926,42 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
             }
             updateGL();
         }
-        else if(Moving3D_Mode == 1)
+        else if(Moving3D_ModeX)
         {
+            MovingNodes_CalculateMove(event);
 
-            qDebug() << "MOVE X " << event->x();
+            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
+            {
+                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX += -0.010f*movement_x*qCos(DegreeToRadiansRatio*(zRot/16))*ZoomFactor;
+                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX += 0.010f*movement_y*qSin(DegreeToRadiansRatio*(zRot/16))*ZoomFactor;
+            }
+            NBPointer->Editing3D_CalculateSelectionCenter();
+            updateGL();
         }
-        else if(Moving3D_Mode == 2)
+        else if(Moving3D_ModeY)
         {
+            MovingNodes_CalculateMove(event);
 
+            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
+            {
+                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY += 0.010f*movement_x*qSin(DegreeToRadiansRatio*(zRot/16));
+                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY += 0.010f*movement_y*qCos(DegreeToRadiansRatio*(zRot/16));
+
+            }
+            NBPointer->Editing3D_CalculateSelectionCenter();
+            updateGL();
         }
-        else if(Moving3D_Mode == 3)
+        else if(Moving3D_ModeZ)
         {
+            MovingNodes_CalculateMove(event);
 
+            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
+            {
+                   NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ += -0.010f*movement_y*qSin(DegreeToRadiansRatio*(xRot/16));
+
+            }
+            NBPointer->Editing3D_CalculateSelectionCenter();
+            updateGL();
         }
 
 
@@ -943,10 +973,31 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     }
     //qDebug()<< "3D view "<< event->pos();
     lastPos = event->pos();
-    float piii = 2*asin(1);
-    qDebug() << piii;
-    qDebug() << "x " << xRot/16 << "y " << yRot/16 << "z " << zRot/16;
-    qDebug() << " xr " << qSin(((2*piii)/360)*(xRot/16));
+
+    qDebug() << "x " << xRot/16 << "z " << zRot/16;
+    qDebug() << " xr " << qSin(((2*pii)/360)*(xRot/16));
+    qDebug() << " zr " << qSin(((2*pii)/360)*(zRot/16));
+    float dotpr = qSin(((2*pii)/360)*(zRot/16));
+    qDebug() << "X-liike " << dotpr;
+    float dotpr2 = qCos(((2*pii)/360)*(zRot/16));
+    qDebug() << "Y-liike " << dotpr2;
+}
+
+void GLWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    /* User has released the mouse, => stop moving nodes */
+    if(event->button() & Qt::LeftButton)
+    {
+        qDebug() << "Left released";
+        Moving3D_ModeX = 0;
+        Moving3D_ModeY = 0;
+        Moving3D_ModeZ = 0;
+    }
+/*
+    Moving3D_ModeX = 0;
+    Moving3D_ModeY = 0;
+    Moving3D_ModeZ = 0;
+    */
 }
 
 void GLWidget::MovingNodes_CalculateMove(QMouseEvent *event)
