@@ -96,6 +96,8 @@ GLWidget::GLWidget(QWidget *parent)
     ViewOffsetY = 0;
     ViewOffsetZ = 0;
 
+    //3D Edit system
+    Move3DCursor = 1;
 }
 
 GLWidget::~GLWidget()
@@ -160,6 +162,7 @@ void GLWidget::setDRotation(int angle)
 
         yRot = dRot*(zRot/5760);
         xRot = dRot*(1-(zRot/5760));
+        qDebug() << "kamera rotaatio " << xRot << ", " << yRot;
         updateGL();
     }
 }
@@ -668,6 +671,18 @@ void GLWidget::paintGL()
         drawpicking(); //Draw nodes in buffer, each with individual color
         //QGLWidget::swapBuffers();
     }
+    else if(Move3DCursor)
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glLoadIdentity();
+        glTranslatef(0.0, 0.0, -10.0);
+        glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
+        glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
+        glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
+        glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
+        Draw3DCursor_Picking();
+        //QGLWidget::swapBuffers();
+    }
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glTranslatef(0.0, 0.0, -10.0);
@@ -677,6 +692,7 @@ void GLWidget::paintGL()
     glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
     draw(); //draw nodes, beams, wheels, lines
     if(ShowArrows) DrawAxisArrows();
+    Draw3DCursor();
     glColor3f(0.6, 0.6, 0.6);
 
     renderText(10, yHeight-20, TextOverlay, QFont( "Arial", 14, QFont::Bold, 0 ) );
@@ -823,6 +839,20 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 
             }
         }
+
+        if(Moving3D_Mode == 1)
+        {
+            qDebug() << "MOVE X";
+        }
+        else if(Moving3D_Mode == 2)
+        {
+
+        }
+        else if(Moving3D_Mode == 3)
+        {
+
+        }
+
     }
     updateGL();
 
@@ -890,6 +920,20 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
             }
             updateGL();
         }
+        else if(Moving3D_Mode == 1)
+        {
+
+            qDebug() << "MOVE X " << event->x();
+        }
+        else if(Moving3D_Mode == 2)
+        {
+
+        }
+        else if(Moving3D_Mode == 3)
+        {
+
+        }
+
 
     } else if (event->buttons() & Qt::RightButton) {
 
@@ -899,6 +943,10 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     }
     //qDebug()<< "3D view "<< event->pos();
     lastPos = event->pos();
+    float piii = 2*asin(1);
+    qDebug() << piii;
+    qDebug() << "x " << xRot/16 << "y " << yRot/16 << "z " << zRot/16;
+    qDebug() << " xr " << qSin(((2*piii)/360)*(xRot/16));
 }
 
 void GLWidget::MovingNodes_CalculateMove(QMouseEvent *event)
@@ -938,6 +986,238 @@ void GLWidget::DrawWheel(float radius, float width, int rays)
     glEnd();
     glEnable(GL_LIGHTING);
     glPopMatrix();
+}
+
+/* Draw 3D Edit cursor */
+/* Draw arrows for X, Y and Z axis */
+void GLWidget::Draw3DCursor()
+{
+    glPushMatrix();
+
+    GLfloat centerx = NBPointer->SelectionCenterPos.x();
+    GLfloat centery = NBPointer->SelectionCenterPos.y();
+    GLfloat centerz = NBPointer->SelectionCenterPos.z();
+    glTranslatef(centerx, centery, centerz);
+
+    glBegin(GL_TRIANGLES);
+    glColor3f(1.0, 0.0, 0.0);
+
+
+    //X-Arrow
+    glVertex3f(0.9, -0.05, 0.05);
+    glVertex3f(1, 0, 0);
+    glVertex3f(0.9, 0.05, 0.05);
+
+    glVertex3f(0.9, 0.05, -0.05);
+    glVertex3f(1, 0, 0);
+    glVertex3f(0.9, -0.05, -0.05);
+
+    glVertex3f(0.9, -0.05, -0.05);
+    glVertex3f(1, 0, 0);
+    glVertex3f(0.9, -0.05, 0.05);
+
+    glVertex3f(0.9, 0.05, 0.05);
+    glVertex3f(1, 0, 0);
+    glVertex3f(0.9, 0.05, -0.05);
+
+    glVertex3f(0.9, 0.05, 0.05);
+    glVertex3f(0.9, 0.05, -0.05);
+    glVertex3f(0.9, -0.05, 0.05);
+    glVertex3f(0.9, -0.05, 0.05);
+    glVertex3f(0.9, 0.05, -0.05);
+    glVertex3f(0.9, -0.05, -0.05);
+    glEnd();
+
+    //Tall arrow
+    glBegin(GL_TRIANGLES);
+    glColor3f(1.0, 0.0, 0.0);
+    glVertex3f(0.1, -0.05, 0.05);
+    glVertex3f(1, 0, 0);
+    glVertex3f(0.1, 0.05, 0.05);
+
+    glVertex3f(0.1, 0.05, -0.05);
+    glVertex3f(1, 0, 0);
+    glVertex3f(0.1, -0.05, -0.05);
+
+    glVertex3f(0.1, -0.05, -0.05);
+    glVertex3f(1, 0, 0);
+    glVertex3f(0.1, -0.05, 0.05);
+
+    glVertex3f(0.1, 0.05, 0.05);
+    glVertex3f(1, 0, 0);
+    glVertex3f(0.1, 0.05, -0.05);
+
+    glVertex3f(0.1, 0.05, 0.05);
+    glVertex3f(0.1, 0.05, -0.05);
+    glVertex3f(0.1, -0.05, 0.05);
+    glVertex3f(0.1, -0.05, 0.05);
+    glVertex3f(0.1, 0.05, -0.05);
+    glVertex3f(0.1, -0.05, -0.05);
+
+    glEnd();
+    //Y-Arrow
+
+    glBegin(GL_TRIANGLES);
+    glColor3f(0.0, 1.0, 0.0);
+
+    glVertex3f(0.05, 0.9, 0.05);
+    glVertex3f(0, 1, 0);
+    glVertex3f(-0.05, 0.9, 0.05);
+
+    glVertex3f(-0.05, 0.9, -0.05);
+    glVertex3f(0, 1, 0);
+    glVertex3f(0.05,0.9,  -0.05);
+
+    glVertex3f(-0.05,0.9,  0.05);
+    glVertex3f(0, 1, 0);
+    glVertex3f(-0.05, 0.9, -0.05);
+
+    glVertex3f(0.05, 0.9, -0.05);
+    glVertex3f(0, 1, 0);
+    glVertex3f(0.05, 0.9, 0.05);
+
+    glVertex3f(-0.05, 0.9, 0.05);
+    glVertex3f(0.05, 0.9, -0.05);
+    glVertex3f(0.05, 0.9, 0.05);
+    glVertex3f(-0.05, 0.9, -0.05);
+    glVertex3f(0.05, 0.9, -0.05);
+    glVertex3f(-0.05, 0.9, 0.05);
+
+    glEnd();
+
+    //Tall arrow
+    glBegin(GL_TRIANGLES);
+    glColor3f(0.0, 1.0, 0.0);
+
+    glVertex3f(0.05, 0.1, 0.05);
+    glVertex3f(0, 1, 0);
+    glVertex3f(-0.05, 0.1, 0.05);
+
+    glVertex3f(-0.05, 0.1, -0.05);
+    glVertex3f(0, 1, 0);
+    glVertex3f(0.05,0.1,  -0.05);
+
+    glVertex3f(-0.05,0.1,  0.05);
+    glVertex3f(0, 1, 0);
+    glVertex3f(-0.05, 0.1, -0.05);
+
+    glVertex3f(0.05, 0.1, -0.05);
+    glVertex3f(0, 1, 0);
+    glVertex3f(0.05, 0.1, 0.05);
+
+    glVertex3f(-0.05, 0.1, 0.05);
+    glVertex3f(0.05, 0.1, -0.05);
+    glVertex3f(0.05, 0.1, 0.05);
+    glVertex3f(-0.05, 0.1, -0.05);
+    glVertex3f(0.05, 0.1, -0.05);
+    glVertex3f(-0.05, 0.1, 0.05);
+
+    glEnd();
+
+    //Z Arrow
+    glBegin(GL_TRIANGLES);
+    glColor3f(0.0, 0.0, 1.0);
+
+    glVertex3f(-0.05, 0.05, 0.9);
+    glVertex3f(0, 0, 1);
+    glVertex3f(0.05, 0.05, 0.9);
+
+    glVertex3f(0.05, -0.05, 0.9);
+    glVertex3f(0, 0, 1);
+    glVertex3f(-0.05, -0.05, 0.9);
+
+    glVertex3f(-0.05, -0.05, 0.9);
+    glVertex3f(0, 0, 1);
+    glVertex3f(-0.05, 0.05, 0.9);
+
+    glVertex3f(0.05, 0.05, 0.9);
+    glVertex3f(0, 0, 1);
+    glVertex3f(0.05, -0.05, 0.9);
+
+    glVertex3f(0.05, -0.05, 0.9);
+    glVertex3f(-0.05, 0.05, 0.9);
+    glVertex3f(0.05, 0.05, 0.9);
+    glVertex3f(-0.05, -0.05, 0.9);
+    glVertex3f(-0.05, 0.05, 0.9);
+    glVertex3f(0.05, -0.05, 0.9);
+
+    glEnd();
+
+    //Tall arrow
+    glBegin(GL_TRIANGLES);
+    glColor3f(0.0, 0.0, 1.0);
+
+    glVertex3f(-0.05, 0.05, 0.1);
+    glVertex3f(0, 0, 1);
+    glVertex3f(0.05, 0.05, 0.1);
+
+    glVertex3f(0.05, -0.05, 0.1);
+    glVertex3f(0, 0, 1);
+    glVertex3f(-0.05, -0.05, 0.1);
+
+    glVertex3f(-0.05, -0.05, 0.1);
+    glVertex3f(0, 0, 1);
+    glVertex3f(-0.05, 0.05, 0.1);
+
+    glVertex3f(0.05, 0.05, 0.1);
+    glVertex3f(0, 0, 1);
+    glVertex3f(0.05, -0.05, 0.1);
+
+    glVertex3f(0.05, -0.05, 0.1);
+    glVertex3f(-0.05, 0.05, 0.1);
+    glVertex3f(0.05, 0.05, 0.1);
+    glVertex3f(-0.05, -0.05, 0.1);
+    glVertex3f(-0.05, 0.05, 0.1);
+    glVertex3f(0.05, -0.05, 0.1);
+    glEnd();
+
+    glPopMatrix();
+
+}
+
+/* Draw 3D cursor picking */
+void GLWidget::Draw3DCursor_Picking()
+{
+    //Each 3D cursor arrow is rendered with unique color, and color is checked
+    //there, where the mouse is clicked, to detect which arrow the user wants to move
+    //only red color is needed for 3 axises
+
+    //glDisable(GL_DITHER);
+    //Nodes
+    // Turn off lighting
+    glDisable(GL_LIGHTING);
+
+    // Turn off antialiasing
+    glDisable (GL_BLEND);
+    glDisable(GL_MULTISAMPLE);
+
+    // Turn off texturing
+    glDisable(GL_TEXTURE_2D);
+
+    GLubyte pixel[3];
+    GLint viewport[4];
+
+    //Get values of OpenGL viewport. viewport[3] will be the height of the viewport
+    glGetIntegerv(GL_VIEWPORT,viewport);
+
+    Draw3DCursor();
+    glReadPixels(lastPos.x(), viewport[3]-lastPos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, (void *) pixel);
+    //qDebug() << "3D cursor picking " << pixel[0] << ", " << pixel[1] << "," << pixel[2];
+
+    if(pixel[0] == 255) Moving3D_Mode = 1;
+    else if(pixel[1] == 255) Moving3D_Mode = 2;
+    else if(pixel[2] == 255) Moving3D_Mode = 3;
+    else Moving3D_Mode = 0;
+
+    glEnable(GL_LIGHTING);
+
+    // Turn on antialiasing
+    glEnable (GL_BLEND);
+    glEnable(GL_MULTISAMPLE);
+
+    // Turn on texturing
+    glEnable(GL_TEXTURE_2D);
+
 }
 
 void GLWidget::DrawSphere(int segments, int diameter)

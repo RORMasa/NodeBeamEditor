@@ -2830,6 +2830,86 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
 
     QString JbeamTextSTR = JbeamText.constData();
 
+    QList <int> CommaMissingPos;
+
+    bool Checking = 0;
+    bool CommaFound = 0;
+    bool InsideString = 0;
+    QChar char1 = 'ö';
+    QChar char2 = 'ö';
+
+    for(int i=0; i<JbeamTextSTR.length(); i++)
+    {
+        char2 = JbeamTextSTR.at(i);
+
+        if((char2 == ' ') || ( char2 == '\n') || (char2 == '\u0009'))
+        {
+            if(!InsideString) Checking = 1;
+        }
+        else if((char2 == ',') && Checking) CommaFound = 1;
+        else
+        {
+            if(Checking)
+            {
+                if((char1 == '}') || (char1 == ']') || (char1 == '"') || char1.isDigit())
+                {
+                    if((char2 == '{') || (char2 == '[') || (char2 == '"') || char2.isDigit())
+                    {
+                        if(!CommaFound)
+                        {
+                            CommaMissingPos.append(i-1);
+                        }
+                    }
+                }
+                CommaFound=0;
+            }
+            Checking = 0;
+
+            if(char2 == '"') InsideString = !InsideString;
+            char1 = char2;
+        }
+    }
+
+    for(int i=0; i<CommaMissingPos.size();i++)
+    {
+        JbeamTextSTR.replace(CommaMissingPos.at(i), 1, ',');
+    }
+
+    for(int i=0; i<JbeamTextSTR.length(); i++)
+    {
+        //qDebug() << "tarkisus " << JbeamTextSTR[i];
+        if((JbeamTextSTR[i] == ']')||(JbeamTextSTR[i] == '}'))
+        {
+            QChar prevchar = 'ö';
+            int prevchar_i=0;
+            if (i>0) prevchar_i = i-1;
+            qDebug() << "aloituspiste " << JbeamTextSTR[i-1]<<JbeamTextSTR[prevchar_i]<<JbeamTextSTR[i+1];
+            JBEAM_FixCommas_PrevChar(JbeamTextSTR, prevchar, prevchar_i);
+            if(prevchar == ',')
+            {
+                int comma_i = prevchar_i;
+                prevchar_i--;
+
+                JBEAM_FixCommas_PrevChar(JbeamTextSTR, prevchar, prevchar_i);
+                JbeamTextSTR.replace(comma_i, 1, " ");
+
+            }
+        }
+
+    }
+
+    JbeamText.clear();
+    JbeamText.append(JbeamTextSTR);
+    return JbeamText;
+}
+/*
+QByteArray NodeBeam::JBEAM_FixCommas2(QByteArray JbeamText)
+{
+    QString temp1;
+    bool checking = 0;
+
+    QString JbeamTextSTR = JbeamText.constData();
+
     for(int i=0; i<JbeamTextSTR.length(); i++)
     {
         if((JbeamTextSTR[i] == ']')||(JbeamTextSTR[i] == '}'))
@@ -2878,7 +2958,7 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
                     JbeamTextSTR.replace(comma_i, 1, " ");
                     qDebug() << "Removing letter";
                 }
-                */
+                *//*
                 JbeamTextSTR.replace(comma_i, 1, " ");
             }
         }
@@ -2888,6 +2968,8 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
     JbeamText.append(JbeamTextSTR);
     return JbeamText;
 }
+*/
+
 
 QByteArray NodeBeam::JBEAM_RemoveComments(QByteArray JbeamText)
 {
@@ -2996,6 +3078,40 @@ bool NodeBeam::JBEAM_SaveAs(const QString &fileName, QString JBEAM_Text)
     return SaveComplete;
 }
 
+/* == 3D Editing, cursor == */
+/* Calculate selection center point */
+bool NodeBeam::Editing3D_CalculateSelectionCenter()
+{
+    bool calculated = 0;
+    float MaxX, MinX, MaxY, MinY, MaxZ, MinZ = 0;
+    if(SelectedNodes.size()>0)
+    {
+         calculated = 1;
+         MaxX = Nodes.at(SelectedNodes.at(0)).locX;
+         MinX = Nodes.at(SelectedNodes.at(0)).locX;
+         MaxY = Nodes.at(SelectedNodes.at(0)).locY;
+         MinY = Nodes.at(SelectedNodes.at(0)).locY;
+         MaxZ = Nodes.at(SelectedNodes.at(0)).locZ;
+         MinZ = Nodes.at(SelectedNodes.at(0)).locZ;
+    }
+
+    for(int i=1; i< SelectedNodes.size(); i++)
+    {
+        if(Nodes.at(SelectedNodes.at(i)).locX > MaxX) MaxX = Nodes.at(SelectedNodes.at(i)).locX;
+        if(Nodes.at(SelectedNodes.at(i)).locX < MinX) MinX = Nodes.at(SelectedNodes.at(i)).locX;
+        if(Nodes.at(SelectedNodes.at(i)).locY > MaxY) MaxY = Nodes.at(SelectedNodes.at(i)).locY;
+        if(Nodes.at(SelectedNodes.at(i)).locY < MinY) MinY = Nodes.at(SelectedNodes.at(i)).locY;
+        if(Nodes.at(SelectedNodes.at(i)).locZ > MaxZ) MaxZ = Nodes.at(SelectedNodes.at(i)).locZ;
+        if(Nodes.at(SelectedNodes.at(i)).locZ < MinZ) MinZ = Nodes.at(SelectedNodes.at(i)).locZ;
+    }
+    SelectionCenterPos.setX(MinX+((MaxX-MinX)/2));
+    SelectionCenterPos.setY(MinY+((MaxY-MinY)/2));
+    SelectionCenterPos.setZ(MinZ+((MaxZ-MinZ)/2));
+
+    qDebug() << "Selection center is " << SelectionCenterPos.x() << ", " << SelectionCenterPos.y() << ", " << SelectionCenterPos.z();
+}
+
+
 /*
 static void LUAtesti(lua_State *L)
 {
@@ -3018,4 +3134,5 @@ void NodeBeam::RunLUAScript()
     lua_close(L);
 }
 */
+
 

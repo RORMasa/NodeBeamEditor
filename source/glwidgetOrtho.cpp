@@ -763,7 +763,7 @@ void GLWidgetOrtho::mouseReleaseEvent(QMouseEvent *event)
         float correctedZ1 = **ZPointer2;
 
         NBPointer->SelectNodesLoc(correctedX0,correctedY0,correctedZ0,correctedX1,correctedY1,correctedZ1);
-
+        NBPointer->Editing3D_CalculateSelectionCenter();
         //emit SelectionUpdated();
 
         Rx0=0;

@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QXmlStreamReader>
 #include <QJsonDocument>
+#include <QVector3D>
 
 /*LUA*/
 //extern "C"
@@ -261,6 +262,13 @@ public:
     /* LUA Script */
     //void RunLUAScript();
     //int LUAtesti(lua_State *L);
+
+    /* 3D Editing */
+    bool Editing3D_CalculateSelectionCenter();
+
+    //Center point of nodes in Selected nodes
+    QVector3D SelectionCenterPos;
+
 
     /* JBEAM TextEdit parsing functions */
     QJsonParseError ParseJBEAM_TextEdit(QByteArray JbeamInputText);

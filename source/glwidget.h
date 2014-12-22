@@ -89,6 +89,10 @@ public:
     float ViewOffsetY;
     float ViewOffsetZ;
 
+    /* 3D edit system */
+    bool Move3DCursor; //If on, will pick 3D cursor.
+    int Moving3D_Mode; //0:none, 1:x, 2:y, 3:z
+
 
 public slots:
     void setXRotation(int angle);
@@ -141,6 +145,8 @@ private:
 
     void DrawAxisArrows();
     void DrawWheel(float radius, float width, int rays);
+    void Draw3DCursor();
+    void Draw3DCursor_Picking();
 };
 
 

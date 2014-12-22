@@ -52,6 +52,7 @@ The active file can be saved in editors own xml file format.
 * Adding anything else except nodes and beams
 
 ##Shortcut keys
+* Numpad Move 3D view
 * G  Move
 * R  Rotate
 * S  Scale
