@@ -104,6 +104,7 @@ GLWidget::GLWidget(QWidget *parent)
     Moving3D_ModeY = 0;
     Moving3D_ModeZ = 0;
     DegreeToRadiansRatio = (2*pii)/360; //One degree is this many radians
+    RectSelect = 0;
 }
 
 GLWidget::~GLWidget()
@@ -706,18 +707,7 @@ void GLWidget::paintGL()
     if(ShowNodeNumbers) RenderTextInScene(1);
     else if(ShowNodeNumbers1) RenderTextInScene(0);
 
-    QVector4D test;
-    glBegin(GL_POINTS);
-    glColor3f(0.0, 1.0, 0.0);
-    for(int i=0; i<10 ; i++)
-    {
-        glColor3f(0.0, 0.1*i, 0.0);
-        test = campos + unitvec*i;
-        glVertex3d(test.x(), test.y(), test.z());
-
-    }
-
-    glEnd();
+    if(RectSelect) DrawRectSelect();
 
     QGLWidget::swapBuffers();
 }
@@ -877,9 +867,18 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
             }
         }
 
+        /* 3D Rectangle selection begin */
+        else if(RectSelect)
+        {
+            RectSelect_start.setX(event->x());
+            RectSelect_start.setY(event->y());
+        }
+
     }
     updateGL();
 
+    /*
+    //Ray trace test
     GLfloat matriisi[16];
     glGetFloatv(GL_MODELVIEW_MATRIX, matriisi);
 
@@ -898,9 +897,9 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 
     //RayTrace test point
     QVector4D unitvector = RayTraceVector(lastPos.x(),lastPos.y());
-    unitvec = unitvector/10;
+    unitvec = unitvector;
     campos = modelview.column(3);
-
+    */
 
 }
 
@@ -1041,7 +1040,36 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
             Moving3D_ModeY = 0;
             Moving3D_ModeZ = 0;
         }
+        else if(RectSelect)
+        {
+            /* 3D Rectangle selection ends */
+            RectSelect_end.setX(event->x());
+            RectSelect_end.setY(event->y());
+            QPoint x1;
+            QPoint y1;
+
+            /*
+            y1 - - - - - - end
+            |               |
+            |               |
+            start - - - - - x1
+            */
+
+            x1.setX(RectSelect_end.x());
+            x1.setY(RectSelect_start.y());
+
+            y1.setX(RectSelect_start.x());
+            y1.setY(RectSelect_end.y());
+
+            RectSel_1 = RayTraceVector(RectSelect_start.x(), RectSelect_start.y());
+            RectSel_2 = RayTraceVector(x1.x(), x1.y());
+            RectSel_3 = RayTraceVector(y1.x(), y1.y());
+            RectSel_4 = RayTraceVector(RectSelect_end.x(), RectSelect_end.y());
+
+        }
+
         qDebug() << "Left released";
+
     }
 
 }
@@ -1399,10 +1427,11 @@ QVector4D GLWidget::RayTraceVector(int MouseX, int MouseY)
 
     /* Camera position is 4th column of the inverse_modelview matrix */
     QVector4D CameraPos = inverse_modelview.column(3);
+    campos=CameraPos;
 
     /* Mouse position to normalized coordinates */
-    float posX = (float)lastPos.x();
-    float posY = (float)lastPos.y();
+    float posX = (float)MouseX;
+    float posY = (float)MouseY;
     posX = (posX/xWidth)*2.0f -1.0f;
     posY = -((posY/yHeight)*2.0f - 1.0f);
 
@@ -1419,7 +1448,66 @@ QVector4D GLWidget::RayTraceVector(int MouseX, int MouseY)
 
     /* Calculate the ray trace vector */
     QVector4D RayTraceVector = MousePos - CameraPos;
+    RayTraceVector.normalize();
 
     return RayTraceVector;
+
+}
+
+void GLWidget::DrawRectSelect()
+{
+
+    QVector4D test,RectSel_1V,RectSel_2V,RectSel_3V,RectSel_4V;
+    glBegin(GL_POINTS);
+    glColor3f(0.0, 1.0, 0.0);
+    for(int i=0; i<20 ; i++)
+    {
+        glColor3f(0.0, 0.03*i, 0.0);
+        test = campos + RectSel_1*i;
+        glVertex3d(test.x(), test.y(), test.z());
+    }
+
+    for(int i=0; i<20 ; i++)
+    {
+        glColor3f(0.0, 0.03*i, 0.0);
+        test = campos + RectSel_2*i;
+        glVertex3d(test.x(), test.y(), test.z());
+    }
+
+    for(int i=0; i<20 ; i++)
+    {
+        glColor3f(0.0, 0.03*i, 0.0);
+        test = campos + RectSel_3*i;
+        glVertex3d(test.x(), test.y(), test.z());
+    }
+
+    for(int i=0; i<20 ; i++)
+    {
+        glColor3f(0.0, 0.03*i, 0.0);
+        test = campos + RectSel_4*i;
+        glVertex3d(test.x(), test.y(), test.z());
+    }
+
+
+    glEnd();
+    glBegin(GL_LINES);
+    RectSel_1V = (campos + RectSel_1*5);
+    RectSel_2V = (campos + RectSel_2*5);
+    RectSel_3V = (campos + RectSel_3*5);
+    RectSel_4V = (campos + RectSel_4*5);
+
+    glVertex3d(RectSel_1V.x(), RectSel_1V.y(), RectSel_1V.z());
+    glVertex3d(RectSel_2V.x(), RectSel_2V.y(), RectSel_2V.z());
+
+    glVertex3d(RectSel_2V.x(), RectSel_2V.y(), RectSel_2V.z());
+    glVertex3d(RectSel_4V.x(), RectSel_4V.y(), RectSel_4V.z());
+
+    glVertex3d(RectSel_4V.x(), RectSel_4V.y(), RectSel_4V.z());
+    glVertex3d(RectSel_3V.x(), RectSel_3V.y(), RectSel_3V.z());
+
+    glVertex3d(RectSel_3V.x(), RectSel_3V.y(), RectSel_3V.z());
+    glVertex3d(RectSel_1V.x(), RectSel_1V.y(), RectSel_1V.z());
+
+    glEnd();
 
 }

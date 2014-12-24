@@ -1697,10 +1697,15 @@ void MainWindow::on_toolButton_6_clicked()
     ButtsUp(5);
     if(ui->toolButton_6->isChecked())
     {
-        if(OpenGLViews->currentIndex()!=1) OpenGLViews->setCurrentIndex(1);
+        //if(OpenGLViews->currentIndex()!=1) OpenGLViews->setCurrentIndex(1);
         glWidgetO->RectSelect=1;
+        glWidget->RectSelect=1;
     }
-    else glWidgetO->RectSelect=0;
+    else
+    {
+        glWidgetO->RectSelect=0;
+        glWidget->RectSelect=0;
+    }
 
 }
 

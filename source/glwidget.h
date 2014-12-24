@@ -100,6 +100,13 @@ public:
     QVector4D RayTraceVector(int MouseX, int MouseY);
     QVector4D campos;
     QVector4D unitvec;
+    bool RectSelect;
+    QPoint RectSelect_start;
+    QPoint RectSelect_end;
+    QVector4D RectSel_1;
+    QVector4D RectSel_2;
+    QVector4D RectSel_3;
+    QVector4D RectSel_4;
 
 public slots:
     void setXRotation(int angle);
@@ -155,6 +162,7 @@ private:
     void DrawWheel(float radius, float width, int rays);
     void Draw3DCursor();
     void Draw3DCursor_Picking();
+    void DrawRectSelect();
 };
 
 
