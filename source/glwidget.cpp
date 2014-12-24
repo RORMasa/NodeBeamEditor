@@ -47,6 +47,8 @@
 #include "glwidget.h"
 #include "NodeBeam.h"
 
+#include <QMatrix4x4>
+
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
 #endif
@@ -98,7 +100,6 @@ GLWidget::GLWidget(QWidget *parent)
     ViewOffsetZ = 0;
 
     //3D Edit system
-    Move3DCursor = 1;
     Moving3D_ModeX = 0;
     Moving3D_ModeY = 0;
     Moving3D_ModeZ = 0;
@@ -676,7 +677,7 @@ void GLWidget::paintGL()
         drawpicking(); //Draw nodes in buffer, each with individual color
         //QGLWidget::swapBuffers();
     }
-    else if(Move3DCursor)
+    else if(MovingNodes > 0)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glLoadIdentity();
@@ -697,13 +698,26 @@ void GLWidget::paintGL()
     glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
     draw(); //draw nodes, beams, wheels, lines
     if(ShowArrows) DrawAxisArrows();
-    Draw3DCursor();
+    if(MovingNodes > 0) Draw3DCursor();
     glColor3f(0.6, 0.6, 0.6);
 
     renderText(10, yHeight-20, TextOverlay, QFont( "Arial", 14, QFont::Bold, 0 ) );
 
     if(ShowNodeNumbers) RenderTextInScene(1);
     else if(ShowNodeNumbers1) RenderTextInScene(0);
+
+    QVector4D test;
+    glBegin(GL_POINTS);
+    glColor3f(0.0, 1.0, 0.0);
+    for(int i=0; i<10 ; i++)
+    {
+        glColor3f(0.0, 0.1*i, 0.0);
+        test = campos + unitvec*i;
+        glVertex3d(test.x(), test.y(), test.z());
+
+    }
+
+    glEnd();
 
     QGLWidget::swapBuffers();
 }
@@ -733,6 +747,7 @@ void GLWidget::resizeGL(int width, int height)
     GLfloat x = (GLfloat(width) / height)*ZoomFactor;
     glFrustum(-x, x, -ZoomFactor, ZoomFactor, 4.0, 55.0);
     glMatrixMode(GL_MODELVIEW);
+
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
@@ -846,21 +861,46 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
         }
         /* Check if user has dragged the move arrows */
         //Lock the moving until mouse is released.
-        if(Moving3D_Mode == 1)
+        if(MovingNodes>0)
         {
-            Moving3D_ModeX = 1;
-        }
-        else if(Moving3D_Mode == 2)
-        {
-            Moving3D_ModeY = 1;
-        }
-        else if(Moving3D_Mode == 3)
-        {
-            Moving3D_ModeZ = 1;
+            if(Moving3D_Mode == 1)
+            {
+                Moving3D_ModeX = 1;
+            }
+            else if(Moving3D_Mode == 2)
+            {
+                Moving3D_ModeY = 1;
+            }
+            else if(Moving3D_Mode == 3)
+            {
+                Moving3D_ModeZ = 1;
+            }
         }
 
     }
     updateGL();
+
+    GLfloat matriisi[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, matriisi);
+
+    QVector4D row1(matriisi[0],matriisi[1],matriisi[2],matriisi[3]);
+    QVector4D row2(matriisi[4],matriisi[5],matriisi[6],matriisi[7]);
+    QVector4D row3(matriisi[8],matriisi[9],matriisi[10],matriisi[11]);
+    QVector4D row4(matriisi[12],matriisi[13],matriisi[14],matriisi[15]);
+
+    QMatrix4x4 modelview;
+    modelview.setRow(0,row1);
+    modelview.setRow(1,row2);
+    modelview.setRow(2,row3);
+    modelview.setRow(3,row4);
+    modelview = modelview.transposed();
+    modelview = modelview.inverted();
+
+    //RayTrace test point
+    QVector4D unitvector = RayTraceVector(lastPos.x(),lastPos.y());
+    unitvec = unitvector/10;
+    campos = modelview.column(3);
+
 
 }
 
@@ -876,6 +916,7 @@ void GLWidget::setZoom()
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
+    updateGL();
     if(AddingBeamsSingle==2)
     {
         updateGL();
@@ -926,43 +967,47 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
             }
             updateGL();
         }
-        else if(Moving3D_ModeX)
+        else if(MovingNodes>0)
         {
-            MovingNodes_CalculateMove(event);
-
-            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
+            if(Moving3D_ModeX)
             {
-                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX += -0.010f*movement_x*qCos(DegreeToRadiansRatio*(zRot/16))*ZoomFactor;
-                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX += 0.010f*movement_y*qSin(DegreeToRadiansRatio*(zRot/16))*ZoomFactor;
-            }
-            NBPointer->Editing3D_CalculateSelectionCenter();
-            updateGL();
-        }
-        else if(Moving3D_ModeY)
-        {
-            MovingNodes_CalculateMove(event);
+                MovingNodes_CalculateMove(event);
 
-            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
+                for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
+                {
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX += -0.010f*movement_x*qCos(DegreeToRadiansRatio*(zRot/16))*ZoomFactor;
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX += 0.010f*movement_y*qSin(DegreeToRadiansRatio*(zRot/16))*ZoomFactor;
+                }
+                NBPointer->Editing3D_CalculateSelectionCenter();
+                updateGL();
+            }
+            else if(Moving3D_ModeY)
             {
-                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY += 0.010f*movement_x*qSin(DegreeToRadiansRatio*(zRot/16));
-                NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY += 0.010f*movement_y*qCos(DegreeToRadiansRatio*(zRot/16));
+                MovingNodes_CalculateMove(event);
 
+                for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
+                {
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY += 0.010f*movement_x*qSin(DegreeToRadiansRatio*(zRot/16));
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY += 0.010f*movement_y*qCos(DegreeToRadiansRatio*(zRot/16));
+
+                }
+                NBPointer->Editing3D_CalculateSelectionCenter();
+                updateGL();
             }
-            NBPointer->Editing3D_CalculateSelectionCenter();
-            updateGL();
-        }
-        else if(Moving3D_ModeZ)
-        {
-            MovingNodes_CalculateMove(event);
-
-            for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
+            else if(Moving3D_ModeZ)
             {
-                   NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ += -0.010f*movement_y*qSin(DegreeToRadiansRatio*(xRot/16));
+                MovingNodes_CalculateMove(event);
 
+                for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
+                {
+                       NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ += -0.010f*movement_y*qSin(DegreeToRadiansRatio*(xRot/16));
+
+                }
+                NBPointer->Editing3D_CalculateSelectionCenter();
+                updateGL();
             }
-            NBPointer->Editing3D_CalculateSelectionCenter();
-            updateGL();
         }
+
 
 
     } else if (event->buttons() & Qt::RightButton) {
@@ -974,6 +1019,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     //qDebug()<< "3D view "<< event->pos();
     lastPos = event->pos();
 
+    /*
     qDebug() << "x " << xRot/16 << "z " << zRot/16;
     qDebug() << " xr " << qSin(((2*pii)/360)*(xRot/16));
     qDebug() << " zr " << qSin(((2*pii)/360)*(zRot/16));
@@ -981,6 +1027,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     qDebug() << "X-liike " << dotpr;
     float dotpr2 = qCos(((2*pii)/360)*(zRot/16));
     qDebug() << "Y-liike " << dotpr2;
+    */
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
@@ -988,16 +1035,15 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
     /* User has released the mouse, => stop moving nodes */
     if(event->button() & Qt::LeftButton)
     {
+        if(MovingNodes>0)
+        {
+            Moving3D_ModeX = 0;
+            Moving3D_ModeY = 0;
+            Moving3D_ModeZ = 0;
+        }
         qDebug() << "Left released";
-        Moving3D_ModeX = 0;
-        Moving3D_ModeY = 0;
-        Moving3D_ModeZ = 0;
     }
-/*
-    Moving3D_ModeX = 0;
-    Moving3D_ModeY = 0;
-    Moving3D_ModeZ = 0;
-    */
+
 }
 
 void GLWidget::MovingNodes_CalculateMove(QMouseEvent *event)
@@ -1304,5 +1350,76 @@ void GLWidget::DrawSphere(int segments, int diameter)
 
 //    }
 //    glEnd;
+
+}
+
+/* Calculate ray trace vector from camera center position
+ * to mouse position on near clipping plane */
+QVector4D GLWidget::RayTraceVector(int MouseX, int MouseY)
+{
+    /* Get modelview matrix */
+    GLfloat matriisi[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, matriisi);
+
+    QVector4D row1(matriisi[0],matriisi[1],matriisi[2],matriisi[3]);
+    QVector4D row2(matriisi[4],matriisi[5],matriisi[6],matriisi[7]);
+    QVector4D row3(matriisi[8],matriisi[9],matriisi[10],matriisi[11]);
+    QVector4D row4(matriisi[12],matriisi[13],matriisi[14],matriisi[15]);
+
+    QMatrix4x4 modelview;
+    modelview.setRow(0,row1);
+    modelview.setRow(1,row2);
+    modelview.setRow(2,row3);
+    modelview.setRow(3,row4);
+    modelview = modelview.transposed();
+
+    /* Get projection matrix */
+    glGetFloatv(GL_PROJECTION_MATRIX, matriisi);
+
+    QVector4D row5(matriisi[0],matriisi[1],matriisi[2],matriisi[3]);
+    QVector4D row6(matriisi[4],matriisi[5],matriisi[6],matriisi[7]);
+    QVector4D row7(matriisi[8],matriisi[9],matriisi[10],matriisi[11]);
+    QVector4D row8(matriisi[12],matriisi[13],matriisi[14],matriisi[15]);
+
+    QMatrix4x4 projection;
+    projection.setRow(0,row5);
+    projection.setRow(1,row6);
+    projection.setRow(2,row7);
+    projection.setRow(3,row8);
+    projection = projection.transposed();
+
+    /* Inverse both matrixes */
+    bool InverseOk = 0;
+    QMatrix4x4 inverse_modelview = modelview.inverted(&InverseOk);
+    if(!InverseOk) qDebug() << "MATRIX INVERSE FAILURE";
+
+    InverseOk = 0;
+    QMatrix4x4 inverse_projection = projection.inverted(&InverseOk);
+    if(!InverseOk) qDebug() << "MATRIX INVERSE FAILURE";
+
+    /* Camera position is 4th column of the inverse_modelview matrix */
+    QVector4D CameraPos = inverse_modelview.column(3);
+
+    /* Mouse position to normalized coordinates */
+    float posX = (float)lastPos.x();
+    float posY = (float)lastPos.y();
+    posX = (posX/xWidth)*2.0f -1.0f;
+    posY = -((posY/yHeight)*2.0f - 1.0f);
+
+    QVector4D MousePos;
+    MousePos.setW(1);
+    MousePos.setX(posX);
+    MousePos.setY(posY);
+    MousePos.setZ(0.0f);
+
+    /* Calculate mouse position in actual scene 3D coordinates
+        with the inverse matrixes */
+    MousePos = inverse_projection*MousePos;
+    MousePos = inverse_modelview*MousePos*7.465;
+
+    /* Calculate the ray trace vector */
+    QVector4D RayTraceVector = MousePos - CameraPos;
+
+    return RayTraceVector;
 
 }

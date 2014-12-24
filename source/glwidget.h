@@ -43,7 +43,7 @@
 #include <QGLWidget>
 #include "NodeBeam.h"
 #include <QString>
-
+#include <QVector4D>
 
 class GLWidgetOrtho;
 
@@ -90,13 +90,16 @@ public:
     float ViewOffsetZ;
 
     /* 3D edit system */
-    bool Move3DCursor; //If on, will pick 3D cursor.
     int Moving3D_Mode; //0:none, 1:x, 2:y, 3:z
     bool Moving3D_ModeX;
     bool Moving3D_ModeY;
     bool Moving3D_ModeZ;
     float DegreeToRadiansRatio;
 
+    //Calculate raytrace vector for 3D rectangle selection
+    QVector4D RayTraceVector(int MouseX, int MouseY);
+    QVector4D campos;
+    QVector4D unitvec;
 
 public slots:
     void setXRotation(int angle);
