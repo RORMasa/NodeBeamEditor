@@ -2196,6 +2196,72 @@ void NodeBeam::SelectNodesLoc(float x0, float y0, float z0, float x1, float y1, 
 
 }
 
+/* Select nodes with 3D rectangle selection tool
+ Check which nodes are inside the volume/pyramid that is limited by 4 planes
+*/
+void NodeBeam::SelectNodes3D(QVector4D RectSel_1V, QVector4D RectSel_2V,
+                             QVector4D RectSel_3V, QVector4D RectSel_4V,
+                             QVector4D CameraLocation)
+{
+    SelectedNodes.clear();
+
+    /* Calculate normals for each plane */
+    QVector3D vec1 = RectSel_1V.toVector3D();
+    QVector3D vec2 = RectSel_2V.toVector3D();
+    QVector3D vec3 = RectSel_3V.toVector3D();
+    QVector3D vec4 = RectSel_4V.toVector3D();
+
+    QVector3D normal_1 = QVector3D::crossProduct(vec1,vec2);
+    QVector3D normal_2 = QVector3D::crossProduct(vec3,vec1);
+    QVector3D normal_3 = QVector3D::crossProduct(vec4,vec3);
+    QVector3D normal_4 = QVector3D::crossProduct(vec2,vec4);
+    qDebug() << normal_1 << normal_2 << normal_3 << normal_4;
+
+    /* Transform each node coordinate to camera coordinate, and calculate
+        the dot product. If dot product with all planes is the same,
+        node is inside the selection.
+    */
+    for(int i=0; i<Nodes.size(); i++)
+    {
+        QVector3D NodeToCheck;
+        NodeToCheck.setX(Nodes.at(i).locX-CameraLocation.x());
+        NodeToCheck.setY(Nodes.at(i).locY-CameraLocation.y());
+        NodeToCheck.setZ(Nodes.at(i).locZ-CameraLocation.z());
+
+        float DotProduct1 = QVector3D::dotProduct(normal_1,NodeToCheck);
+        float DotProduct2 = QVector3D::dotProduct(normal_2,NodeToCheck);
+        float DotProduct3 = QVector3D::dotProduct(normal_3,NodeToCheck);
+        float DotProduct4 = QVector3D::dotProduct(normal_4,NodeToCheck);
+
+        if(DotProduct1 < 0)
+        {
+            if(DotProduct2 < 0)
+            {
+                if(DotProduct3 < 0)
+                {
+                    if(DotProduct4 < 0)
+                    {
+                        SelectedNodes.append(Nodes.at(i).GlobalID);
+                    }
+                }
+            }
+        }
+        else if(DotProduct1 > 0)
+        {
+            if(DotProduct2 > 0)
+            {
+                if(DotProduct3 > 0)
+                {
+                    if(DotProduct4 > 0)
+                    {
+                        SelectedNodes.append(Nodes.at(i).GlobalID);
+                    }
+                }
+            }
+        }
+    }
+}
+
 void NodeBeam::ReadJBeamTree(QString fileName)
 {
     //JBeam jbeamtree("test3.jbeam");

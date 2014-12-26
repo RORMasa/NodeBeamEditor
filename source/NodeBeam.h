@@ -269,6 +269,12 @@ public:
     //Center point of nodes in Selected nodes
     QVector3D SelectionCenterPos;
 
+    //3D Rectangle selection
+    void SelectNodes3D(QVector4D RectSel_1V, QVector4D RectSel_2V,
+                       QVector4D RectSel_3V, QVector4D RectSel_4V,
+                       QVector4D CameraLocation);
+
+
 
     /* JBEAM TextEdit parsing functions */
     QJsonParseError ParseJBEAM_TextEdit(QByteArray JbeamInputText);

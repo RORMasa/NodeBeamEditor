@@ -1739,6 +1739,7 @@ void MainWindow::ButtsUp(int buttoni)
     {
         ui->toolButton_6->setChecked(0);
         glWidgetO->RectSelect=0;
+        glWidget->RectSelect=0;
     }
     if(buttoni != 6)
     {

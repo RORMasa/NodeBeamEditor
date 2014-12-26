@@ -79,7 +79,7 @@ GLWidget::GLWidget(QWidget *parent)
 
     TextOverlay = "";
 
-    setAutoFillBackground(false);
+    //setAutoFillBackground(false);
     setMouseTracking(true);
 
     ShowArrows = 1;
@@ -1031,11 +1031,11 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    /* User has released the mouse, => stop moving nodes */
     if(event->button() & Qt::LeftButton)
     {
         if(MovingNodes>0)
         {
+            /* User has released the mouse, => stop moving nodes */
             Moving3D_ModeX = 0;
             Moving3D_ModeY = 0;
             Moving3D_ModeZ = 0;
@@ -1066,6 +1066,13 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
             RectSel_3 = RayTraceVector(y1.x(), y1.y());
             RectSel_4 = RayTraceVector(RectSelect_end.x(), RectSelect_end.y());
 
+            //QVector4D RectSel_1V = (campos + RectSel_1*5);
+            //QVector4D RectSel_2V = (campos + RectSel_2*5);
+            //QVector4D RectSel_3V = (campos + RectSel_3*5);
+            //QVector4D RectSel_4V = (campos + RectSel_4*5);
+
+            NBPointer->SelectNodes3D(RectSel_1, RectSel_2, RectSel_3, RectSel_4, campos);
+            NBPointer->Editing3D_CalculateSelectionCenter();
         }
 
         qDebug() << "Left released";
@@ -1454,10 +1461,13 @@ QVector4D GLWidget::RayTraceVector(int MouseX, int MouseY)
 
 }
 
+/* Draw box for 3D rectangle selection tool */
+
 void GLWidget::DrawRectSelect()
 {
-
     QVector4D test,RectSel_1V,RectSel_2V,RectSel_3V,RectSel_4V;
+
+    /*
     glBegin(GL_POINTS);
     glColor3f(0.0, 1.0, 0.0);
     for(int i=0; i<20 ; i++)
@@ -1488,8 +1498,9 @@ void GLWidget::DrawRectSelect()
         glVertex3d(test.x(), test.y(), test.z());
     }
 
+    glEnd();*/
 
-    glEnd();
+
     glBegin(GL_LINES);
     RectSel_1V = (campos + RectSel_1*5);
     RectSel_2V = (campos + RectSel_2*5);
@@ -1509,5 +1520,40 @@ void GLWidget::DrawRectSelect()
     glVertex3d(RectSel_1V.x(), RectSel_1V.y(), RectSel_1V.z());
 
     glEnd();
+
+    //normals test
+    /* Calculate normals for each plane */
+    QVector3D vec1 = RectSel_1V.toVector3D();
+    QVector3D vec2 = RectSel_2V.toVector3D();
+    QVector3D vec3 = RectSel_3V.toVector3D();
+    QVector3D vec4 = RectSel_4V.toVector3D();
+
+    QVector3D normal_1 = QVector3D::crossProduct(vec1,vec2);
+    QVector3D normal_2 = QVector3D::crossProduct(vec3,vec1);
+    QVector3D normal_3 = QVector3D::crossProduct(vec4,vec3);
+    QVector3D normal_4 = QVector3D::crossProduct(vec2,vec4);
+    qDebug() << normal_1 << normal_2 << normal_3 << normal_4;
+
+    /* Draw selection plane normals
+    glBegin(GL_LINES);
+    QVector3D campos2 = campos.toVector3D();
+    QVector3D normal = campos2 + normal_1;
+    glVertex3d(normal.x(), normal.y(), normal.z());
+    glVertex3d(campos.x(), campos.y(), campos.z());
+
+    normal = campos2 + normal_2;
+    glVertex3d(normal.x(), normal.y(), normal.z());
+    glVertex3d(campos.x(), campos.y(), campos.z());
+
+    normal = campos2 + normal_3;
+    glVertex3d(normal.x(), normal.y(), normal.z());
+    glVertex3d(campos.x(), campos.y(), campos.z());
+
+    normal = campos2 + normal_4;
+    glVertex3d(normal.x(), normal.y(), normal.z());
+    glVertex3d(campos.x(), campos.y(), campos.z());
+
+
+    glEnd();*/
 
 }
