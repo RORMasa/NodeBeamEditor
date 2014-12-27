@@ -195,7 +195,6 @@ public:
     NodeGroup TempNodeGroup;
     BeamGroup TempBeamGroup;
     BeamDefs TempBeamDefaults;
-    //void ResetTempNode();
 
     //Currently selected nodes, by GlobalID
     QVector <int> SelectedNodes;
@@ -228,7 +227,10 @@ public:
     void DuplicateNodes();
 
     /* Select nodes */
-    void SelectNodesLoc(float x0, float y0, float z0, float x1, float y1, float z1);
+    void SelectNodesLoc(float x0, float y0, float z0, float x1, float y1, float z1); //2D Rectangle selection
+    void SelectNodes3D(QVector4D RectSel_1V, QVector4D RectSel_2V, //3D Rectangle selection
+                       QVector4D RectSel_3V, QVector4D RectSel_4V,
+                       QVector4D CameraLocation, bool AddToSelection);
 
     /* Make new set of Beam arguments */
     void NewBeamArguments();
@@ -269,10 +271,7 @@ public:
     //Center point of nodes in Selected nodes
     QVector3D SelectionCenterPos;
 
-    //3D Rectangle selection
-    void SelectNodes3D(QVector4D RectSel_1V, QVector4D RectSel_2V,
-                       QVector4D RectSel_3V, QVector4D RectSel_4V,
-                       QVector4D CameraLocation, bool AddToSelection);
+
 
 
 

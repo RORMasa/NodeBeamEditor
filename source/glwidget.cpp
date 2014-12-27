@@ -1111,6 +1111,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
                 {
                     if((pii-angle3)<angle) angle = pii+(pii-angle)-angle3;
                     else angle = -angle-angle3;
+                    angle = -angle;
                 }
             }
             else
@@ -1120,7 +1121,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
                     if((pii-angle3)<angle) angle = pii+(pii-angle)-angle3;
                     else angle = -angle-angle3;
                 }
-                else angle = angle - angle3;
+                else angle = -(angle - angle3);
             }
 
             //Rounding to 0.1 degrees resolution
@@ -1129,14 +1130,17 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
             angle = angletemp.toFloat();
             angle = angle*((2*pii)/360.0f);
 
-            float a1 = qCos(angle);
-            float b1 = qSin(angle);
-            float a2 = qSin(angle);
-            float b2 = qCos(angle);
-
-
             if(Rotating3D_ModeX)
             {
+                //Correct the rotation direction based on camera angle
+                if(zRot < 2880) angle = -angle;
+                if(dRot < 2880) angle = -angle;
+
+                float a1 = qCos(angle);
+                float b1 = qSin(angle);
+                float a2 = qSin(angle);
+                float b2 = qCos(angle);
+
                 for(int i=0; i<NBPointer->SelectedNodes.size();i++)
                 {
                     float YCoordinate = NBPointer->TempNodes.at(i).locY;
@@ -1147,6 +1151,14 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
             }
             else if(Rotating3D_ModeY)
             {
+                if((zRot > 1440) && (zRot < 4320)) angle = -angle;
+                if(dRot < 2880) angle = -angle;
+
+                float a1 = qCos(angle);
+                float b1 = qSin(angle);
+                float a2 = qSin(angle);
+                float b2 = qCos(angle);
+
                 for(int i=0; i<NBPointer->SelectedNodes.size();i++)
                 {
                     float XCoordinate = NBPointer->TempNodes.at(i).locX;
@@ -1157,6 +1169,12 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
             }
             else if(Rotating3D_ModeZ)
             {
+                if((dRot > 4320) || (dRot < 1440)) angle = -angle;
+
+                float a1 = qCos(angle);
+                float b1 = qSin(angle);
+                float a2 = qSin(angle);
+                float b2 = qCos(angle);
                 for(int i=0; i<NBPointer->SelectedNodes.size();i++)
                 {
                     float YCoordinate = NBPointer->TempNodes.at(i).locY;
@@ -1165,6 +1183,11 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
                     NBPointer->Nodes[NBPointer->SelectedNodes[i]].locX = a2*YCoordinate + b2*XCoordinate + NBPointer->SelectionCenterPos.x();
                 }
             }
+
+            QString Message = "Rotating: ";
+            Message.append(QString::number((angle*360.0f/(2*pii))));
+            TextOverlay = Message;
+
             updateGL();
         }
         else if(RectSelect > 0)
@@ -1233,6 +1256,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
             Rotating3D_ModeX = 0;
             Rotating3D_ModeY = 0;
             Rotating3D_ModeZ = 0;
+            TextOverlay.clear();
         }
         else if(RectSelect > 1)
         {
