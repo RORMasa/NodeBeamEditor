@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     /* About box : Version and compliation time , link to GitHub */
-    AboutBox = "<br><br><br><b>Version: 0.3</b><br><br>Built on ";
+    AboutBox = "<br><br><br><b>Version: 0.31</b><br><br>Built on ";
     AboutBox.append(__DATE__);
     AboutBox.append(", ");
     AboutBox.append(__TIME__);
@@ -1102,6 +1102,7 @@ void MainWindow::on_toolButton_2_clicked()
     {
         glWidgetO->MovingNodes = 1;
         glWidget->MovingNodes=1;
+        glWidget->updateGL();
         ui->stackedWidget->setCurrentIndex(2);
     }
     else
@@ -1248,6 +1249,8 @@ void MainWindow::on_toolButton_4_clicked()
         {
             glWidgetO->RotatingNodes = 1;
         }
+        glWidget->RotatingNodes = 1;
+        glWidget->updateGL();
         ui->statusBar->showMessage("Press X, Y or Z to choose lock rotating axis");
         ui->stackedWidget->setCurrentIndex(4);
     }
@@ -1255,8 +1258,10 @@ void MainWindow::on_toolButton_4_clicked()
     else
     {
         glWidgetO->RotatingNodes = 0;
+        glWidget->RotatingNodes = 0;
         ui->statusBar->clearMessage();
         ui->stackedWidget->setCurrentIndex(0);
+        glWidget->updateGL();
     }
 }
 
@@ -1670,6 +1675,19 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
         glWidget->ViewOffsetZ = glWidget->ViewOffsetZ + 0.10;
         glWidget->updateGL();
     }
+    else if(eventti->key() == Qt::Key_Shift)
+    {
+        glWidget->Select_AddToSelection=1;
+    }
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *eventti)
+{
+    if(eventti->key() == Qt::Key_Shift)
+    {
+        glWidget->Select_AddToSelection=0;
+    }
+
 }
 
 /* Delete nodes */
@@ -1733,6 +1751,7 @@ void MainWindow::ButtsUp(int buttoni)
     {
         ui->toolButton_4->setChecked(0);
         glWidgetO->RotatingNodes = 0;
+        glWidget->RotatingNodes = 0;
         ui->statusBar->clearMessage();
     }
     if(buttoni != 5)

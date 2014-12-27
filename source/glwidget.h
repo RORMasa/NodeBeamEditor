@@ -96,17 +96,23 @@ public:
     bool Moving3D_ModeZ;
     float DegreeToRadiansRatio;
 
+    int Rotating3D_Mode; //0:none, 1:x, 2:y, 3:z
+    bool Rotating3D_ModeX;
+    bool Rotating3D_ModeY;
+    bool Rotating3D_ModeZ;
+
     //Calculate raytrace vector for 3D rectangle selection
     QVector4D RayTraceVector(int MouseX, int MouseY);
     QVector4D campos;
     QVector4D unitvec;
-    bool RectSelect;
+    int RectSelect; //0 = RectSelect off, 1 = Waiting for user to draw a rect, 2 = Draw a rect
     QPoint RectSelect_start;
     QPoint RectSelect_end;
     QVector4D RectSel_1;
     QVector4D RectSel_2;
     QVector4D RectSel_3;
     QVector4D RectSel_4;
+    bool Select_AddToSelection;
 
 public slots:
     void setXRotation(int angle);
@@ -157,11 +163,14 @@ private:
     void MovingNodes_CalculateMove(QMouseEvent *event);
     float movement_x;
     float movement_y;
+    QPoint RotationStartScreen;
+    QPoint RotationCenterScreen;
 
     void DrawAxisArrows();
     void DrawWheel(float radius, float width, int rays);
     void Draw3DCursor();
-    void Draw3DCursor_Picking();
+    void Draw3DCursor_Rotate();
+    void Draw3DCursor_Picking(int Mode); //Mode 0 = move, 1 = scale, 2 = rotate
     void DrawRectSelect();
 };
 

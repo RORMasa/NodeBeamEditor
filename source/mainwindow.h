@@ -162,6 +162,7 @@ private slots:
     void on_lineEdit_textChanged(const QString &arg1);
 
     void keyPressEvent(QKeyEvent * eventti);
+    void keyReleaseEvent(QKeyEvent *eventti);
 
     void on_comboBox_3_views_activated(int index);
 

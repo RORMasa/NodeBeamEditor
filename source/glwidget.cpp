@@ -79,7 +79,7 @@ GLWidget::GLWidget(QWidget *parent)
 
     TextOverlay = "";
 
-    //setAutoFillBackground(false);
+    setAutoFillBackground(false);
     setMouseTracking(true);
 
     ShowArrows = 1;
@@ -103,8 +103,12 @@ GLWidget::GLWidget(QWidget *parent)
     Moving3D_ModeX = 0;
     Moving3D_ModeY = 0;
     Moving3D_ModeZ = 0;
+    Rotating3D_ModeX = 0;
+    Rotating3D_ModeY = 0;
+    Rotating3D_ModeZ = 0;
     DegreeToRadiansRatio = (2*pii)/360; //One degree is this many radians
     RectSelect = 0;
+    Select_AddToSelection=0;
 }
 
 GLWidget::~GLWidget()
@@ -226,18 +230,28 @@ void GLWidget::draw()
     int i3 = 0;
     for(int i2=0; i2<NBPointer->NodeGroups.size();i2++)
     {
-        for(int i=0; i<NBPointer->NodeGroups[i2].NodeAmount; i++)
+        for(int i=0; i<NBPointer->NodeGroups.at(i2).NodeAmount; i++)
         {
-            if(NBPointer->NodeGroups[i2].draw)
+            if(NBPointer->NodeGroups.at(i2).draw)
             {
-                if(NBPointer->Nodes[i3].GlobalID == NBPointer->ActiveNode) glColor4f(1.0f,0.0f,0.0f,1.0f);
+                if(NBPointer->Nodes.at(i3).GlobalID == NBPointer->ActiveNode) glColor4f(1.0f,0.0f,0.0f,1.0f);
                 else glColor4f(0.4f,0.4f,0.4f,1.0f);
 
-                glVertex3f(NBPointer->Nodes[i3].locX, NBPointer->Nodes[i3].locY, NBPointer->Nodes[i3].locZ);
+                glVertex3f(NBPointer->Nodes.at(i3).locX, NBPointer->Nodes.at(i3).locY, NBPointer->Nodes.at(i3).locZ);
             }
             i3++;
         }
     }
+    glColor4f(1.0f,1.0f,0.0f,1.0f);
+    glEnd();
+    glPointSize(15);
+    glBegin(GL_POINTS);
+    for(int i2=0; i2<NBPointer->SelectedNodes.size();i2++)
+    {
+        i3 = NBPointer->SelectedNodes.at(i2);
+        glVertex3f(NBPointer->Nodes.at(i3).locX, NBPointer->Nodes.at(i3).locY, NBPointer->Nodes.at(i3).locZ);
+    }
+    glColor4f(0.4f,0.4f,0.4f,1.0f);
     glEnd();
 
     /* Drawing beams */
@@ -665,49 +679,43 @@ void GLWidget::initializeGL()
 
 void GLWidget::paintGL()
 {  
+    /* Set background color */
     glClearColor(backgroundcolor[0], backgroundcolor[1], backgroundcolor[2], backgroundcolor[3]);
-    if(NodePicking)
+
+    /* Render picking colors in buffer and check what should be picked */
+    if(NodePicking || (MovingNodes > 0) || (RotatingNodes > 0))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glLoadIdentity();
         glTranslatef(0.0, 0.0, -10.0);
         glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
-        //glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
         glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
-        glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
-        drawpicking(); //Draw nodes in buffer, each with individual color
-        //QGLWidget::swapBuffers();
-    }
-    else if(MovingNodes > 0)
-    {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glLoadIdentity();
-        glTranslatef(0.0, 0.0, -10.0);
-        glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
         //glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
-        glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
         glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
-        Draw3DCursor_Picking(); //Draw 3D cursor in buffer
-        //QGLWidget::swapBuffers();
+        if(NodePicking) drawpicking(); //Draw nodes in buffer, each with individual color
+        else if(MovingNodes >0) Draw3DCursor_Picking(0); //Draw move 3D cursor in buffer and check
+        else if(RotatingNodes > 0) Draw3DCursor_Picking(2); //Draw rotate 3D cursor in buffer and check
+        //QGLWidget::swapBuffers(); // Swap buffes to render on screen, only for testing
     }
+
+    /* Render the actual scene itself */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glTranslatef(0.0, 0.0, -10.0);
-    glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
-    //glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
+    glRotatef(xRot / 16.0, 1.0, 0.0, 0.0); //Rotate 3D view
     glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
+    //glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
     glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
     draw(); //draw nodes, beams, wheels, lines
-    if(ShowArrows) DrawAxisArrows();
     if(MovingNodes > 0) Draw3DCursor();
-    glColor3f(0.6, 0.6, 0.6);
-
+    else if(RotatingNodes > 0) Draw3DCursor_Rotate();
+    else if(ShowArrows) DrawAxisArrows();
+    glColor3f(0.6, 0.6, 0.6);  //Set text color
     renderText(10, yHeight-20, TextOverlay, QFont( "Arial", 14, QFont::Bold, 0 ) );
 
     if(ShowNodeNumbers) RenderTextInScene(1);
     else if(ShowNodeNumbers1) RenderTextInScene(0);
-
-    if(RectSelect) DrawRectSelect();
+    if(RectSelect > 1) DrawRectSelect();
 
     QGLWidget::swapBuffers();
 }
@@ -866,10 +874,83 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
                 Moving3D_ModeZ = 1;
             }
         }
-
-        /* 3D Rectangle selection begin */
-        else if(RectSelect)
+        //Lock the rotating until mouse is released
+        if(RotatingNodes>0)
         {
+            if(Rotating3D_Mode == 1)
+            {
+                Rotating3D_ModeX = 1;
+            }
+            else if(Rotating3D_Mode == 2)
+            {
+                Rotating3D_ModeY = 1;
+            }
+            else if(Rotating3D_Mode == 3)
+            {
+                Rotating3D_ModeZ = 1;
+            }
+            /* Set rotation start point */
+            RotationStartScreen.setX(event->x());
+            RotationStartScreen.setY(event->y());
+
+            /* Calculate rotation center point on screen */
+            /* Get modelview matrix */
+            GLfloat matriisi[16];
+            glGetFloatv(GL_MODELVIEW_MATRIX, matriisi);
+
+            QVector4D row1(matriisi[0],matriisi[1],matriisi[2],matriisi[3]);
+            QVector4D row2(matriisi[4],matriisi[5],matriisi[6],matriisi[7]);
+            QVector4D row3(matriisi[8],matriisi[9],matriisi[10],matriisi[11]);
+            QVector4D row4(matriisi[12],matriisi[13],matriisi[14],matriisi[15]);
+
+            QMatrix4x4 modelview;
+            modelview.setRow(0,row1);
+            modelview.setRow(1,row2);
+            modelview.setRow(2,row3);
+            modelview.setRow(3,row4);
+
+            /* Get projection matrix */
+            glGetFloatv(GL_PROJECTION_MATRIX, matriisi);
+
+            QVector4D row5(matriisi[0],matriisi[1],matriisi[2],matriisi[3]);
+            QVector4D row6(matriisi[4],matriisi[5],matriisi[6],matriisi[7]);
+            QVector4D row7(matriisi[8],matriisi[9],matriisi[10],matriisi[11]);
+            QVector4D row8(matriisi[12],matriisi[13],matriisi[14],matriisi[15]);
+
+            QMatrix4x4 projection;
+            projection.setRow(0,row5);
+            projection.setRow(1,row6);
+            projection.setRow(2,row7);
+            projection.setRow(3,row8);
+
+            /* Get selection center position */
+            QVector4D SelectionCenter = NBPointer->SelectionCenterPos.toVector4D();
+            SelectionCenter.setW(1.0f); // set W to 1 for a point
+
+            /* Transform center position from world coordinates to screen coordinates */
+            QVector4D RotationCenter = projection.transposed()*modelview.transposed()*SelectionCenter;
+
+            //Only X and Y are needed
+            RotationCenterScreen.setX(((RotationCenter.x()/RotationCenter.w()+1)/2)*xWidth);
+            RotationCenterScreen.setY(((-RotationCenter.y()/RotationCenter.w()+1)/2)*yHeight);
+
+            qDebug() << "Rotation middlepoint in screen coordinates is " << RotationCenterScreen;
+
+            /* Take a copy of original node coordinates of selected nodes */
+            NBPointer->TempNodes.clear();
+            for(int i=0; i<NBPointer->SelectedNodes.size();i++)
+            {
+                NBPointer->TempNodes.append(NBPointer->Nodes.at(NBPointer->SelectedNodes.at(i)));
+                NBPointer->TempNodes[i].locX = NBPointer->TempNodes[i].locX - NBPointer->SelectionCenterPos.x();
+                NBPointer->TempNodes[i].locY = NBPointer->TempNodes[i].locY - NBPointer->SelectionCenterPos.y();
+                NBPointer->TempNodes[i].locZ = NBPointer->TempNodes[i].locZ - NBPointer->SelectionCenterPos.z();
+            }
+
+        }
+        /* 3D Rectangle selection begin */
+        else if(RectSelect > 0)
+        {
+            RectSelect = 2;
             RectSelect_start.setX(event->x());
             RectSelect_start.setY(event->y());
         }
@@ -915,7 +996,7 @@ void GLWidget::setZoom()
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    updateGL();
+    //qDebug() << "hiiri " << event->x() << ", " << event->y();
     if(AddingBeamsSingle==2)
     {
         updateGL();
@@ -1006,6 +1087,113 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
                 updateGL();
             }
         }
+        else if(RotatingNodes>0)
+        {
+            QVector2D RotationVec;
+            RotationVec.setX(event->x()-RotationCenterScreen.x());
+            RotationVec.setY(event->y()-RotationCenterScreen.y());
+            float angle = qAcos(RotationVec.x()/RotationVec.length());
+            float angle2 = qAsin(RotationVec.y()/RotationVec.length());
+
+            QVector2D BeginVec;
+            BeginVec.setX(RotationStartScreen.x()-RotationCenterScreen.x());
+            BeginVec.setY(RotationStartScreen.y()-RotationCenterScreen.y());
+            float angle3 = qAcos(BeginVec.x()/BeginVec.length());
+            float angle4 = qAsin(BeginVec.y()/BeginVec.length());
+
+            if(angle2<0)
+            {
+                if(angle4<0)
+                {
+                    angle = angle - angle3;
+                }
+                else
+                {
+                    if((pii-angle3)<angle) angle = pii+(pii-angle)-angle3;
+                    else angle = -angle-angle3;
+                }
+            }
+            else
+            {
+                if(angle4<0)
+                {
+                    if((pii-angle3)<angle) angle = pii+(pii-angle)-angle3;
+                    else angle = -angle-angle3;
+                }
+                else angle = angle - angle3;
+            }
+
+            //Rounding to 0.1 degrees resolution
+            angle = angle*(360.0f/(2*pii));
+            QString angletemp = QString::number(angle, 'f', 1);
+            angle = angletemp.toFloat();
+            angle = angle*((2*pii)/360.0f);
+
+            float a1 = qCos(angle);
+            float b1 = qSin(angle);
+            float a2 = qSin(angle);
+            float b2 = qCos(angle);
+
+
+            if(Rotating3D_ModeX)
+            {
+                for(int i=0; i<NBPointer->SelectedNodes.size();i++)
+                {
+                    float YCoordinate = NBPointer->TempNodes.at(i).locY;
+                    float ZCoordinate = NBPointer->TempNodes.at(i).locZ;
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i]].locY = a1*YCoordinate - b1*ZCoordinate + NBPointer->SelectionCenterPos.y();
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i]].locZ = a2*YCoordinate + b2*ZCoordinate + NBPointer->SelectionCenterPos.z();
+                }
+            }
+            else if(Rotating3D_ModeY)
+            {
+                for(int i=0; i<NBPointer->SelectedNodes.size();i++)
+                {
+                    float XCoordinate = NBPointer->TempNodes.at(i).locX;
+                    float ZCoordinate = NBPointer->TempNodes.at(i).locZ;
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i]].locX = a1*XCoordinate - b1*ZCoordinate + NBPointer->SelectionCenterPos.x();
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i]].locZ = a2*XCoordinate + b2*ZCoordinate + NBPointer->SelectionCenterPos.z();
+                }
+            }
+            else if(Rotating3D_ModeZ)
+            {
+                for(int i=0; i<NBPointer->SelectedNodes.size();i++)
+                {
+                    float YCoordinate = NBPointer->TempNodes.at(i).locY;
+                    float XCoordinate = NBPointer->TempNodes.at(i).locX;
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i]].locY = a1*YCoordinate - b1*XCoordinate + NBPointer->SelectionCenterPos.y();
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i]].locX = a2*YCoordinate + b2*XCoordinate + NBPointer->SelectionCenterPos.x();
+                }
+            }
+            updateGL();
+        }
+        else if(RectSelect > 0)
+        {
+            updateGL();
+            /* 3D Rectangle selection ends */
+            RectSelect_end.setX(event->x());
+            RectSelect_end.setY(event->y());
+            QPoint x1;
+            QPoint y1;
+
+            /*
+            y1 - - - - - - end
+            |               |
+            |               |
+            start - - - - - x1
+            */
+
+            x1.setX(RectSelect_end.x());
+            x1.setY(RectSelect_start.y());
+
+            y1.setX(RectSelect_start.x());
+            y1.setY(RectSelect_end.y());
+
+            RectSel_1 = RayTraceVector(RectSelect_start.x(), RectSelect_start.y());
+            RectSel_2 = RayTraceVector(x1.x(), x1.y());
+            RectSel_3 = RayTraceVector(y1.x(), y1.y());
+            RectSel_4 = RayTraceVector(RectSelect_end.x(), RectSelect_end.y());
+        }
 
 
 
@@ -1040,7 +1228,13 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
             Moving3D_ModeY = 0;
             Moving3D_ModeZ = 0;
         }
-        else if(RectSelect)
+        else if(RotatingNodes>0)
+        {
+            Rotating3D_ModeX = 0;
+            Rotating3D_ModeY = 0;
+            Rotating3D_ModeZ = 0;
+        }
+        else if(RectSelect > 1)
         {
             /* 3D Rectangle selection ends */
             RectSelect_end.setX(event->x());
@@ -1066,13 +1260,10 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
             RectSel_3 = RayTraceVector(y1.x(), y1.y());
             RectSel_4 = RayTraceVector(RectSelect_end.x(), RectSelect_end.y());
 
-            //QVector4D RectSel_1V = (campos + RectSel_1*5);
-            //QVector4D RectSel_2V = (campos + RectSel_2*5);
-            //QVector4D RectSel_3V = (campos + RectSel_3*5);
-            //QVector4D RectSel_4V = (campos + RectSel_4*5);
-
-            NBPointer->SelectNodes3D(RectSel_1, RectSel_2, RectSel_3, RectSel_4, campos);
+            NBPointer->SelectNodes3D(RectSel_1, RectSel_2, RectSel_3, RectSel_4, campos, Select_AddToSelection);
             NBPointer->Editing3D_CalculateSelectionCenter();
+            updateGL();
+            RectSelect = 1;
         }
 
         qDebug() << "Left released";
@@ -1307,12 +1498,142 @@ void GLWidget::Draw3DCursor()
 
 }
 
+void GLWidget::Draw3DCursor_Rotate()
+{
+    glPushMatrix();
+
+    GLfloat centerx = NBPointer->SelectionCenterPos.x();
+    GLfloat centery = NBPointer->SelectionCenterPos.y();
+    GLfloat centerz = NBPointer->SelectionCenterPos.z();
+    glTranslatef(centerx, centery, centerz);
+
+    glBegin(GL_TRIANGLES);
+    glColor3f(1.0, 0.0, 0.0);
+
+    float angle = DegreeToRadiansRatio*15;
+
+    //Draw X circle
+    glColor3f(1.0, 0.0, 0.0);
+    for(int i=0; i<24; i++)
+    {
+        glVertex3f(-0.05, qSin(angle*i)*1.00, qCos(angle*i)*1.00);
+        glVertex3f(0.0, qSin(angle*i)*1.05, qCos(angle*i)*1.05);
+        glVertex3f(-0.05, qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00);
+
+        glVertex3f(-0.05, qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00);
+        glVertex3f(0.0, qSin(angle*i)*1.05, qCos(angle*i)*1.05);
+        glVertex3f(0.0, qSin(angle*(i+1))*1.05, qCos(angle*(i+1))*1.05);
+
+        glVertex3f(-0.05, qSin(angle*i)*1.00, qCos(angle*i)*1.00);
+        glVertex3f(-0.05, qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00);
+        glVertex3f(0.0, qSin(angle*i)*0.95, qCos(angle*i)*0.95);
+
+        glVertex3f(-0.05, qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00);
+        glVertex3f(0.0, qSin(angle*(i+1))*0.95, qCos(angle*(i+1))*0.95);
+        glVertex3f(0.0, qSin(angle*i)*0.95, qCos(angle*i)*0.95);
+
+        glVertex3f(0.05, qSin(angle*i)*1.00, qCos(angle*i)*1.00);
+        glVertex3f(0.05, qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00);
+        glVertex3f(0.0, qSin(angle*i)*1.05, qCos(angle*i)*1.05);
+
+        glVertex3f(0.05, qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00);
+        glVertex3f(0.0, qSin(angle*(i+1))*1.05, qCos(angle*(i+1))*1.05);
+        glVertex3f(0.0, qSin(angle*i)*1.05, qCos(angle*i)*1.05);
+
+        glVertex3f(0.05, qSin(angle*i)*1.00, qCos(angle*i)*1.00);
+        glVertex3f(0.0, qSin(angle*i)*0.95, qCos(angle*i)*0.95);
+        glVertex3f(0.05, qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00);
+
+        glVertex3f(0.05, qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00);
+        glVertex3f(0.0, qSin(angle*i)*0.95, qCos(angle*i)*0.95);
+        glVertex3f(0.0, qSin(angle*(i+1))*0.95, qCos(angle*(i+1))*0.95);
+    }
+
+    //Draw Y circle
+    glColor3f(0.0, 1.0, 0.0);
+    for(int i=0; i<24; i++)
+    {
+        glVertex3f(qSin(angle*i)*1.00,-0.05, qCos(angle*i)*1.00);
+        glVertex3f(qSin(angle*i)*1.05,0.0, qCos(angle*i)*1.05);
+        glVertex3f(qSin(angle*(i+1))*1.00,-0.05, qCos(angle*(i+1))*1.00);
+
+        glVertex3f(qSin(angle*(i+1))*1.00,-0.05, qCos(angle*(i+1))*1.00);
+        glVertex3f(qSin(angle*i)*1.05,0.0, qCos(angle*i)*1.05);
+        glVertex3f(qSin(angle*(i+1))*1.05,0.0, qCos(angle*(i+1))*1.05);
+
+        glVertex3f(qSin(angle*i)*1.00,-0.05, qCos(angle*i)*1.00);
+        glVertex3f(qSin(angle*(i+1))*1.00,-0.05, qCos(angle*(i+1))*1.00);
+        glVertex3f(qSin(angle*i)*0.95,0.0, qCos(angle*i)*0.95);
+
+        glVertex3f(qSin(angle*(i+1))*1.00,-0.05, qCos(angle*(i+1))*1.00);
+        glVertex3f(qSin(angle*(i+1))*0.95,0.0, qCos(angle*(i+1))*0.95);
+        glVertex3f(qSin(angle*i)*0.95,0.0, qCos(angle*i)*0.95);
+
+        glVertex3f(qSin(angle*i)*1.00, 0.05,  qCos(angle*i)*1.00);
+        glVertex3f(qSin(angle*(i+1))*1.00, 0.05,  qCos(angle*(i+1))*1.00);
+        glVertex3f(qSin(angle*i)*1.05 ,0.0 , qCos(angle*i)*1.05);
+
+        glVertex3f(qSin(angle*(i+1))*1.00, 0.05,  qCos(angle*(i+1))*1.00);
+        glVertex3f(qSin(angle*(i+1))*1.05, 0.0,  qCos(angle*(i+1))*1.05);
+        glVertex3f(qSin(angle*i)*1.05, 0.0,  qCos(angle*i)*1.05);
+
+        glVertex3f(qSin(angle*i)*1.00, 0.05,  qCos(angle*i)*1.00);
+        glVertex3f(qSin(angle*i)*0.95, 0.0,  qCos(angle*i)*0.95);
+        glVertex3f(qSin(angle*(i+1))*1.00, 0.05,  qCos(angle*(i+1))*1.00);
+
+        glVertex3f(qSin(angle*(i+1))*1.00, 0.05,  qCos(angle*(i+1))*1.00);
+        glVertex3f(qSin(angle*i)*0.95, 0.0,  qCos(angle*i)*0.95);
+        glVertex3f(qSin(angle*(i+1))*0.95, 0.0,  qCos(angle*(i+1))*0.95);
+    }
+    //Draw Z circle
+    glColor3f(0.0, 0.0, 1.0);
+    for(int i=0; i<24; i++)
+    {
+        glVertex3f(qSin(angle*i)*1.00, qCos(angle*i)*1.00, -0.05);
+        glVertex3f(qSin(angle*i)*1.05, qCos(angle*i)*1.05, 0.0);
+        glVertex3f(qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00, -0.05);
+
+        glVertex3f(qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00, -0.05);
+        glVertex3f(qSin(angle*i)*1.05, qCos(angle*i)*1.05, 0.0);
+        glVertex3f(qSin(angle*(i+1))*1.05, qCos(angle*(i+1))*1.05, 0.0);
+
+        glVertex3f(qSin(angle*i)*1.00, qCos(angle*i)*1.00, -0.05);
+        glVertex3f(qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00, -0.05);
+        glVertex3f(qSin(angle*i)*0.95, qCos(angle*i)*0.95, 0.0);
+
+        glVertex3f(qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00, -0.05);
+        glVertex3f(qSin(angle*(i+1))*0.95, qCos(angle*(i+1))*0.95, 0.0);
+        glVertex3f(qSin(angle*i)*0.95, qCos(angle*i)*0.95, 0.0);
+
+        glVertex3f(qSin(angle*i)*1.00, qCos(angle*i)*1.00, 0.05);
+        glVertex3f(qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00, 0.05);
+        glVertex3f(qSin(angle*i)*1.05, qCos(angle*i)*1.05, 0.0);
+
+        glVertex3f(qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00, 0.05);
+        glVertex3f(qSin(angle*(i+1))*1.05, qCos(angle*(i+1))*1.05, 0.0);
+        glVertex3f(qSin(angle*i)*1.05, qCos(angle*i)*1.05, 0.0);
+
+        glVertex3f(qSin(angle*i)*1.00, qCos(angle*i)*1.00, 0.05);
+        glVertex3f(qSin(angle*i)*0.95, qCos(angle*i)*0.95, 0.0);
+        glVertex3f(qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00, 0.05);
+
+        glVertex3f(qSin(angle*(i+1))*1.00, qCos(angle*(i+1))*1.00, 0.05);
+        glVertex3f(qSin(angle*i)*0.95, qCos(angle*i)*0.95, 0.0);
+        glVertex3f(qSin(angle*(i+1))*0.95, qCos(angle*(i+1))*0.95, 0.0);
+    }
+
+    glEnd();
+
+    glPopMatrix();
+
+}
+
+
 /* Draw 3D cursor picking */
-void GLWidget::Draw3DCursor_Picking()
+void GLWidget::Draw3DCursor_Picking(int Mode)
 {
     //Each 3D cursor arrow is rendered with unique color, and color is checked
     //there, where the mouse is clicked, to detect which arrow the user wants to move
-    //only red color is needed for 3 axises
 
     //glDisable(GL_DITHER);
     //Nodes
@@ -1332,14 +1653,29 @@ void GLWidget::Draw3DCursor_Picking()
     //Get values of OpenGL viewport. viewport[3] will be the height of the viewport
     glGetIntegerv(GL_VIEWPORT,viewport);
 
-    Draw3DCursor();
+    if(Mode==0) Draw3DCursor();
+    else if(Mode == 1);
+    else if(Mode == 2) Draw3DCursor_Rotate();
+
     glReadPixels(lastPos.x(), viewport[3]-lastPos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, (void *) pixel);
     //qDebug() << "3D cursor picking " << pixel[0] << ", " << pixel[1] << "," << pixel[2];
 
-    if(pixel[0] == 255) Moving3D_Mode = 1;
-    else if(pixel[1] == 255) Moving3D_Mode = 2;
-    else if(pixel[2] == 255) Moving3D_Mode = 3;
-    else Moving3D_Mode = 0;
+    if(Mode == 0)
+    {
+        if(pixel[0] == 255) Moving3D_Mode = 1;
+        else if(pixel[1] == 255) Moving3D_Mode = 2;
+        else if(pixel[2] == 255) Moving3D_Mode = 3;
+        else Moving3D_Mode = 0;
+    }
+    else if(Mode == 1);
+    else if(Mode == 2)
+    {
+        if(pixel[0] == 255) Rotating3D_Mode = 1;
+        else if(pixel[1] == 255) Rotating3D_Mode = 2;
+        else if(pixel[2] == 255) Rotating3D_Mode = 3;
+        else Rotating3D_Mode = 0;
+    }
+
 
     glEnable(GL_LIGHTING);
 
@@ -1500,8 +1836,10 @@ void GLWidget::DrawRectSelect()
 
     glEnd();*/
 
-
+    glLineStipple(1, 0x3F07);
+    glEnable(GL_LINE_STIPPLE);
     glBegin(GL_LINES);
+    glColor4f(0.75f,0.75f,0.75f,0.2f);
     RectSel_1V = (campos + RectSel_1*5);
     RectSel_2V = (campos + RectSel_2*5);
     RectSel_3V = (campos + RectSel_3*5);
@@ -1518,9 +1856,8 @@ void GLWidget::DrawRectSelect()
 
     glVertex3d(RectSel_3V.x(), RectSel_3V.y(), RectSel_3V.z());
     glVertex3d(RectSel_1V.x(), RectSel_1V.y(), RectSel_1V.z());
-
     glEnd();
-
+    glDisable(GL_LINE_STIPPLE);
     //normals test
     /* Calculate normals for each plane */
     QVector3D vec1 = RectSel_1V.toVector3D();

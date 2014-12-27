@@ -2201,9 +2201,9 @@ void NodeBeam::SelectNodesLoc(float x0, float y0, float z0, float x1, float y1, 
 */
 void NodeBeam::SelectNodes3D(QVector4D RectSel_1V, QVector4D RectSel_2V,
                              QVector4D RectSel_3V, QVector4D RectSel_4V,
-                             QVector4D CameraLocation)
+                             QVector4D CameraLocation, bool AddToSelection)
 {
-    SelectedNodes.clear();
+    if(!AddToSelection) SelectedNodes.clear();
 
     /* Calculate normals for each plane */
     QVector3D vec1 = RectSel_1V.toVector3D();
