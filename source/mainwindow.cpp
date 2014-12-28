@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     glWidget = new GLWidget;    
     glWidgetO = new GLWidgetOrtho;
+    //glWidget2 = new GLWidget;
+    //glWidget3 = new GLWidget;
     BeamProperties = new BeamDefaultsDialog;
     HubWheelProperties = new BeamDefaultsDialog;
 
@@ -50,13 +52,25 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboBox_3_views->setMinimumHeight(28);
     vertikaali2->setMargin(1);
     OpenGLViewO->setLayout(vertikaali2);
-
     ui->doubleSpinBox->setValue(2.0);
+
+    /* Quad view *//*
+    QSplitter *splitterVertical = new QSplitter;
+    splitterVertical->setOrientation(Qt::Vertical);
+    QSplitter *splitter1 = new QSplitter;
+    splitter1->addWidget(OpenGLViewO);
+    splitter1->addWidget(OpenGLView);
+    QSplitter *splitter2 = new QSplitter;
+    splitter2->addWidget(glWidget2);
+    splitter2->addWidget(glWidget3);
+    splitterVertical->addWidget(splitter1);
+    splitterVertical->addWidget(splitter2);*/
 
     /* Views into tab widget */
     OpenGLViews = new QTabWidget;
     OpenGLViews->addTab(OpenGLView,tr("3D View"));
     OpenGLViews->addTab(OpenGLViewO, tr("Orthographic View"));
+    //OpenGLViews->addTab(splitterVertical,tr("Quad View"));
     //OpenGLViews->addTab(glWidget,tr("3D View"));
     //OpenGLViews->addTab(glWidgetO,tr("Orthographic View"));
 
@@ -1370,56 +1384,119 @@ void MainWindow::on_toolButton_25_clicked()
 /* Key press events */
 void MainWindow::keyPressEvent(QKeyEvent * eventti)
 {
-    /* Move */
-    if(eventti->key() == Qt::Key_G)
+    /* Add nodes */
+    if(eventti->key() == Qt::Key_N)
     {
-        qDebug() << "G";
-        InputDialog testi;
-        testi.MoveNodes();
-        testi.exec();
-        if(!testi.ValuesOk)
+        if(!ui->toolButton->isChecked())
         {
-            QMessageBox msgBox;
-            msgBox.setText("The moving distance must be a number.");
-            msgBox.exec();
+            ui->toolButton->setChecked(1);
         }
         else
         {
-            for(int i2=0; i2<CurrentNodeBeam->SelectedNodes.size();i2++)
-            {
-                CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX + testi.valuesFloat[0];
-                CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY + testi.valuesFloat[1];
-                CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ + testi.valuesFloat[2];
-
-            }
+            ui->toolButton->setChecked(0);
         }
+        on_toolButton_clicked();
+    }
+    /* Add beams single */
+    if(eventti->key() == Qt::Key_V)
+    {
+        if(!ui->toolButton_8->isChecked())
+        {
+            ui->toolButton_8->setChecked(1);
+        }
+        else
+        {
+            ui->toolButton_8->setChecked(0);
+        }
+        on_toolButton_8_clicked();
+    }
+    /* Add beams cont */
+    if(eventti->key() == Qt::Key_B)
+    {
+        if(!ui->toolButton_9->isChecked())
+        {
+            ui->toolButton_9->setChecked(1);
+        }
+        else
+        {
+            ui->toolButton_9->setChecked(0);
+        }
+        on_toolButton_9_clicked();
+    }
+    /* Move */
+    else if(eventti->key() == Qt::Key_M)
+    {
+        if(!ui->toolButton_2->isChecked())
+        {
+            ui->toolButton_2->setChecked(1);
+        }
+        else
+        {
+            ui->toolButton_2->setChecked(0);
+        }
+        on_toolButton_2_clicked();
     }
     /* Scale */
     else if(eventti->key() == Qt::Key_S)
     {
-        /* Set up the scale dialog and execute it */
-        InputDialog ScaleInput;
-        ScaleInput.ScaleNodes();
-        ScaleInput.exec();
-
-        /* If values given by user are not ok, show error message
-         * else do the scaling. */
-        if(!ScaleInput.ValuesOk)
+        if(!ui->toolButton_3->isChecked())
         {
-            QMessageBox msgBox;
-            msgBox.setText("The scaling factor must be a number.");
-            msgBox.exec();
+            ui->toolButton_3->setChecked(1);
         }
         else
         {
-            for(int i2=0; i2<CurrentNodeBeam->SelectedNodes.size();i2++)
-            {
-                CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX * ScaleInput.valuesFloat[0];
-                CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY * ScaleInput.valuesFloat[1];
-                CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ * ScaleInput.valuesFloat[2];
-
-            }
+            ui->toolButton_3->setChecked(0);
         }
+        on_toolButton_3_clicked();
+    }
+    /* Rotate */
+    else if(eventti->key() == Qt::Key_R)
+    {
+        if(!ui->toolButton_4->isChecked())
+        {
+            ui->toolButton_4->setChecked(1);
+        }
+        else
+        {
+            ui->toolButton_4->setChecked(0);
+        }
+        on_toolButton_4_clicked();
+    }
+    /* Duplicate */
+    else if(eventti->key() == Qt::Key_D)
+    {
+        on_toolButton_5_clicked();
+    }
+    /* RectSelect */
+    else if(eventti->key() == Qt::Key_W)
+    {
+        if(!ui->toolButton_6->isChecked())
+        {
+            ui->toolButton_6->setChecked(1);
+        }
+        else
+        {
+            ui->toolButton_6->setChecked(0);
+        }
+        on_toolButton_6_clicked();
+    }
+    /* Extrude */
+    else if(eventti->key() == Qt::Key_E)
+    {
+        on_toolButton_14_clicked();
+    }
+    /* Snap to grid */
+    else if(eventti->key() == Qt::Key_G)
+    {
+        if(!ui->checkBox_gridsnap->isChecked())
+        {
+            ui->checkBox_gridsnap->setChecked(1);
+        }
+        else
+        {
+            ui->checkBox_gridsnap->setChecked(0);
+        }
+        on_checkBox_gridsnap_stateChanged(1);
     }
     /* Choose X-axis */
     else if(eventti->key() == Qt::Key_X)
@@ -1573,111 +1650,6 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
                 ui->statusBar->showMessage("Rotating Z");
             }
         }
-    }
-    /* Rotate */
-    else if(eventti->key() == Qt::Key_R)
-    {
-        InputDialog testi;
-        testi.RotateNodes();
-        testi.exec();
-        if(!testi.ValuesOk)
-        {
-            QMessageBox msgBox;
-            msgBox.setText("The rotating angle must be in degrees.");
-            msgBox.exec();
-        }
-        else
-        {
-            float a1, b1, a2, b2;
-
-            if(testi.valuesFloat[0]!=0)
-            {
-                //X-Rotation
-                //Calculating rotation matrix
-                // cos a1 | -sin b1
-                // sin a2 |  cos b2
-                a1 = qCos(qDegreesToRadians(testi.valuesFloat[0]));
-                b1 = qSin(qDegreesToRadians(testi.valuesFloat[0]));
-                a2 = qSin(qDegreesToRadians(testi.valuesFloat[0]));
-                b2 = qCos(qDegreesToRadians(testi.valuesFloat[0]));
-
-                for(int i2=0; i2<CurrentNodeBeam->SelectedNodes.size();i2++)
-                {
-                    float XCoordinate = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY;
-                    float YCoordinate = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ;
-                    CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY = a1*XCoordinate - b1*YCoordinate;
-                    CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ = a2*XCoordinate + b2*YCoordinate;
-                }
-            }
-            if(testi.valuesFloat[1]!=0)
-            {
-                //Y-Rotation
-                //Calculating rotation matrix
-                // cos a1 | -sin b1
-                // sin a2 |  cos b2
-                a1 = qCos(qDegreesToRadians(testi.valuesFloat[1]));
-                b1 = qSin(qDegreesToRadians(testi.valuesFloat[1]));
-                a2 = qSin(qDegreesToRadians(testi.valuesFloat[1]));
-                b2 = qCos(qDegreesToRadians(testi.valuesFloat[1]));
-
-                for(int i2=0; i2<CurrentNodeBeam->SelectedNodes.size();i2++)
-                {
-                    float XCoordinate = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX;
-                    float YCoordinate = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ;
-                    CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX = a1*XCoordinate - b1*YCoordinate;
-                    CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locZ = a2*XCoordinate + b2*YCoordinate;
-                }
-            }
-            if(testi.valuesFloat[2]!=0)
-            {
-                //Z-Rotation
-                //Calculating rotation matrix
-                // cos a1 | -sin b1
-                // sin a2 |  cos b2
-                a1 = qCos(qDegreesToRadians(testi.valuesFloat[2]));
-                b1 = qSin(qDegreesToRadians(testi.valuesFloat[2]));
-                a2 = qSin(qDegreesToRadians(testi.valuesFloat[2]));
-                b2 = qCos(qDegreesToRadians(testi.valuesFloat[2]));
-
-                for(int i2=0; i2<CurrentNodeBeam->SelectedNodes.size();i2++)
-                {
-                    float XCoordinate = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX;
-                    float YCoordinate = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY;
-                    CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locX = a1*XCoordinate - b1*YCoordinate;
-                    CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i2]].locY = a2*XCoordinate + b2*YCoordinate;
-                }
-            }
-        }
-    }
-    else if(eventti->key() == Qt::Key_4)
-    {
-        glWidget->ViewOffsetX = glWidget->ViewOffsetX - 0.10;
-        glWidget->updateGL();
-    }
-    else if(eventti->key() == Qt::Key_6)
-    {
-        glWidget->ViewOffsetX = glWidget->ViewOffsetX + 0.10;
-        glWidget->updateGL();
-    }
-    else if(eventti->key() == Qt::Key_2)
-    {
-        glWidget->ViewOffsetY = glWidget->ViewOffsetY - 0.10;
-        glWidget->updateGL();
-    }
-    else if(eventti->key() == Qt::Key_8)
-    {
-        glWidget->ViewOffsetY = glWidget->ViewOffsetY + 0.10;
-        glWidget->updateGL();
-    }
-    else if(eventti->key() == Qt::Key_7)
-    {
-        glWidget->ViewOffsetZ = glWidget->ViewOffsetZ - 0.10;
-        glWidget->updateGL();
-    }
-    else if(eventti->key() == Qt::Key_1)
-    {
-        glWidget->ViewOffsetZ = glWidget->ViewOffsetZ + 0.10;
-        glWidget->updateGL();
     }
     else if(eventti->key() == Qt::Key_Shift)
     {
@@ -2669,6 +2641,8 @@ void MainWindow::JBEAM_Update()
     */
 }
 
+/* Change 3D view to ortographic */
+void MainWindow::on_pushButton_ViewTest_clicked()
+{
 
-
-
+}

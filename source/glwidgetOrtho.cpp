@@ -343,75 +343,129 @@ void GLWidgetOrtho::draw()
 //    glVertex3f(0.1, -0.1, -0.1);
 //    glEnd();
 
-    //Beams
-    glColor4f(0.8f,0.4f,0.01f,1.0f);
-    glLineWidth(3);
-    glBegin(GL_LINES);
-    int NodeAmount = NBPointer->Nodes.size();
-    for(int i=0; i<NBPointer->Beams.size(); i++)
-    {
-        if(NBPointer->Beams[i].draw)
-        {
-            if(NBPointer->Beams[i].HasBeamDefs)
-            {
-                float beamred = NBPointer->BeamDefaults[NBPointer->Beams[i].BeamDefsID].RGB_Color[0]/255.0f;
-                float beamgre = NBPointer->BeamDefaults[NBPointer->Beams[i].BeamDefsID].RGB_Color[1]/255.0f;
-                float beamblu = NBPointer->BeamDefaults[NBPointer->Beams[i].BeamDefsID].RGB_Color[2]/255.0f;
-                glColor4f(beamred,beamgre,beamblu,1.0f);
-            }
-            else
-            {
-                glColor4f(0.0f,0.4f,0.6f,1.0f);
-            }
-            int Bnode1 = NBPointer->Beams[i].Node1GlobalID;
-            int Bnode2 = NBPointer->Beams[i].Node2GlobalID;
+    /* Drawing nodes */
+      glPointSize(10);
+      glBegin(GL_POINTS);
+      int i3 = 0;
+      for(int i2=0; i2<NBPointer->NodeGroups.size();i2++)
+      {
+          for(int i=0; i<NBPointer->NodeGroups.at(i2).NodeAmount; i++)
+          {
+              if(NBPointer->NodeGroups.at(i2).draw)
+              {
+                  if(NBPointer->Nodes.at(i3).GlobalID == NBPointer->ActiveNode) glColor4f(1.0f,0.0f,0.0f,1.0f);
+                  else glColor4f(0.4f,0.4f,0.4f,1.0f);
 
-            if((Bnode1<NodeAmount) && (Bnode2<NodeAmount))
-            {
-                glVertex3f(NBPointer->Nodes[Bnode1].locX, NBPointer->Nodes[Bnode1].locY, NBPointer->Nodes[Bnode1].locZ);
-                glVertex3f(NBPointer->Nodes[Bnode2].locX, NBPointer->Nodes[Bnode2].locY, NBPointer->Nodes[Bnode2].locZ);
-            }
+                  glVertex3f(NBPointer->Nodes.at(i3).locX, NBPointer->Nodes.at(i3).locY, NBPointer->Nodes.at(i3).locZ);
+              }
+              i3++;
+          }
+      }
+      glColor4f(1.0f,1.0f,0.0f,1.0f);
+      glEnd();
+      glPointSize(15);
+      glBegin(GL_POINTS);
+      for(int i2=0; i2<NBPointer->SelectedNodes.size();i2++)
+      {
+          i3 = NBPointer->SelectedNodes.at(i2);
+          glVertex3f(NBPointer->Nodes.at(i3).locX, NBPointer->Nodes.at(i3).locY, NBPointer->Nodes.at(i3).locZ);
+      }
+      glColor4f(0.4f,0.4f,0.4f,1.0f);
+      glEnd();
 
-        }
+      /* Drawing beams */
+      glColor4f(0.0f,0.4f,0.6f,1.0f);
+      glLineWidth(2);
+      glBegin(GL_LINES);
+      i3=0;
+      int NodeAmount = NBPointer->Nodes.size();
 
-    }
-    glEnd();
+      for(int i2=0;i2<NBPointer->BeamGroups.size();i2++)
+      {
 
-    /* Drawing hubwheels */
-    for(int i=0; i<NBPointer->Hubwheels.size(); i++)
-    {
-        NBPointer->CalcHubWheelRotation(i);
-        glPushMatrix();
-        glTranslatef(NBPointer->Nodes[NBPointer->Hubwheels[i].node1id].locX,NBPointer->Nodes[NBPointer->Hubwheels[i].node1id].locY,NBPointer->Nodes[NBPointer->Hubwheels[i].node1id].locZ);
-        glPushMatrix();
-        glRotatef(NBPointer->Hubwheels[i].RotationX, 1, 0, 0);
-        glRotatef(NBPointer->Hubwheels[i].RotationY, 0, 1, 0);
-        glRotatef(NBPointer->Hubwheels[i].RotationZ, 0, 0, 1);
-        DrawWheel(NBPointer->Hubwheels[i].radius, NBPointer->Hubwheels[i].width, 16);
-        glPopMatrix();
-        glPopMatrix();
+          for(int i=0; i<NBPointer->BeamGroups[i2].BeamAmount; i++)
+          {
 
-    }
+              if(NBPointer->BeamGroups[i2].draw)
+              {
+                  if(NBPointer->Beams[i3].draw)
+                  {
+                      if(i3 == NBPointer->ActiveBeam)
+                      {
+                          glEnd();
+                          glColor4f(0.6f,0.4f,0.0f,1.0f);
+                          glLineWidth(4);
+                          glBegin(GL_LINES);
 
-    //Nodes
-    glPointSize(10);
-    glBegin(GL_POINTS);
-    int i3 = 0;
-    for(int i2=0; i2<NBPointer->NodeGroups.size();i2++)
-    {
-        for(int i=0; i<NBPointer->NodeGroups[i2].NodeAmount; i++)
-        {
-            if(NBPointer->NodeGroups[i2].draw)
-            {
-                if(NBPointer->Nodes[i3].GlobalID == NBPointer->ActiveNode) glColor4f(1.0f,0.0f,0.0f,1.0f);
-                else glColor4f(0.3f,0.7f,0.7f,1.0f);
 
-                glVertex3f(NBPointer->Nodes[i3].locX, NBPointer->Nodes[i3].locY, NBPointer->Nodes[i3].locZ);
-            }
-            i3++;
-        }
-    }
-    glEnd();
+                          int Bnode1 = NBPointer->Beams[i3].Node1GlobalID;
+                          int Bnode2 = NBPointer->Beams[i3].Node2GlobalID;
+                          if((Bnode1<NodeAmount) && (Bnode2<NodeAmount))
+                          {
+                              //qDebug()<<"Rendering beams 7 .... " << Bnode1 << ", " << Bnode2;
+                              glVertex3f(NBPointer->Nodes[Bnode1].locX, NBPointer->Nodes[Bnode1].locY, NBPointer->Nodes[Bnode1].locZ);
+                              glVertex3f(NBPointer->Nodes[Bnode2].locX, NBPointer->Nodes[Bnode2].locY, NBPointer->Nodes[Bnode2].locZ);
+                              //qDebug()<<"Rendering beams 8 .... ";
+                          }
+                          glEnd();
+                          glLineWidth(2);
+                          glBegin(GL_LINES);
+
+                      }
+                      else
+                      {
+                          if(NBPointer->Beams[i3].HasBeamDefs)
+                          {
+                              float beamred = NBPointer->BeamDefaults[NBPointer->Beams[i3].BeamDefsID].RGB_Color[0]/255.0f;
+                              float beamgre = NBPointer->BeamDefaults[NBPointer->Beams[i3].BeamDefsID].RGB_Color[1]/255.0f;
+                              float beamblu = NBPointer->BeamDefaults[NBPointer->Beams[i3].BeamDefsID].RGB_Color[2]/255.0f;
+                              glColor4f(beamred,beamgre,beamblu,1.0f);
+                          }
+                          else
+                          {
+                              glColor4f(0.0f,0.4f,0.6f,1.0f);
+                          }
+
+
+                          int Bnode1 = NBPointer->Beams[i3].Node1GlobalID;
+                          int Bnode2 = NBPointer->Beams[i3].Node2GlobalID;
+                          if((Bnode1<NodeAmount) && (Bnode2<NodeAmount))
+                          {
+                              //qDebug()<<"Rendering beams 7 .... " << Bnode1 << ", " << Bnode2;
+                              glVertex3f(NBPointer->Nodes[Bnode1].locX, NBPointer->Nodes[Bnode1].locY, NBPointer->Nodes[Bnode1].locZ);
+                              glVertex3f(NBPointer->Nodes[Bnode2].locX, NBPointer->Nodes[Bnode2].locY, NBPointer->Nodes[Bnode2].locZ);
+                              //qDebug()<<"Rendering beams 8 .... ";
+                          }
+
+
+                      }
+                  }
+              }
+
+              i3++;
+          }
+
+
+      }
+      glEnd();
+
+       glLineWidth(2);
+
+       /* Drawing hubwheels */
+       for(int i=0; i<NBPointer->Hubwheels.size(); i++)
+       {
+           NBPointer->CalcHubWheelRotation(i);
+           glPushMatrix();
+           glTranslatef(NBPointer->Nodes[NBPointer->Hubwheels[i].node1id].locX,NBPointer->Nodes[NBPointer->Hubwheels[i].node1id].locY,NBPointer->Nodes[NBPointer->Hubwheels[i].node1id].locZ);
+           glPushMatrix();
+           glRotatef(NBPointer->Hubwheels[i].RotationX, 1, 0, 0);
+           glRotatef(NBPointer->Hubwheels[i].RotationY, 0, 1, 0);
+           glRotatef(NBPointer->Hubwheels[i].RotationZ, 0, 0, 1);
+           DrawWheel(NBPointer->Hubwheels[i].radius, NBPointer->Hubwheels[i].width, 16);
+           glPopMatrix();
+           glPopMatrix();
+
+       }
 
 }
 
@@ -829,6 +883,15 @@ void GLWidgetOrtho::mouseReleaseEvent(QMouseEvent *event)
     {
         emit JBEAM_UpdateO();
     }
+}
+
+/* Mouse wheel zoom */
+void GLWidgetOrtho::wheelEvent(QWheelEvent *event)
+{
+    float NewZoom = ViewHeight - (event->delta()*0.001f);
+    if(NewZoom > 0) ViewHeight = NewZoom;
+    resizeGL(this->width(), this->height());
+    updateGL();
 }
 
 void GLWidgetOrtho::MovingNodes_CalculateMove(QMouseEvent *event)

@@ -1417,6 +1417,15 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
 
 }
 
+/* Mouse wheel Zoom */
+void GLWidget::wheelEvent(QWheelEvent * event)
+{
+    float NewZoom = ZoomFactor - event->delta()*0.001f;
+    if(NewZoom > 0) ZoomFactor = NewZoom;
+    resizeGL(this->width(),this->height());
+    updateGL();
+}
+
 void GLWidget::MovingNodes_CalculateMove(QMouseEvent *event)
 {
     movement_x = lastPos.x();
@@ -1466,6 +1475,7 @@ void GLWidget::Draw3DCursor()
     GLfloat centery = NBPointer->SelectionCenterPos.y();
     GLfloat centerz = NBPointer->SelectionCenterPos.z();
     glTranslatef(centerx, centery, centerz);
+    glScalef(ZoomFactor,ZoomFactor,ZoomFactor);
 
     glBegin(GL_TRIANGLES);
     glColor3f(1.0, 0.0, 0.0);
@@ -1651,7 +1661,7 @@ void GLWidget::Draw3DCursor_Scale()
     GLfloat centery = NBPointer->SelectionCenterPos.y();
     GLfloat centerz = NBPointer->SelectionCenterPos.z();
     glTranslatef(centerx, centery, centerz);
-
+    glScalef(ZoomFactor,ZoomFactor,ZoomFactor);
     //Y arrow
     glBegin(GL_TRIANGLES);
     glColor3f(0.0, 1.0, 0.0);
@@ -1823,6 +1833,7 @@ void GLWidget::Draw3DCursor_Rotate()
     GLfloat centery = NBPointer->SelectionCenterPos.y();
     GLfloat centerz = NBPointer->SelectionCenterPos.z();
     glTranslatef(centerx, centery, centerz);
+    glScalef(ZoomFactor,ZoomFactor,ZoomFactor);
 
     glBegin(GL_TRIANGLES);
     glColor3f(1.0, 0.0, 0.0);
@@ -2052,36 +2063,10 @@ void GLWidget::DrawSphere(int segments, int diameter)
  * to mouse position on near clipping plane */
 QVector4D GLWidget::RayTraceVector(int MouseX, int MouseY)
 {
-    /* Get modelview matrix */
-    GLfloat matriisi[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, matriisi);
-
-    QVector4D row1(matriisi[0],matriisi[1],matriisi[2],matriisi[3]);
-    QVector4D row2(matriisi[4],matriisi[5],matriisi[6],matriisi[7]);
-    QVector4D row3(matriisi[8],matriisi[9],matriisi[10],matriisi[11]);
-    QVector4D row4(matriisi[12],matriisi[13],matriisi[14],matriisi[15]);
-
+    /* Get modelview matrix and projection matrix */
     QMatrix4x4 modelview;
-    modelview.setRow(0,row1);
-    modelview.setRow(1,row2);
-    modelview.setRow(2,row3);
-    modelview.setRow(3,row4);
-    modelview = modelview.transposed();
-
-    /* Get projection matrix */
-    glGetFloatv(GL_PROJECTION_MATRIX, matriisi);
-
-    QVector4D row5(matriisi[0],matriisi[1],matriisi[2],matriisi[3]);
-    QVector4D row6(matriisi[4],matriisi[5],matriisi[6],matriisi[7]);
-    QVector4D row7(matriisi[8],matriisi[9],matriisi[10],matriisi[11]);
-    QVector4D row8(matriisi[12],matriisi[13],matriisi[14],matriisi[15]);
-
     QMatrix4x4 projection;
-    projection.setRow(0,row5);
-    projection.setRow(1,row6);
-    projection.setRow(2,row7);
-    projection.setRow(3,row8);
-    projection = projection.transposed();
+    GetViewMatrices(&modelview,&projection);
 
     /* Inverse both matrixes */
     bool InverseOk = 0;
@@ -2122,7 +2107,6 @@ QVector4D GLWidget::RayTraceVector(int MouseX, int MouseY)
 }
 
 /* Draw box for 3D rectangle selection tool */
-
 void GLWidget::DrawRectSelect()
 {
     QVector4D test,RectSel_1V,RectSel_2V,RectSel_3V,RectSel_4V;
@@ -2216,5 +2200,94 @@ void GLWidget::DrawRectSelect()
 
 
     glEnd();*/
+
+}
+
+/* Move 3D view around */
+void GLWidget::keyPressEvent(QKeyEvent * event)
+{
+    /* Calculate camera direction vector */
+    QVector3D CameraDirection = RayTraceVector(this->width()/2, this->height()/2).toVector3D();
+    CameraDirection.normalize();
+
+    QVector3D CameraUpVector(0,0,1);
+
+    QVector3D CameraLeft = QVector3D::crossProduct(CameraDirection,CameraUpVector);
+
+    if(event->key() == Qt::Key_4)
+    {
+        ViewOffsetX += CameraLeft.x()*0.2f;
+        ViewOffsetY += CameraLeft.y()*0.2f;
+        updateGL();
+    }
+    else if(event->key() == Qt::Key_6)
+    {
+        ViewOffsetX -= CameraLeft.x()*0.2f;
+        ViewOffsetY -= CameraLeft.y()*0.2f;
+        updateGL();
+    }
+    else if(event->key() == Qt::Key_8)
+    {
+        ViewOffsetX -= CameraDirection.x()*0.2f;
+        ViewOffsetY -= CameraDirection.y()*0.2f;
+        //ViewOffsetZ -= CameraDirection.z()*0.2f;
+        updateGL();
+    }
+    else if(event->key() == Qt::Key_2)
+    {
+        ViewOffsetX += CameraDirection.x()*0.2f;
+        ViewOffsetY += CameraDirection.y()*0.2f;
+        //ViewOffsetZ += CameraDirection.z()*0.2f;
+        updateGL();
+    }
+    else if(event->key() == Qt::Key_7)
+    {
+        ViewOffsetZ -= 0.1f;
+        updateGL();
+    }
+    else if(event->key() == Qt::Key_1)
+    {
+        ViewOffsetZ += 0.1f;
+        updateGL();
+    }
+}
+
+/* Get projection and model view matrix as transposed */
+void GLWidget::GetViewMatrices(QMatrix4x4 * ModelviewMatrix, QMatrix4x4 * ProjectionMatrix)
+{
+    /* Get modelview matrix */
+    GLfloat matriisi[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, matriisi);
+
+    QVector4D row1(matriisi[0],matriisi[1],matriisi[2],matriisi[3]);
+    QVector4D row2(matriisi[4],matriisi[5],matriisi[6],matriisi[7]);
+    QVector4D row3(matriisi[8],matriisi[9],matriisi[10],matriisi[11]);
+    QVector4D row4(matriisi[12],matriisi[13],matriisi[14],matriisi[15]);
+
+    QMatrix4x4 modelview;
+    modelview.setRow(0,row1);
+    modelview.setRow(1,row2);
+    modelview.setRow(2,row3);
+    modelview.setRow(3,row4);
+    modelview = modelview.transposed();
+
+    /* Get projection matrix */
+    glGetFloatv(GL_PROJECTION_MATRIX, matriisi);
+
+    QVector4D row5(matriisi[0],matriisi[1],matriisi[2],matriisi[3]);
+    QVector4D row6(matriisi[4],matriisi[5],matriisi[6],matriisi[7]);
+    QVector4D row7(matriisi[8],matriisi[9],matriisi[10],matriisi[11]);
+    QVector4D row8(matriisi[12],matriisi[13],matriisi[14],matriisi[15]);
+
+    QMatrix4x4 projection;
+    projection.setRow(0,row5);
+    projection.setRow(1,row6);
+    projection.setRow(2,row7);
+    projection.setRow(3,row8);
+    projection = projection.transposed();
+
+    /* Return matrices */
+    *ModelviewMatrix = modelview;
+    *ProjectionMatrix = projection;
 
 }

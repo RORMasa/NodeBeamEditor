@@ -56,6 +56,7 @@ public:
     ~GLWidget();
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
+
     bool RotationMode;
     bool AddingNodes;
     int AddingBeamsSingle;
@@ -146,6 +147,8 @@ protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent * event);
+    void keyPressEvent(QKeyEvent * event);
     void DrawSphere(int segments, int diameter);
 
 
@@ -180,6 +183,7 @@ private:
     void Draw3DCursor_Rotate();
     void Draw3DCursor_Picking(int Mode); //Mode 0 = move, 1 = scale, 2 = rotate
     void DrawRectSelect();
+    void GetViewMatrices(QMatrix4x4 * ModelviewMatrix, QMatrix4x4 * ProjectionMatrix);
 };
 
 
