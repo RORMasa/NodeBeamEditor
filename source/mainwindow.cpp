@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     /* About box : Version and compliation time , link to GitHub */
-    AboutBox = "<br><br><br><b>Version: 0.31</b><br><br>Built on ";
+    AboutBox = "<br><br><br><b>Version: 0.32</b><br><br>Built on ";
     AboutBox.append(__DATE__);
     AboutBox.append(", ");
     AboutBox.append(__TIME__);
@@ -1217,15 +1217,19 @@ void MainWindow::on_toolButton_3_clicked()
     if(ui->toolButton_3->isChecked())
     {
         glWidgetO->ScalingNodes = 1;
+        glWidget->ScalingNodes = 1;
         ui->statusBar->showMessage("Press X, Y or Z to choose lock scaling axis");
         ui->stackedWidget->setCurrentIndex(3);
+        glWidget->updateGL();
     }
 
     else
     {
         glWidgetO->ScalingNodes = 0;
+        glWidget->ScalingNodes = 0;
         ui->statusBar->clearMessage();
         ui->stackedWidget->setCurrentIndex(0);
+        glWidget->updateGL();
     }
 
 }
@@ -1745,6 +1749,7 @@ void MainWindow::ButtsUp(int buttoni)
     {
         ui->toolButton_3->setChecked(0);
         glWidgetO->ScalingNodes = 0;
+        glWidget->ScalingNodes = 0;
         ui->statusBar->clearMessage();
     }
     if(buttoni != 3)

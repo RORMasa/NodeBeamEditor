@@ -101,6 +101,11 @@ public:
     bool Rotating3D_ModeY;
     bool Rotating3D_ModeZ;
 
+    int Scaling3D_Mode;
+    bool Scaling3D_ModeX;
+    bool Scaling3D_ModeY;
+    bool Scaling3D_ModeZ;
+
     //Calculate raytrace vector for 3D rectangle selection
     QVector4D RayTraceVector(int MouseX, int MouseY);
     QVector4D campos;
@@ -165,10 +170,13 @@ private:
     float movement_y;
     QPoint RotationStartScreen;
     QPoint RotationCenterScreen;
+    QPoint ScaleStartScreen;
+    QPoint ScalingCenterScreen;
 
     void DrawAxisArrows();
     void DrawWheel(float radius, float width, int rays);
     void Draw3DCursor();
+    void Draw3DCursor_Scale();
     void Draw3DCursor_Rotate();
     void Draw3DCursor_Picking(int Mode); //Mode 0 = move, 1 = scale, 2 = rotate
     void DrawRectSelect();

@@ -683,7 +683,7 @@ void GLWidget::paintGL()
     glClearColor(backgroundcolor[0], backgroundcolor[1], backgroundcolor[2], backgroundcolor[3]);
 
     /* Render picking colors in buffer and check what should be picked */
-    if(NodePicking || (MovingNodes > 0) || (RotatingNodes > 0))
+    if(NodePicking || (MovingNodes > 0) || (ScalingNodes > 0) || (RotatingNodes > 0))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glLoadIdentity();
@@ -694,6 +694,7 @@ void GLWidget::paintGL()
         glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
         if(NodePicking) drawpicking(); //Draw nodes in buffer, each with individual color
         else if(MovingNodes >0) Draw3DCursor_Picking(0); //Draw move 3D cursor in buffer and check
+        else if(ScalingNodes >0) Draw3DCursor_Picking(1); //Draw scale 3D cursor in buffer and check
         else if(RotatingNodes > 0) Draw3DCursor_Picking(2); //Draw rotate 3D cursor in buffer and check
         //QGLWidget::swapBuffers(); // Swap buffes to render on screen, only for testing
     }
@@ -708,11 +709,11 @@ void GLWidget::paintGL()
     glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
     draw(); //draw nodes, beams, wheels, lines
     if(MovingNodes > 0) Draw3DCursor();
+    else if(ScalingNodes > 0) Draw3DCursor_Scale();
     else if(RotatingNodes > 0) Draw3DCursor_Rotate();
     else if(ShowArrows) DrawAxisArrows();
     glColor3f(0.6, 0.6, 0.6);  //Set text color
     renderText(10, yHeight-20, TextOverlay, QFont( "Arial", 14, QFont::Bold, 0 ) );
-
     if(ShowNodeNumbers) RenderTextInScene(1);
     else if(ShowNodeNumbers1) RenderTextInScene(0);
     if(RectSelect > 1) DrawRectSelect();
@@ -874,8 +875,79 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
                 Moving3D_ModeZ = 1;
             }
         }
+        else if(ScalingNodes>0)
+        {
+            if(Scaling3D_Mode == 1)
+            {
+                Scaling3D_ModeX = 1;
+            }
+            else if(Scaling3D_Mode == 2)
+            {
+                Scaling3D_ModeY = 1;
+            }
+            else if(Scaling3D_Mode == 3)
+            {
+                Scaling3D_ModeZ = 1;
+            }
+            /* Set scaling start point */
+            ScaleStartScreen.setX(event->x());
+            ScaleStartScreen.setY(event->y());
+
+            /* Calculate scaling center point on screen */
+            /* Get modelview matrix */
+            GLfloat matriisi[16];
+            glGetFloatv(GL_MODELVIEW_MATRIX, matriisi);
+
+            QVector4D row1(matriisi[0],matriisi[1],matriisi[2],matriisi[3]);
+            QVector4D row2(matriisi[4],matriisi[5],matriisi[6],matriisi[7]);
+            QVector4D row3(matriisi[8],matriisi[9],matriisi[10],matriisi[11]);
+            QVector4D row4(matriisi[12],matriisi[13],matriisi[14],matriisi[15]);
+
+            QMatrix4x4 modelview;
+            modelview.setRow(0,row1);
+            modelview.setRow(1,row2);
+            modelview.setRow(2,row3);
+            modelview.setRow(3,row4);
+
+            /* Get projection matrix */
+            glGetFloatv(GL_PROJECTION_MATRIX, matriisi);
+
+            QVector4D row5(matriisi[0],matriisi[1],matriisi[2],matriisi[3]);
+            QVector4D row6(matriisi[4],matriisi[5],matriisi[6],matriisi[7]);
+            QVector4D row7(matriisi[8],matriisi[9],matriisi[10],matriisi[11]);
+            QVector4D row8(matriisi[12],matriisi[13],matriisi[14],matriisi[15]);
+
+            QMatrix4x4 projection;
+            projection.setRow(0,row5);
+            projection.setRow(1,row6);
+            projection.setRow(2,row7);
+            projection.setRow(3,row8);
+
+            /* Get selection center position */
+            QVector4D SelectionCenter = NBPointer->SelectionCenterPos.toVector4D();
+            SelectionCenter.setW(1.0f); // set W to 1 for a point
+
+            /* Transform center position from world coordinates to screen coordinates */
+            QVector4D ScalingCenter = projection.transposed()*modelview.transposed()*SelectionCenter;
+
+            //Only X and Y are needed
+            ScalingCenterScreen.setX(((ScalingCenter.x()/ScalingCenter.w()+1)/2)*xWidth);
+            ScalingCenterScreen.setY(((-ScalingCenter.y()/ScalingCenter.w()+1)/2)*yHeight);
+
+            qDebug() << "Scaling middlepoint in screen coordinates is " << ScalingCenterScreen;
+
+            /* Take a copy of original node coordinates of selected nodes */
+            NBPointer->TempNodes.clear();
+            for(int i=0; i<NBPointer->SelectedNodes.size();i++)
+            {
+                NBPointer->TempNodes.append(NBPointer->Nodes.at(NBPointer->SelectedNodes.at(i)));
+                NBPointer->TempNodes[i].locX = NBPointer->TempNodes[i].locX - NBPointer->SelectionCenterPos.x();
+                NBPointer->TempNodes[i].locY = NBPointer->TempNodes[i].locY - NBPointer->SelectionCenterPos.y();
+                NBPointer->TempNodes[i].locZ = NBPointer->TempNodes[i].locZ - NBPointer->SelectionCenterPos.z();
+            }
+        }
         //Lock the rotating until mouse is released
-        if(RotatingNodes>0)
+        else if(RotatingNodes>0)
         {
             if(Rotating3D_Mode == 1)
             {
@@ -1087,6 +1159,50 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
                 updateGL();
             }
         }
+        else if(ScalingNodes>0)
+        {
+            QVector2D ScalingVectorBegin;
+            ScalingVectorBegin.setX(ScaleStartScreen.x()-ScalingCenterScreen.x());
+            ScalingVectorBegin.setY(ScaleStartScreen.y()-ScalingCenterScreen.y());
+            QVector2D ScalingVector;
+            ScalingVector.setX(event->x()-ScalingCenterScreen.x());
+            ScalingVector.setY(event->y()-ScalingCenterScreen.y());
+
+            float ScalingFactor = ScalingVector.length()/ScalingVectorBegin.length();
+            ScalingFactor = (ScalingFactor-1)*0.5f + 1;
+            qDebug()<<  "scaling vector is " << ScalingVector;
+            if(Scaling3D_ModeX)
+            {
+                qDebug() << "Scalingx";
+                for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
+                {
+                    float XCoordinate = NBPointer->TempNodes.at(i5).locX;
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX = XCoordinate*ScalingFactor + NBPointer->SelectionCenterPos.x();
+
+                }
+                updateGL();
+            }
+            else if(Scaling3D_ModeY)
+            {
+                for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
+                {
+                    float YCoordinate = NBPointer->TempNodes.at(i5).locY;
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY = YCoordinate*ScalingFactor + NBPointer->SelectionCenterPos.y();
+
+                }
+                updateGL();
+            }
+            else if(Scaling3D_ModeZ)
+            {
+                for(int i5=0; i5<NBPointer->SelectedNodes.size(); i5++)
+                {
+                    float ZCoordinate = NBPointer->TempNodes.at(i5).locZ;
+                    NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ = ZCoordinate*ScalingFactor + NBPointer->SelectionCenterPos.z();
+
+                }
+                updateGL();
+            }
+        }
         else if(RotatingNodes>0)
         {
             QVector2D RotationVec;
@@ -1218,8 +1334,6 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
             RectSel_4 = RayTraceVector(RectSelect_end.x(), RectSelect_end.y());
         }
 
-
-
     } else if (event->buttons() & Qt::RightButton) {
 
         setZRotation(zRot + 8 * dx);
@@ -1250,6 +1364,13 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
             Moving3D_ModeX = 0;
             Moving3D_ModeY = 0;
             Moving3D_ModeZ = 0;
+        }
+        else if(ScalingNodes>0)
+        {
+            Scaling3D_ModeX = 0;
+            Scaling3D_ModeY = 0;
+            Scaling3D_ModeZ = 0;
+            NBPointer->Editing3D_CalculateSelectionCenter();
         }
         else if(RotatingNodes>0)
         {
@@ -1522,6 +1643,178 @@ void GLWidget::Draw3DCursor()
 
 }
 
+void GLWidget::Draw3DCursor_Scale()
+{
+    glPushMatrix();
+
+    GLfloat centerx = NBPointer->SelectionCenterPos.x();
+    GLfloat centery = NBPointer->SelectionCenterPos.y();
+    GLfloat centerz = NBPointer->SelectionCenterPos.z();
+    glTranslatef(centerx, centery, centerz);
+
+    //Y arrow
+    glBegin(GL_TRIANGLES);
+    glColor3f(0.0, 1.0, 0.0);
+
+    glVertex3f(0.05, 0.05, -0.05);
+    glVertex3f(-0.05, 0.05, -0.05);
+    glVertex3f(0.05, 1, -0.05);
+
+    glVertex3f(-0.05, 0.05, -0.05);
+    glVertex3f(-0.05, 1, -0.05);
+    glVertex3f(0.05, 1, -0.05);
+
+    glVertex3f(0.05, 0.05, 0.05);
+    glVertex3f(0.05, 1, 0.05);
+    glVertex3f(-0.05, 0.05, 0.05);
+
+    glVertex3f(-0.05, 0.05, 0.05);
+    glVertex3f(0.05, 1, 0.05);
+    glVertex3f(-0.05, 1, 0.05);
+
+    glVertex3f(0.05, 0.05, 0.05);
+    glVertex3f(0.05, 0.05, -0.05);
+    glVertex3f(0.05, 1, 0.05);
+
+    glVertex3f(0.05, 0.05, -0.05);
+    glVertex3f(0.05, 1, -0.05);
+    glVertex3f(0.05, 1, 0.05);
+
+    glVertex3f(-0.05, 0.05, 0.05);
+    glVertex3f(-0.05, 1, 0.05);
+    glVertex3f(-0.05, 0.05, -0.05);
+
+    glVertex3f(-0.05, 0.05, -0.05);
+    glVertex3f(-0.05, 1, 0.05);
+    glVertex3f(-0.05, 1, -0.05);
+
+    glVertex3f(-0.05, 1, 0.05);
+    glVertex3f(0.05, 1, 0.05);
+    glVertex3f(-0.05, 1, -0.05);
+
+    glVertex3f(-0.05, 1, -0.05);
+    glVertex3f(0.05, 1, 0.05);
+    glVertex3f(0.05, 1, -0.05);
+
+    glVertex3f(-0.05, 0.05, 0.05);
+    glVertex3f(-0.05, 0.05, -0.05);
+    glVertex3f(0.05, 0.05, 0.05);
+
+    glVertex3f(-0.05, 0.05, -0.05);
+    glVertex3f(0.05, 0.05, -0.05);
+    glVertex3f(0.05, 0.05, 0.05);
+
+
+    //X-arrow
+    glColor3f(1.0, 0.0, 0.0);
+
+    glVertex3f(0.05, 0.05, -0.05);
+    glVertex3f(1, 0.05, -0.05);
+    glVertex3f(0.05, -0.05, -0.05);
+
+    glVertex3f(0.05, -0.05, -0.05);
+    glVertex3f(1, 0.05, -0.05);
+    glVertex3f(1, -0.05, -0.05);
+
+    glVertex3f(0.05, 0.05, 0.05);
+    glVertex3f(0.05, -0.05, 0.05);
+    glVertex3f(1, 0.05, 0.05);
+
+    glVertex3f(0.05, -0.05, 0.05);
+    glVertex3f(1, -0.05, 0.05);
+    glVertex3f(1, 0.05, 0.05);
+
+    glVertex3f(0.05, 0.05, 0.05);
+    glVertex3f(1, 0.05, 0.05);
+    glVertex3f(0.05, 0.05, -0.05);
+
+    glVertex3f(0.05, 0.05, -0.05);
+    glVertex3f(1, 0.05, 0.05);
+    glVertex3f(1, 0.05, -0.05);
+
+    glVertex3f(0.05, -0.05, 0.05);
+    glVertex3f(0.05, -0.05, -0.05);
+    glVertex3f(1, -0.05, 0.05);
+
+    glVertex3f(0.05, -0.05, -0.05);
+    glVertex3f(1, -0.05, -0.05);
+    glVertex3f(1, -0.05, 0.05);
+
+    glVertex3f(1, -0.05, 0.05);
+    glVertex3f(1, -0.05, -0.05);
+    glVertex3f(1, 0.05, 0.05);
+
+    glVertex3f(1, -0.05, -0.05);
+    glVertex3f(1, 0.05, -0.05);
+    glVertex3f(1, 0.05, 0.05);
+
+    glVertex3f(0.05, -0.05, 0.05);
+    glVertex3f(0.05, 0.05, 0.05);
+    glVertex3f(0.05, -0.05, -0.05);
+
+    glVertex3f(0.05, -0.05, -0.05);
+    glVertex3f(0.05, 0.05, 0.05);
+    glVertex3f(0.05, 0.05, -0.05);
+
+    //Z-arrow
+    glColor3f(0.0, 0.0, 1.0);
+
+    glVertex3f(0.05, -0.05, 0.05);
+    glVertex3f(-0.05, -0.05, 0.05);
+    glVertex3f(0.05, -0.05, 1);
+
+    glVertex3f(-0.05, -0.05, 0.05);
+    glVertex3f(-0.05, -0.05, 1);
+    glVertex3f(0.05,  -0.05, 1);
+
+    glVertex3f(0.05, 0.05, 0.05);
+    glVertex3f(0.05,  0.05, 1);
+    glVertex3f(-0.05, 0.05, 0.05);
+
+    glVertex3f(-0.05, 0.05, 0.05);
+    glVertex3f(0.05, 0.05, 1);
+    glVertex3f(-0.05, 0.05, 1);
+
+    glVertex3f(0.05, 0.05, 0.05);
+    glVertex3f(0.05, -0.05, 0.05);
+    glVertex3f(0.05,  0.05, 1);
+
+    glVertex3f(0.05, -0.05, 0.05);
+    glVertex3f(0.05,  -0.05, 1);
+    glVertex3f(0.05,  0.05, 1);
+
+    glVertex3f(-0.05, 0.05, 0.05);
+    glVertex3f(-0.05,  0.05, 1);
+    glVertex3f(-0.05, -0.05, 0.05);
+
+    glVertex3f(-0.05, -0.05, 0.05);
+    glVertex3f(-0.05,  0.05, 1);
+    glVertex3f(-0.05,  -0.05, 1);
+
+    glVertex3f(-0.05,  0.05, 1);
+    glVertex3f(0.05, 0.05, 1);
+    glVertex3f(-0.05, -0.05, 1);
+
+    glVertex3f(-0.05, -0.05, 1);
+    glVertex3f(0.05, 0.05, 1);
+    glVertex3f(0.05, -0.05, 1);
+
+    glVertex3f(-0.05, 0.05, 0.05);
+    glVertex3f(-0.05, -0.05, 0.05);
+    glVertex3f(0.05, 0.05, 0.05);
+
+    glVertex3f(-0.05, -0.05, 0.05);
+    glVertex3f(0.05, -0.05, 0.05);
+    glVertex3f(0.05, 0.05, 0.05);
+
+    glEnd();
+
+
+
+    glPopMatrix();
+
+}
+
 void GLWidget::Draw3DCursor_Rotate()
 {
     glPushMatrix();
@@ -1678,11 +1971,11 @@ void GLWidget::Draw3DCursor_Picking(int Mode)
     glGetIntegerv(GL_VIEWPORT,viewport);
 
     if(Mode==0) Draw3DCursor();
-    else if(Mode == 1);
+    else if(Mode == 1) Draw3DCursor_Scale();
     else if(Mode == 2) Draw3DCursor_Rotate();
 
     glReadPixels(lastPos.x(), viewport[3]-lastPos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, (void *) pixel);
-    //qDebug() << "3D cursor picking " << pixel[0] << ", " << pixel[1] << "," << pixel[2];
+    qDebug() << "3D cursor picking " << pixel[0] << ", " << pixel[1] << "," << pixel[2];
 
     if(Mode == 0)
     {
@@ -1691,7 +1984,14 @@ void GLWidget::Draw3DCursor_Picking(int Mode)
         else if(pixel[2] == 255) Moving3D_Mode = 3;
         else Moving3D_Mode = 0;
     }
-    else if(Mode == 1);
+    else if(Mode == 1)
+    {
+        qDebug() << "skaalaus";
+        if(pixel[0] == 255) Scaling3D_Mode = 1;
+        else if(pixel[1] == 255) Scaling3D_Mode = 2;
+        else if(pixel[2] == 255) Scaling3D_Mode = 3;
+        else Scaling3D_Mode = 0;
+    }
     else if(Mode == 2)
     {
         if(pixel[0] == 255) Rotating3D_Mode = 1;
