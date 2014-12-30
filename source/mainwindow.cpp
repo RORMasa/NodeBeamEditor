@@ -26,17 +26,26 @@ MainWindow::MainWindow(QWidget *parent) :
     AboutBox.append("<br><br><a href='https://github.com/RORMasa/NodeBeamEditor'>https://github.com/RORMasa/NodeBeamEditor</a>");
 
     ui->setupUi(this);
-    glWidget = new GLWidget;    
-    glWidgetO = new GLWidgetOrtho;
-    //glWidget2 = new GLWidget;
-    //glWidget3 = new GLWidget;
     BeamProperties = new BeamDefaultsDialog;
     HubWheelProperties = new BeamDefaultsDialog;
+
+    /* Create perspective views */
+    for(int i=0; i<2; i++)
+    {
+        GLWidget * widget1 = new GLWidget;
+        glWidgetViews[i] = widget1;
+    }
+    /* Create orthographic views */
+    for(int i=0; i<4; i++)
+    {
+        GLWidgetOrtho * widget1 = new GLWidgetOrtho;
+        glWidgetOViews[i] = widget1;
+    }
 
     /* 3D perspective view */
     QVBoxLayout *vertikaali = new QVBoxLayout;
     QWidget * OpenGLView = new QWidget;
-    vertikaali->addWidget(glWidget);
+    vertikaali->addWidget(glWidgetViews[0]);
     vertikaali->addWidget(ui->spinBox);
     ui->spinBox->setMaximumWidth(100);
     ui->spinBox->setMinimumHeight(28);
@@ -46,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
     /* Orthographic view */
     QVBoxLayout *vertikaali2 = new QVBoxLayout;
     QWidget * OpenGLViewO = new QWidget;
-    vertikaali2->addWidget(glWidgetO);
+    vertikaali2->addWidget(glWidgetOViews[0]);
     vertikaali2->addWidget(ui->frame_5);
     ui->comboBox_3_views->setMaximumWidth(100);
     ui->comboBox_3_views->setMinimumHeight(28);
@@ -54,23 +63,25 @@ MainWindow::MainWindow(QWidget *parent) :
     OpenGLViewO->setLayout(vertikaali2);
     ui->doubleSpinBox->setValue(2.0);
 
-    /* Quad view *//*
+    /* Quad view */
     QSplitter *splitterVertical = new QSplitter;
     splitterVertical->setOrientation(Qt::Vertical);
+
     QSplitter *splitter1 = new QSplitter;
-    splitter1->addWidget(OpenGLViewO);
-    splitter1->addWidget(OpenGLView);
+    splitter1->addWidget(glWidgetOViews[1]);
+    splitter1->addWidget(glWidgetOViews[2]);
+
     QSplitter *splitter2 = new QSplitter;
-    splitter2->addWidget(glWidget2);
-    splitter2->addWidget(glWidget3);
+    splitter2->addWidget(glWidgetOViews[3]);
+    splitter2->addWidget(glWidgetViews[1]);
     splitterVertical->addWidget(splitter1);
-    splitterVertical->addWidget(splitter2);*/
+    splitterVertical->addWidget(splitter2);
 
     /* Views into tab widget */
     OpenGLViews = new QTabWidget;
     OpenGLViews->addTab(OpenGLView,tr("3D View"));
     OpenGLViews->addTab(OpenGLViewO, tr("Orthographic View"));
-    //OpenGLViews->addTab(splitterVertical,tr("Quad View"));
+    OpenGLViews->addTab(splitterVertical,tr("Quad View"));
     //OpenGLViews->addTab(glWidget,tr("3D View"));
     //OpenGLViews->addTab(glWidgetO,tr("Orthographic View"));
 
@@ -78,8 +89,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Active working file
     CurrentNodeBeam = new NodeBeam;
-    glWidget->setNBPointer(CurrentNodeBeam);
-    glWidgetO->setNBPointer(CurrentNodeBeam);
+
+    //Link nodebeam to glwidgets
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->setNBPointer(CurrentNodeBeam);
+    }
+    for(int i=0; i<4; i++)
+    {
+        glWidgetOViews[i]->setNBPointer(CurrentNodeBeam);
+    }
 
     BeamProperties->setNBPointer(&CurrentNodeBeam->BeamDefaults);
     BeamProperties->argumenttype = BeamProperties->BEAM_ARGUMENTS;
@@ -92,31 +111,58 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Settings for the application
     AppSettings = new settings;
-    glWidget->backgroundcolor[0] = (AppSettings->readsetting("bg_color_r").toInt())/255.0f;
-    glWidget->backgroundcolor[1] = (AppSettings->readsetting("bg_color_g").toInt())/255.0f;
-    glWidget->backgroundcolor[2] = (AppSettings->readsetting("bg_color_b").toInt())/255.0f;
-    glWidgetO->backgroundcolor[0] = (AppSettings->readsetting("bg_color_r").toInt())/255.0f;
-    glWidgetO->backgroundcolor[1] = (AppSettings->readsetting("bg_color_g").toInt())/255.0f;
-    glWidgetO->backgroundcolor[2] = (AppSettings->readsetting("bg_color_b").toInt())/255.0f;
-    glWidget->gridcolor[0] = (AppSettings->readsetting("grid_color_r").toInt())/255.0f;
-    glWidget->gridcolor[1] = (AppSettings->readsetting("grid_color_g").toInt())/255.0f;
-    glWidget->gridcolor[2] = (AppSettings->readsetting("grid_color_b").toInt())/255.0f;
-    glWidgetO->gridcolor[0] = (AppSettings->readsetting("grid_color_r").toInt())/255.0f;
-    glWidgetO->gridcolor[1] = (AppSettings->readsetting("grid_color_g").toInt())/255.0f;
-    glWidgetO->gridcolor[2] = (AppSettings->readsetting("grid_color_b").toInt())/255.0f;
+    QVector <float> backgroundcolor;
+    backgroundcolor.append((AppSettings->readsetting("bg_color_r").toInt())/255.0f);
+    backgroundcolor.append((AppSettings->readsetting("bg_color_g").toInt())/255.0f);
+    backgroundcolor.append((AppSettings->readsetting("bg_color_b").toInt())/255.0f);
+    backgroundcolor.append(1.0f); //Alpha to 1
 
-    QObject::connect(glWidget, SIGNAL(NodeBeamUpdated()), this, SLOT(MainNodeBeamUpdated()));
-    QObject::connect(glWidgetO, SIGNAL(NodeBeamUpdated()), this, SLOT(MainNodeBeamUpdated()));
-    QObject::connect(glWidget, SIGNAL(NodeBeamUpdated()), glWidgetO, SLOT(updateGL()));
-    QObject::connect(glWidgetO, SIGNAL(NodeBeamUpdated()), glWidget, SLOT(updateGL()));
-    QObject::connect(this, SIGNAL(ZoomChanged()), glWidget, SLOT(setZoom()));
-    QObject::connect(glWidgetO, SIGNAL(SelectionUpdated()), this, SLOT(UpdateSelection()));
+    QVector <float> gridcolor;
+    gridcolor.append((AppSettings->readsetting("grid_color_r").toInt())/255.0f);
+    gridcolor.append((AppSettings->readsetting("grid_color_g").toInt())/255.0f);
+    gridcolor.append((AppSettings->readsetting("grid_color_b").toInt())/255.0f);
+    gridcolor.append(1.0f); //Alpha to 1
+
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->backgroundcolor = backgroundcolor;
+        glWidgetViews[i]->gridcolor = gridcolor;
+    }
+
+    //Settings to orthogonal views
+    for(int i=0; i<4; i++)
+    {
+        glWidgetOViews[i]->backgroundcolor = backgroundcolor;
+        glWidgetOViews[i]->gridcolor = gridcolor;
+    }
+
+    //Connect signals and slots
     QObject::connect(AppSettings, SIGNAL(SettingsUpdated()), this, SLOT(SettingsUpdated()));
 
+    for(int i=0; i<2; i++)
+    {
+        QObject::connect(glWidgetViews[i], SIGNAL(NodeBeamUpdated()), this, SLOT(MainNodeBeamUpdated()));
+        QObject::connect(this, SIGNAL(ZoomChanged()), glWidgetViews[i], SLOT(setZoom()));
+        QObject::connect(glWidgetViews[i], SIGNAL(JBEAM_AddBeamO()), this, SLOT(JBEAM_AddBeam()));
+    }
+    for(int i=0; i<4; i++)
+    {
+        QObject::connect(glWidgetOViews[i], SIGNAL(NodeBeamUpdated()), this, SLOT(MainNodeBeamUpdated()));
+        QObject::connect(glWidgetOViews[i], SIGNAL(SelectionUpdated()), this, SLOT(UpdateSelection()));
+        QObject::connect(glWidgetOViews[i], SIGNAL(JBEAM_AddNodeO()), this, SLOT(JBEAM_AddNode()));
+        QObject::connect(glWidgetOViews[i], SIGNAL(JBEAM_UpdateO()), this, SLOT(JBEAM_Update()));
+    }
+    for(int i=0; i<2; i++)
+    {
+        for(int i2=0; i2<4; i2++)
+        {
+            QObject::connect(glWidgetOViews[i2], SIGNAL(NodeBeamUpdated()), glWidgetViews[i], SLOT(updateGL()));
+            QObject::connect(glWidgetViews[i], SIGNAL(NodeBeamUpdated()), glWidgetOViews[i2], SLOT(updateGL()));
+        }
+    }
+
     //JBEAM widget
-    QObject::connect(glWidgetO, SIGNAL(JBEAM_AddNodeO()), this, SLOT(JBEAM_AddNode()));
-    QObject::connect(glWidget, SIGNAL(JBEAM_AddBeamO()), this, SLOT(JBEAM_AddBeam()));
-    QObject::connect(glWidgetO, SIGNAL(JBEAM_UpdateO()), this, SLOT(JBEAM_Update()));
+
     JBEAM_NodeCursor = -1;
     JBEAM_BeamCursor = -1;
 
@@ -146,8 +192,14 @@ MainWindow::MainWindow(QWidget *parent) :
     //Change glwidget cursors to crosscursor
     QCursor cursor;
     cursor.setShape(Qt::CrossCursor);
-    glWidget->setCursor(cursor);
-    glWidgetO->setCursor(cursor);
+    for(int i=0; i<2 ;i++)
+    {
+        glWidgetViews[i]->setCursor(cursor);
+    }
+    for(int i=0; i<4 ;i++)
+    {
+        glWidgetOViews[i]->setCursor(cursor);
+    }
 
     //Set slider range
     ui->horizontalSlider->setRange(0, 100);
@@ -197,18 +249,27 @@ MainWindow::MainWindow(QWidget *parent) :
     //Update JBEAM textbox cursor locations
     JBEAM_UpdateCursors(ui->textEdit_JBEAM->toPlainText());
 
+    //Change Quad view default views
+    glWidgetOViews[1]->setViewFront();
+    glWidgetOViews[2]->setViewLeft();
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
-    delete glWidget;
-    delete glWidgetO;
-    delete OpenGLViews;
-    delete AppSettings;
-    //delete CurrentNodeBeam;
-    //delete BeamProperties;
+    for(int i=0; i<4 ; i++)
+    {
+        delete glWidgetOViews[i];
+    }
 
+    for(int i=0; i<2 ; i++)
+    {
+        delete glWidgetViews[i];
+    }
+
+    delete AppSettings;
+    delete CurrentNodeBeam;
+    delete BeamProperties;
+    delete ui;
 
 }
 
@@ -266,8 +327,14 @@ void MainWindow::ShowContextMenu_Beams(const QPoint& position)
 void MainWindow::on_actionNew_triggered()
 {
     CurrentNodeBeam->clear();
-    glWidget->updateGL();
-    glWidgetO->updateGL();
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->updateGL();
+    }
+    for(int i=0; i<4; i++)
+    {
+        glWidgetOViews[i]->updateGL();
+    }
     ui->treeWidget->clear();
     ui->treeWidget_2->clear();
 
@@ -305,7 +372,10 @@ void MainWindow::on_actionImport_Rigs_of_Rods_triggered()
     if (!fileName.isEmpty())
         CurrentNodeBeam->ImportNBFile(fileName);
 
-    glWidget->setNBPointer( CurrentNodeBeam);
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->setNBPointer(CurrentNodeBeam);
+    }
 
     MainNodeBeamUpdated();
 }
@@ -372,8 +442,14 @@ void MainWindow::on_treeWidget_itemSelectionChanged()
 
     if(!RefreshLock)
     {
-        glWidget->updateGL();
-        glWidgetO->updateGL();
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->updateGL();
+        }
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->updateGL();
+        }
 
 
         qDebug() << "Updating SELECTION";
@@ -440,8 +516,14 @@ void MainWindow::on_treeWidget_2_itemSelectionChanged()
         }
 
         //qDebug()<< "Active beam is "<< CurrentNodeBeam->ActiveBeam;
-        glWidget->updateGL();
-        glWidgetO->updateGL();
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->updateGL();
+        }
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->updateGL();
+        }
         }
     }
 
@@ -485,8 +567,14 @@ void MainWindow::on_pushButton_5_clicked()
     CurrentNodeBeam->Nodes[TempNodeID].locZ = ui->lineEdit_5->text().toFloat();
     CurrentNodeBeam->Nodes[TempNodeID].Properties = ui->lineEdit_2->text();
     CurrentNodeBeam->Nodes[TempNodeID].NodeName = ui->lineEdit_nodename->text();
-    glWidget->updateGL();
-    glWidgetO->updateGL();
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->updateGL();
+    }
+    for(int i=0; i<4; i++)
+    {
+        glWidgetOViews[i]->updateGL();
+    }
     MainNodeBeamUpdated();
 
 }
@@ -684,21 +772,30 @@ void MainWindow::on_pushButton_16_clicked()
 void MainWindow::on_treeWidget_itemCollapsed(QTreeWidgetItem *item)
 {
     CurrentNodeBeam->NodeGroups[item->text(3).toInt()].draw=0;
-    glWidget->updateGL();
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->updateGL();
+    }
 
 }
 
 void MainWindow::on_treeWidget_itemExpanded(QTreeWidgetItem *item)
 {
     CurrentNodeBeam->NodeGroups[item->text(3).toInt()].draw=1;
-    glWidget->updateGL();
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->updateGL();
+    }
 }
 
 /* Beams Tree Widget */
 void MainWindow::on_treeWidget_2_itemCollapsed(QTreeWidgetItem *item)
 {
     CurrentNodeBeam->BeamGroups[item->text(3).toInt()].draw=0;
-    glWidget->updateGL();
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->updateGL();
+    }
 }
 
 void MainWindow::on_treeWidget_2_itemExpanded(QTreeWidgetItem *item)
@@ -707,7 +804,10 @@ void MainWindow::on_treeWidget_2_itemExpanded(QTreeWidgetItem *item)
     {
         if(item->text(3).toInt()<CurrentNodeBeam->BeamGroups.size()) CurrentNodeBeam->BeamGroups[item->text(3).toInt()].draw=1;
     }
-    glWidget->updateGL();
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->updateGL();
+    }
 }
 
 //Add nodes button
@@ -721,14 +821,20 @@ void MainWindow::on_pushButton_6_clicked()
 void MainWindow::on_lineEdit_zcoordinate_textChanged(const QString &arg1)
 {
     bool ok=0;
-    glWidgetO->Zcoordinate= ui->lineEdit_zcoordinate->text().toFloat(&ok);
+    for(int i=0; i<4; i++)
+    {
+        glWidgetOViews[i]->Zcoordinate = ui->lineEdit_zcoordinate->text().toFloat(&ok);
+    }
     if(!ok)
     {
         if(ui->lineEdit_zcoordinate->text()=="-");
         else
         {
             ui->lineEdit_zcoordinate->setText("0");
-            glWidgetO->Zcoordinate=0;
+            for(int i=0; i<4; i++)
+            {
+                glWidgetOViews[i]->Zcoordinate=0;
+            }
             QMessageBox msgBox;
             msgBox.setText("The Z coordinate must be a number.");
             msgBox.exec();
@@ -740,20 +846,29 @@ void MainWindow::on_checkBox_gridsnap_stateChanged(int arg1)
 {
     if(ui->checkBox_gridsnap->isChecked())
     {
-        glWidgetO->SnapToGrid = 1;
-        glWidgetO->updateGL();
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->SnapToGrid = 1;
+            glWidgetOViews[i]->updateGL();
+        }
     }
     else
     {
-        glWidgetO->SnapToGrid = 0;
-        glWidgetO->updateGL();
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->SnapToGrid = 0;
+            glWidgetOViews[i]->updateGL();
+        }
     }
 }
 //Grid size
 void MainWindow::on_spinBox_grids_valueChanged(const QString &arg1)
 {
-    glWidgetO->GridSize = ui->spinBox_grids->value()*0.01;
-    glWidgetO->updateGL();
+    for(int i=0; i<4; i++)
+    {
+        glWidgetOViews[i]->GridSize = ui->spinBox_grids->value()*0.01;
+        glWidgetOViews[i]->updateGL();
+    }
 }
 
 /* Choosing beam group to add beams in */
@@ -767,7 +882,10 @@ void MainWindow::on_spinBox_valueChanged(int arg1)
 {
     float ZoomF = 1.0f;
     ZoomF = ZoomF/(arg1*0.01f);
-    glWidget->ZoomFactor = ZoomF;
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->ZoomFactor = ZoomF;
+    }
     emit ZoomChanged();
 
 }
@@ -781,7 +899,10 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
 void MainWindow::on_toolButton_12_clicked()
 {
     CurrentBeamGroupi=ui->comboBox->currentIndex();
-    glWidget->CurrentBeamGroup=ui->comboBox->currentIndex();
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->CurrentBeamGroup=ui->comboBox->currentIndex();
+    }
     ui->toolButton_12->setEnabled(0);
 }
 
@@ -802,7 +923,10 @@ void MainWindow::on_toolButton_13_clicked()
 {
     CurrentNodeGroupi=ui->comboBox_2->currentIndex();
     ui->toolButton_13->setEnabled(0);
-    glWidgetO->CurrentNodeGroup=ui->comboBox_2->currentIndex();
+    for(int i=0; i<4; i++)
+    {
+        glWidgetOViews[i]->CurrentNodeGroup=ui->comboBox_2->currentIndex();
+    }
 }
 
 /* Toggle rectangle selection */
@@ -869,11 +993,19 @@ void MainWindow::on_checkBox_clicked()
 {
     if(ui->checkBox->isChecked())
     {
-        glWidget->ShowNodeNumbers = 1;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->ShowNodeNumbers = 1;
+            glWidgetViews[i]->updateGL();
+        }
     }
     else
     {
-        glWidget->ShowNodeNumbers = 0;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->ShowNodeNumbers = 0;
+            glWidgetViews[i]->updateGL();
+        }
     }
 }
 /* Show node ID's button */
@@ -881,11 +1013,19 @@ void MainWindow::on_checkBox_3_clicked()
 {
     if(ui->checkBox_3->isChecked())
     {
-        glWidget->ShowNodeNumbers1 = 1;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->ShowNodeNumbers1 = 1;
+            glWidgetViews[i]->updateGL();
+        }
     }
     else
     {
-        glWidget->ShowNodeNumbers1 = 0;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->ShowNodeNumbers1 = 0;
+            glWidgetViews[i]->updateGL();
+        }
     }
 }
 
@@ -1094,16 +1234,22 @@ void MainWindow::on_actionSave_As_triggered()
 void MainWindow::on_toolButton_clicked()
 {
     ButtsUp(0);
-    if(glWidgetO->AddingNodes==0)
+    if(glWidgetOViews[0]->AddingNodes==0)
     {
-        if(OpenGLViews->currentIndex()!=1) OpenGLViews->setCurrentIndex(1);
-        glWidgetO->AddingNodes=1;
+        if(OpenGLViews->currentIndex()==0) OpenGLViews->setCurrentIndex(1);
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->AddingNodes=1;
+        }
         ui->stackedWidget->setCurrentIndex(1);
     }
     else
     {
         ui->stackedWidget->setCurrentIndex(0);
-        glWidgetO->AddingNodes=0;
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->AddingNodes=0;
+        }
     }
 
 }
@@ -1114,19 +1260,29 @@ void MainWindow::on_toolButton_2_clicked()
     ButtsUp(1);
     if(ui->toolButton_2->isChecked())
     {
-        glWidgetO->MovingNodes = 1;
-        glWidget->MovingNodes=1;
-        glWidget->updateGL();
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->MovingNodes = 1;
+        }
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->MovingNodes = 1;
+            glWidgetViews[i]->updateGL();
+        }
         ui->stackedWidget->setCurrentIndex(2);
     }
     else
     {
-        glWidgetO->MovingNodes = 0;
-        glWidget->MovingNodes=0;
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->MovingNodes = 0;
+        }
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->MovingNodes = 0;
+        }
         ui->stackedWidget->setCurrentIndex(0);
     }
-
-
 }
 
 /* Move by typing distance, button clicked from top toolbar*/
@@ -1164,8 +1320,14 @@ void MainWindow::on_toolButton_21_clicked()
 
         }
     }
-    glWidget->updateGL();
-    glWidgetO->updateGL();
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->updateGL();
+    }
+    for(int i=0; i<4; i++)
+    {
+        glWidgetOViews[i]->updateGL();
+    }
 }
 
 /* Move - reset values in text boxes */
@@ -1211,8 +1373,14 @@ void MainWindow::on_toolButton_28_clicked()
 
         }
     }
-    glWidget->updateGL();
-    glWidgetO->updateGL();
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->updateGL();
+    }
+    for(int i=0; i<4; i++)
+    {
+        glWidgetOViews[i]->updateGL();
+    }
 }
 
 
@@ -1230,20 +1398,33 @@ void MainWindow::on_toolButton_3_clicked()
     ButtsUp(2);
     if(ui->toolButton_3->isChecked())
     {
-        glWidgetO->ScalingNodes = 1;
-        glWidget->ScalingNodes = 1;
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->ScalingNodes = 1;
+        }
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->ScalingNodes = 1;
+            glWidgetViews[i]->updateGL();
+        }
+
         ui->statusBar->showMessage("Press X, Y or Z to choose lock scaling axis");
         ui->stackedWidget->setCurrentIndex(3);
-        glWidget->updateGL();
     }
 
     else
     {
-        glWidgetO->ScalingNodes = 0;
-        glWidget->ScalingNodes = 0;
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->ScalingNodes = 0;
+        }
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->ScalingNodes = 0;
+            glWidgetViews[i]->updateGL();
+        }
         ui->statusBar->clearMessage();
         ui->stackedWidget->setCurrentIndex(0);
-        glWidget->updateGL();
     }
 
 }
@@ -1255,31 +1436,45 @@ void MainWindow::on_toolButton_4_clicked()
     if(ui->toolButton_4->isChecked())
     {
         enum viewmodes {VIEW_TOP, VIEW_RIGHT, VIEW_LEFT, VIEW_BACK, VIEW_FRONT, VIEW_BOTTOM};
-        if((glWidgetO->CurrentViewMode == VIEW_TOP) || (glWidgetO->CurrentViewMode == VIEW_BOTTOM))
+        for(int i=0; i<4; i++)
         {
-            glWidgetO->RotatingNodes = 3;
+            glWidgetOViews[i];
+            if((glWidgetOViews[i]->CurrentViewMode == VIEW_TOP) || (glWidgetOViews[i]->CurrentViewMode == VIEW_BOTTOM))
+            {
+                glWidgetOViews[i]->RotatingNodes = 3;
+            }
+            else if((glWidgetOViews[i]->CurrentViewMode == VIEW_FRONT) || (glWidgetOViews[i]->CurrentViewMode == VIEW_BACK))
+            {
+                glWidgetOViews[i]->RotatingNodes = 2;
+            }
+            else if((glWidgetOViews[i]->CurrentViewMode == VIEW_RIGHT) || (glWidgetOViews[i]->CurrentViewMode == VIEW_LEFT))
+            {
+                glWidgetOViews[i]->RotatingNodes = 1;
+            }
         }
-        else if((glWidgetO->CurrentViewMode == VIEW_FRONT) || (glWidgetO->CurrentViewMode == VIEW_BACK))
+
+        for(int i=0; i<2; i++)
         {
-            glWidgetO->RotatingNodes = 2;
+            glWidgetViews[i]->RotatingNodes = 1;
+            glWidgetViews[i]->updateGL();
         }
-        else if((glWidgetO->CurrentViewMode == VIEW_RIGHT) || (glWidgetO->CurrentViewMode == VIEW_LEFT))
-        {
-            glWidgetO->RotatingNodes = 1;
-        }
-        glWidget->RotatingNodes = 1;
-        glWidget->updateGL();
         ui->statusBar->showMessage("Press X, Y or Z to choose lock rotating axis");
         ui->stackedWidget->setCurrentIndex(4);
     }
 
     else
     {
-        glWidgetO->RotatingNodes = 0;
-        glWidget->RotatingNodes = 0;
+        for(int i=0; i<4 ;i++)
+        {
+            glWidgetOViews[i]->RotatingNodes = 0;
+        }
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->RotatingNodes = 0;
+            glWidgetViews[i]->updateGL();
+        }
         ui->statusBar->clearMessage();
-        ui->stackedWidget->setCurrentIndex(0);
-        glWidget->updateGL();
+        ui->stackedWidget->setCurrentIndex(0);    
     }
 }
 
@@ -1370,8 +1565,14 @@ void MainWindow::on_toolButton_26_clicked()
             }
         }
     }
-    glWidget->updateGL();
-    glWidgetO->updateGL();
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->updateGL();
+    }
+    for(int i=0; i<4 ;i++)
+    {
+        glWidgetOViews[i]->updateGL();
+    }
 }
 //Rotate - clear text boxes
 void MainWindow::on_toolButton_25_clicked()
@@ -1501,50 +1702,74 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
     /* Choose X-axis */
     else if(eventti->key() == Qt::Key_X)
     {
-        if(glWidgetO->ScalingNodes>0)
+        if(glWidgetOViews[0]->ScalingNodes>0)
         {
             if(EditorMode == 1)
             {
                 //RoR axises
-                glWidgetO->ScalingNodes=3;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->ScalingNodes=3;
+                }
                 ui->statusBar->showMessage("Scaling X",10000);
             }
             else
             {
                 //BeamNG axises
-                glWidgetO->ScalingNodes=2;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->ScalingNodes=2;
+                }
                 ui->statusBar->showMessage("Scaling X",10000);
             }
         }
-        else if(glWidgetO->MovingNodes>0)
+        else if(glWidgetOViews[0]->MovingNodes>0)
         {
             if(EditorMode == 1)
             {
                 //RoR axises
-                glWidgetO->MovingNodes=3;
-                glWidget->MovingNodes=3;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->MovingNodes=3;
+                }
+                for(int i=0; i<2; i++)
+                {
+                    glWidgetViews[i]->MovingNodes=3;
+                }
                 ui->statusBar->showMessage("Moving X",10000);
             }
             else
             {
                 //BeamNG axises
-                glWidgetO->MovingNodes=2;
-                glWidget->MovingNodes=2;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->MovingNodes=2;
+                }
+                for(int i=0; i<2; i++)
+                {
+                    glWidgetViews[i]->MovingNodes=2;
+                }
                 ui->statusBar->showMessage("Moving X",10000);
             }
         }
-        else if(glWidgetO->RotatingNodes>0)
+        else if(glWidgetOViews[0]->RotatingNodes>0)
         {
             if(EditorMode == 1)
             {
                 //RoR axises
-                glWidgetO->RotatingNodes=2;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->RotatingNodes=2;
+                }
                 ui->statusBar->showMessage("Rotating X",10000);
             }
             else
             {
                 //BeamNG axises
-                glWidgetO->RotatingNodes=1;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->RotatingNodes=1;
+                }
                 ui->statusBar->showMessage("Rotating X",10000);
             }
         }
@@ -1552,50 +1777,74 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
     /* Choose Y-axis */
     else if(eventti->key() == Qt::Key_Y)
     {
-        if(glWidgetO->ScalingNodes>0)
+        if(glWidgetOViews[0]->ScalingNodes>0)
         {
             if(EditorMode == 1)
             {
                 //RoR axises
-                glWidgetO->ScalingNodes=4;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->ScalingNodes=4;
+                }
                 ui->statusBar->showMessage("Scaling Y");
             }
             else
             {
                 //BeamNG axises
-                glWidgetO->ScalingNodes=3;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->ScalingNodes=3;
+                }
                 ui->statusBar->showMessage("Scaling Y");
             }
         }
-        else if(glWidgetO->MovingNodes>0)
+        else if(glWidgetOViews[0]->MovingNodes>0)
         {
             if(EditorMode == 1)
             {
                 //RoR axises
-                glWidgetO->MovingNodes=4;
-                glWidget->MovingNodes=4;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->MovingNodes=4;
+                }
+                for(int i=0; i<2; i++)
+                {
+                    glWidgetViews[i]->MovingNodes=4;
+                }
                 ui->statusBar->showMessage("Moving Y");
             }
             else
             {
                 //BeamNG axises
-                glWidgetO->MovingNodes=3;
-                glWidget->MovingNodes=3;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->MovingNodes=3;
+                }
+                for(int i=0; i<2; i++)
+                {
+                    glWidgetViews[i]->MovingNodes=3;
+                }
                 ui->statusBar->showMessage("Moving Y");
             }
         }
-        else if(glWidgetO->RotatingNodes>0)
+        else if(glWidgetOViews[0]->RotatingNodes>0)
         {
             if(EditorMode == 1)
             {
                 //RoR axises
-                glWidgetO->RotatingNodes=3;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->RotatingNodes=3;
+                }
                 ui->statusBar->showMessage("Rotating Y");
             }
             else
             {
                 //BeamNG axises
-                glWidgetO->RotatingNodes=2;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->RotatingNodes=2;
+                }
                 ui->statusBar->showMessage("Rotating Y");
             }
         }
@@ -1603,57 +1852,84 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
     /* Choose Z-axis */
     else if(eventti->key() == Qt::Key_Z)
     {
-        if(glWidgetO->ScalingNodes>0)
+        if(glWidgetOViews[0]->ScalingNodes>0)
         {
             if(EditorMode == 1)
             {
                 //RoR axises
-                glWidgetO->ScalingNodes=2;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->ScalingNodes=2;
+                }
                 ui->statusBar->showMessage("Scaling Z");
             }
             else
             {
                 //BeamNG axises
-                glWidgetO->ScalingNodes=4;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->ScalingNodes=4;
+                }
                 ui->statusBar->showMessage("Scaling Z");
             }
         }
-        else if(glWidgetO->MovingNodes>0)
+        else if(glWidgetOViews[0]->MovingNodes>0)
         {
             if(EditorMode == 1)
             {
                 //RoR axises
-                glWidgetO->MovingNodes=2;
-                glWidget->MovingNodes=2;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->MovingNodes=2;
+                }
+                for(int i=0; i<2; i++)
+                {
+                    glWidgetViews[i]->MovingNodes=2;
+                }
                 ui->statusBar->showMessage("Moving Z");
             }
             else
             {
                 //BeamNG axises
-                glWidgetO->MovingNodes=4;
-                glWidget->MovingNodes=4;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->MovingNodes=4;
+                }
+                for(int i=0; i<2; i++)
+                {
+                    glWidgetViews[i]->MovingNodes=4;
+                }
                 ui->statusBar->showMessage("Moving Z");
             }
         }
-        else if(glWidgetO->RotatingNodes>0)
+        else if(glWidgetOViews[0]->RotatingNodes>0)
         {
             if(EditorMode == 1)
             {
                 //RoR axises
-                glWidgetO->RotatingNodes=1;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->RotatingNodes=1;
+                }
                 ui->statusBar->showMessage("Rotating Z");
             }
             else
             {
                 //BeamNG axises
-                glWidgetO->RotatingNodes=3;
+                for(int i=0; i<4 ;i++)
+                {
+                    glWidgetOViews[i]->RotatingNodes=3;
+                }
                 ui->statusBar->showMessage("Rotating Z");
             }
         }
     }
     else if(eventti->key() == Qt::Key_Shift)
     {
-        glWidget->Select_AddToSelection=1;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->Select_AddToSelection=1;
+        }
     }
 }
 
@@ -1661,7 +1937,10 @@ void MainWindow::keyReleaseEvent(QKeyEvent *eventti)
 {
     if(eventti->key() == Qt::Key_Shift)
     {
-        glWidget->Select_AddToSelection=0;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->Select_AddToSelection=0;
+        }
     }
 
 }
@@ -1692,13 +1971,25 @@ void MainWindow::on_toolButton_6_clicked()
     if(ui->toolButton_6->isChecked())
     {
         //if(OpenGLViews->currentIndex()!=1) OpenGLViews->setCurrentIndex(1);
-        glWidgetO->RectSelect=1;
-        glWidget->RectSelect=1;
+        for(int i=0; i<4 ;i++)
+        {
+            glWidgetOViews[i]->RectSelect=1;
+        }
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->RectSelect=1;
+        }
     }
     else
     {
-        glWidgetO->RectSelect=0;
-        glWidget->RectSelect=0;
+        for(int i=0; i<4 ;i++)
+        {
+            glWidgetOViews[i]->RectSelect=0;
+        }
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->RectSelect=0;
+        }
     }
 
 }
@@ -1709,38 +2000,68 @@ void MainWindow::ButtsUp(int buttoni)
     if(buttoni != 0)
     {
         ui->toolButton->setChecked(0);
-        glWidgetO->AddingNodes=0;
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->AddingNodes=0;
+        }
     }
     if(buttoni != 1)
     {
         ui->toolButton_2->setChecked(0);
-        glWidgetO->MovingNodes = 0;
-        glWidget->MovingNodes=0;
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->MovingNodes=0;
+        }
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->MovingNodes=0;
+        }
     }
     if(buttoni != 2)
     {
         ui->toolButton_3->setChecked(0);
-        glWidgetO->ScalingNodes = 0;
-        glWidget->ScalingNodes = 0;
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->ScalingNodes=0;
+        }
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->ScalingNodes=0;
+        }
         ui->statusBar->clearMessage();
     }
     if(buttoni != 3)
     {
         ui->toolButton_4->setChecked(0);
-        glWidgetO->RotatingNodes = 0;
-        glWidget->RotatingNodes = 0;
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->RotatingNodes=0;
+        }
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->RotatingNodes=0;
+        }
         ui->statusBar->clearMessage();
     }
     if(buttoni != 5)
     {
         ui->toolButton_6->setChecked(0);
-        glWidgetO->RectSelect=0;
-        glWidget->RectSelect=0;
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->RectSelect=0;
+        }
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->RectSelect=0;
+        }
     }
     if(buttoni != 6)
     {
         ui->toolButton_19->setChecked(0);
-        glWidget->AddingWheels=0;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->AddingWheels=0;
+        }
     }
 
 }
@@ -1842,19 +2163,28 @@ void MainWindow::on_toolButton_8_clicked()
 {
     if(ui->toolButton_8->isChecked())
     {
-        if(OpenGLViews->currentIndex()!=0) OpenGLViews->setCurrentIndex(0);
-        glWidget->NodePicking = 1;
-        glWidget->AddingBeamsSingle=1;
+        if(OpenGLViews->currentIndex()==1) OpenGLViews->setCurrentIndex(0);
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->NodePicking = 1;
+            glWidgetViews[i]->AddingBeamsSingle = 1;
+        }
     }
     else
     {
-        glWidget->NodePicking = 0;
-        glWidget->AddingBeamsSingle=0;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->NodePicking = 0;
+            glWidgetViews[i]->AddingBeamsSingle = 0;
+        }
     }
     if(ui->toolButton_9->isChecked())
     {
         ui->toolButton_9->setChecked(0);
-        glWidget->AddingBeamsCont=0;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->AddingBeamsCont=0;
+        }
     }
 }
 
@@ -1864,20 +2194,28 @@ void MainWindow::on_toolButton_9_clicked()
     if(ui->toolButton_9->isChecked())
     {
         if(OpenGLViews->currentIndex()!=0) OpenGLViews->setCurrentIndex(0);
-        glWidget->NodePicking = 1;
-        glWidget->AddingBeamsCont=1;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->NodePicking=1;
+            glWidgetViews[i]->AddingBeamsCont=1;
+        }
     }
     else
     {
-        glWidget->NodePicking = 0;
-        glWidget->AddingBeamsCont=0;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->NodePicking=0;
+            glWidgetViews[i]->AddingBeamsCont=0;
+        }
     }
     if(ui->toolButton_8->isChecked())
     {
         ui->toolButton_8->setChecked(0);
-        glWidget->AddingBeamsSingle=0;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->AddingBeamsSingle=0;
+        }
     }
-
 }
 
 /* Open beam arguments editor */
@@ -1948,6 +2286,7 @@ void MainWindow::on_lineEdit_textChanged(const QString &arg1)
 //Change orthographic view direction
 void MainWindow::on_comboBox_3_views_activated(int index)
 {
+    /*
     if(index == 0)
     {
         //top
@@ -2009,6 +2348,8 @@ void MainWindow::on_comboBox_3_views_activated(int index)
     }
     ui->label_10_bluepname->setText(texti);
     glWidgetO->updateGL();
+
+    */
 }
 
 /* show arrows */
@@ -2016,19 +2357,32 @@ void MainWindow::on_checkBox_2_clicked()
 {
     if(ui->checkBox_2->isChecked())
     {
-        glWidget->ShowArrows = 1;
-        glWidgetO->ShowArrows = 1;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->ShowArrows = 1;
+        }
+        for(int i=0; i<4 ;i++)
+        {
+            glWidgetOViews[i]->ShowArrows=1;
+        }
     }
     else
     {
-        glWidget->ShowArrows = 0;
-        glWidgetO->ShowArrows = 0;
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->ShowArrows = 0;
+        }
+        for(int i=0; i<4 ;i++)
+        {
+            glWidgetOViews[i]->ShowArrows=0;
+        }
     }
 }
 
 //load blueprint
 void MainWindow::on_toolButton_17_clicked()
 {
+    /*
     if(OpenGLViews->currentIndex()!=1) OpenGLViews->setCurrentIndex(1);
     QString fileName = QFileDialog::getOpenFileName(this);
     if (!fileName.isEmpty())
@@ -2044,27 +2398,32 @@ void MainWindow::on_toolButton_17_clicked()
         }
         ui->label_10_bluepname->setText(fileName);
     }
-
+    */
 
 }
 
 //change blueprint scaling
 void MainWindow::on_lineEdit_bluep_scale_textEdited(const QString &arg1)
 {
+    /*
     glWidgetO->blueprint_scale[glWidgetO->textureid] = arg1.toFloat();
-    glWidgetO->updateGL();
+    glWidgetO->updateGL();*/
 }
 
 void MainWindow::on_lineEdit_9_bpoffY_textEdited(const QString &arg1)
 {
+    /*
     glWidgetO->blueprint_offY[glWidgetO->textureid] = arg1.toFloat();
     glWidgetO->updateGL();
+    */
 }
 
 void MainWindow::on_lineEdit_9_bpoffX_textEdited(const QString &arg1)
 {
+    /*
     glWidgetO->blueprint_offX[glWidgetO->textureid] = arg1.toFloat();
     glWidgetO->updateGL();
+    */
 }
 
 //Launch beamng
@@ -2093,15 +2452,20 @@ void MainWindow::on_toolButton_19_clicked()
     if(ui->toolButton_19->isChecked())
     {
         if(OpenGLViews->currentIndex()!=0) OpenGLViews->setCurrentIndex(0);
-        glWidget->AddingWheels=1;
-        glWidget->NodePicking=1;
-
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->AddingWheels=1;
+            glWidgetViews[i]->NodePicking=1;
+        }
     }
     else
     {
-        glWidget->NodePicking=0;
-        glWidget->AddingWheels=0;
-        glWidget->TextOverlay="";
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->AddingWheels=0;
+            glWidgetViews[i]->NodePicking=0;
+            glWidgetViews[i]->TextOverlay.clear();
+        }
     }
 }
 
@@ -2171,27 +2535,38 @@ void MainWindow::on_pushButton_2_clicked()
 
 void MainWindow::SettingsUpdated()
 {
-    glWidget->backgroundcolor[0] = (AppSettings->readsetting("bg_color_r").toInt())/255.0f;
-    glWidget->backgroundcolor[1] = (AppSettings->readsetting("bg_color_g").toInt())/255.0f;
-    glWidget->backgroundcolor[2] = (AppSettings->readsetting("bg_color_b").toInt())/255.0f;
-    glWidgetO->backgroundcolor[0] = (AppSettings->readsetting("bg_color_r").toInt())/255.0f;
-    glWidgetO->backgroundcolor[1] = (AppSettings->readsetting("bg_color_g").toInt())/255.0f;
-    glWidgetO->backgroundcolor[2] = (AppSettings->readsetting("bg_color_b").toInt())/255.0f;
+    QVector <float> backgroundcolor;
+    backgroundcolor.append((AppSettings->readsetting("bg_color_r").toInt())/255.0f);
+    backgroundcolor.append((AppSettings->readsetting("bg_color_b").toInt())/255.0f);
+    backgroundcolor.append((AppSettings->readsetting("bg_color_g").toInt())/255.0f);
+    backgroundcolor.append(1.0f);
 
-    glWidget->gridcolor[0] = (AppSettings->readsetting("grid_color_r").toInt())/255.0f;
-    glWidget->gridcolor[1] = (AppSettings->readsetting("grid_color_g").toInt())/255.0f;
-    glWidget->gridcolor[2] = (AppSettings->readsetting("grid_color_b").toInt())/255.0f;
-    glWidgetO->gridcolor[0] =  (AppSettings->readsetting("grid_color_r").toInt())/255.0f;
-    glWidgetO->gridcolor[1] =  (AppSettings->readsetting("grid_color_g").toInt())/255.0f;
-    glWidgetO->gridcolor[2] =  (AppSettings->readsetting("grid_color_b").toInt())/255.0f;
+    QVector <float> gridcolor;
+    gridcolor.append((AppSettings->readsetting("grid_color_r").toInt())/255.0f);
+    gridcolor.append((AppSettings->readsetting("grid_color_b").toInt())/255.0f);
+    gridcolor.append((AppSettings->readsetting("grid_color_g").toInt())/255.0f);
+    gridcolor.append(1.0f);
 
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->backgroundcolor = backgroundcolor;
+        glWidgetViews[i]->gridcolor = gridcolor;
+    }
+    for(int i=0; i<4; i++)
+    {
+        glWidgetOViews[i]->backgroundcolor = backgroundcolor;
+        glWidgetOViews[i]->gridcolor = gridcolor;
+    }
     CurrentNodeBeam->VehicleAuthors[0] = AppSettings->readsetting("author");
 }
 
+/* Blueprints opacity adjust */
 void MainWindow::on_horizontalSlider_sliderMoved(int position)
 {
+    /*
     glWidgetO->blueprint_opa[glWidgetO->textureid] = ui->horizontalSlider->value()/100.0f;
     glWidgetO->updateGL();
+    */
 }
 
 //Set scale by measuring distance
@@ -2199,13 +2574,19 @@ void MainWindow::on_toolButton_20_clicked()
 {
     if(ui->toolButton_20->isChecked())
     {
-        glWidgetO->MeasuringDistance=1;
-        glWidgetO->SetScaleByDistance=1;
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->MeasuringDistance=1;
+            glWidgetOViews[i]->SetScaleByDistance=1;
+        }
     }
     else
     {
-        glWidgetO->MeasuringDistance=0;
-        glWidgetO->SetScaleByDistance=0;
+        for(int i=0; i<4; i++)
+        {
+            glWidgetOViews[i]->MeasuringDistance=0;
+            glWidgetOViews[i]->SetScaleByDistance=0;
+        }
     }
 
 }
@@ -2229,9 +2610,14 @@ void MainWindow::on_doubleSpinBox_editingFinished()
 
 void MainWindow::on_doubleSpinBox_valueChanged(double arg1)
 {
-    glWidgetO->ViewHeight = arg1;
-    glWidgetO->resizeGL(glWidgetO->width(), glWidgetO->height());
-    glWidgetO->updateGL();
+
+    for(int i=0; i<4; i++)
+    {
+        glWidgetOViews[i]->ViewHeight = arg1;
+        glWidgetOViews[i]->resizeGL(glWidgetOViews[i]->width(), glWidgetOViews[i]->height());
+        glWidgetOViews[i]->updateGL();
+    }
+
 }
 
 

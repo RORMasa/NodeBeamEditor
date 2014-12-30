@@ -230,10 +230,15 @@ private slots:
 
     void on_toolButton_28_clicked();
 
+    void on_pushButton_ViewTest_clicked();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
+    GLWidget *glWidgetViews[2];
     GLWidgetOrtho *glWidgetO;
+    GLWidgetOrtho* glWidgetOViews[4];
+
     NodeBeam *CurrentNodeBeam;
     BeamDefaultsDialog *BeamProperties;
     BeamDefaultsDialog *HubWheelProperties;

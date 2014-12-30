@@ -57,7 +57,6 @@
 GLWidget::GLWidget(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 {
-
     dRot = 4510;
     zRot = 3600;
     yRot = dRot*(zRot/5760);
@@ -109,6 +108,10 @@ GLWidget::GLWidget(QWidget *parent)
     DegreeToRadiansRatio = (2*pii)/360; //One degree is this many radians
     RectSelect = 0;
     Select_AddToSelection=0;
+
+    MovingNodes=0;
+    ScalingNodes=0;
+    RotatingNodes=0;
 }
 
 GLWidget::~GLWidget()
@@ -385,7 +388,7 @@ void GLWidget::drawpicking()
 
 
     PickedNode1=9999;
-    glPointSize(40);
+    glPointSize(10);
     glBegin(GL_POINTS);
 
     int i3 = 0;
@@ -707,6 +710,7 @@ void GLWidget::paintGL()
     glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
     //glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
     glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
+    glEnable(GL_MULTISAMPLE);
     draw(); //draw nodes, beams, wheels, lines
     if(MovingNodes > 0) Draw3DCursor();
     else if(ScalingNodes > 0) Draw3DCursor_Scale();
@@ -1068,6 +1072,8 @@ void GLWidget::setZoom()
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
+    //Set keyboard focus to this widget, if mouse moves on the widget
+    this->setFocus();
     //qDebug() << "hiiri " << event->x() << ", " << event->y();
     if(AddingBeamsSingle==2)
     {
@@ -1420,6 +1426,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
 /* Mouse wheel Zoom */
 void GLWidget::wheelEvent(QWheelEvent * event)
 {
+    this->updateGL();
     float NewZoom = ZoomFactor - event->delta()*0.001f;
     if(NewZoom > 0) ZoomFactor = NewZoom;
     resizeGL(this->width(),this->height());

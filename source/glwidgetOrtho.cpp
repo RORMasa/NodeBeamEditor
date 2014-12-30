@@ -130,13 +130,13 @@ GLWidgetOrtho::GLWidgetOrtho(QWidget *parent)
     gridcolor[0] = 1.0;
     gridcolor[1] = 1.0;
     gridcolor[2] = 1.0;
-    gridcolor[3] = 1.0;
+    gridcolor[3] = 0.3;
 
 }
 
 GLWidgetOrtho::~GLWidgetOrtho()
 {
-    delete NBPointer;
+
 }
 
 QSize GLWidgetOrtho::minimumSizeHint() const
@@ -567,17 +567,20 @@ void GLWidgetOrtho::paintGL()
     glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
     if(blueprint_file[textureid].length()>0) DrawBlueprint();
     draw();
-
     glEnable(GL_BLEND);
+    glEnable(GL_MULTISAMPLE);
+
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glColor4ub(255, 255, 255, 20);
     if(ShowArrows) DrawAxisArrows();
     DrawRect();
+    DrawUI();
     //glRectf(Rx0, Ry0, Rx1, Ry1);
     glDisable(GL_BLEND);
 
     glColor3f(0.6, 0.6, 0.6);
     if(TextOverlay.length()>0) renderText(10, yHeight-20, TextOverlay, QFont(  "Arial", 14, QFont::Bold, 0 ) );
+
     //QGLWidget::swapBuffers();
     //renderText(10, yHeight-20, "TextOverlay", QFont( "courier", 10, QFont::Normal, 0 ) );
 
@@ -888,10 +891,11 @@ void GLWidgetOrtho::mouseReleaseEvent(QMouseEvent *event)
 /* Mouse wheel zoom */
 void GLWidgetOrtho::wheelEvent(QWheelEvent *event)
 {
+    this->updateGL();
     float NewZoom = ViewHeight - (event->delta()*0.001f);
     if(NewZoom > 0) ViewHeight = NewZoom;
     resizeGL(this->width(), this->height());
-    updateGL();
+    this->updateGL();
 }
 
 void GLWidgetOrtho::MovingNodes_CalculateMove(QMouseEvent *event)
@@ -1591,3 +1595,58 @@ void GLWidgetOrtho::DrawWheel(float radius, float width, int rays)
     glEnable(GL_LIGHTING);
     glPopMatrix();
 }
+
+void GLWidgetOrtho::DrawUI()
+{
+    glRotatef(-zRot / 16.0, 0.0, 0.0, 1.0);
+    glRotatef(-yRot / 16.0, 0.0, 1.0, 0.0);
+    glRotatef(-xRot / 16.0, 1.0, 0.0, 0.0);
+    glTranslatef(-ViewOffsetX, -ViewOffsetY, 0.0);
+
+    float ScaleFactor = ViewHeight*2/height();
+    float ViewWidth = (ScaleFactor*width())/2.0f; //View width in scene coordinates
+
+    glTranslatef(-ViewWidth, ViewHeight, 0.0);
+
+    //qDebug() << ScaleFactor;
+    //qDebug() << ViewHeight;
+    //qDebug() << ViewWidth;
+
+    if(CurrentViewMode == VIEW_FRONT) DrawUI_Button(tr("Front"),0, 0,ScaleFactor);
+    else if(CurrentViewMode == VIEW_BACK) DrawUI_Button(tr("Back"),0, 0,ScaleFactor);
+    else if(CurrentViewMode == VIEW_TOP) DrawUI_Button(tr("Top"),0, 0,ScaleFactor);
+    else if(CurrentViewMode == VIEW_BOTTOM) DrawUI_Button(tr("Bottom"),0, 0,ScaleFactor);
+    else if(CurrentViewMode == VIEW_RIGHT) DrawUI_Button(tr("Right"),0, 0,ScaleFactor);
+    else if(CurrentViewMode == VIEW_LEFT) DrawUI_Button(tr("Left"),0, 0,ScaleFactor);
+}
+
+void GLWidgetOrtho::DrawUI_Button(QString text, int ButtonLocX, int ButtonLocY, float ScaleFactor)
+{
+
+
+
+
+    double ButtonHeight = 20;
+    double usize = ButtonHeight*ScaleFactor;
+
+    glTranslatef(ButtonLocX*ScaleFactor, -ButtonLocY*ScaleFactor, 0.0);
+
+    glDisable(GL_DEPTH_TEST);
+    glColor4f(0,0,0,0.5);
+    glBegin(GL_TRIANGLE_STRIP);
+    glVertex3f(0,-1*usize,0);
+    glVertex3f(2.7f*usize,-1*usize,0);
+    glVertex3f(0,0,0);
+    glVertex3f(2.7f*usize,0,0.5);
+
+    glEnd();
+    glEnable(GL_DEPTH_TEST);
+
+    glColor4f(0.5,0.5,0.5,1);
+    glTranslatef(-ButtonLocX*ScaleFactor, ButtonLocY*ScaleFactor, 0.0);
+
+    renderText(ButtonLocX+4, ButtonLocY+ButtonHeight-5, text, QFont(  "Arial", 8, QFont::Bold, 0 ));
+
+
+}
+

@@ -56,6 +56,7 @@ For easy testing, it is possible to specify preselected map and vehicle in edito
 * Numpad 2 Move backwards
 * Numpad 7 Move up
 * Numpad 1 Move down
+
 Tools
 * N  Add nodes
 * B  Add beams continuously

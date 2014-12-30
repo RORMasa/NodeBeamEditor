@@ -189,6 +189,10 @@ private:
     void DrawAxisArrows();
     void DrawWheel(float radius, float width, int rays);
 
+    /* Draw buttons */
+    void DrawUI();
+    void DrawUI_Button(QString text, int ButtonLocX, int ButtonLocY, float ScaleFactor);
+
     /* Blueprint functions */
     GLuint texture[6]; //Storage for blueprint images
     void DrawBlueprint(); //drawing function
