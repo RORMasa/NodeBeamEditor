@@ -119,6 +119,7 @@ public:
     QVector4D RectSel_3;
     QVector4D RectSel_4;
     bool Select_AddToSelection;
+    bool ManipulateByStep;
 
 public slots:
     void setXRotation(int angle);

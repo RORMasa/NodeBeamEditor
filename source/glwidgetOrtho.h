@@ -54,6 +54,8 @@ public:
     ~GLWidgetOrtho();
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
+    int WidgetID; //unique id for each widget
+
     bool AddingNodes;
     double ViewHeight; //in meters
     int MovingNodes;
@@ -93,6 +95,9 @@ public:
 
     void resizeGL(int width, int height);
 
+    //Very simple ui, menu open / close
+    bool DrawUI_MenuOpen;
+
 public slots:
     void setNBPointer(NodeBeam *NBPointer1);
     void setViewTop();
@@ -107,6 +112,7 @@ signals:
     void SelectionUpdated();
     void JBEAM_AddNodeO();
     void JBEAM_UpdateO();
+    void AdjustBlueprint(int WidgetID);
 
 
 protected:
@@ -189,9 +195,11 @@ private:
     void DrawAxisArrows();
     void DrawWheel(float radius, float width, int rays);
 
-    /* Draw buttons */
+    /* Very simple UI - draw buttons */
     void DrawUI();
-    void DrawUI_Button(QString text, int ButtonLocX, int ButtonLocY, float ScaleFactor);
+    void DrawUI_Button(QString text, int ButtonLocX, int ButtonLocY, float ScaleFactor, float width, bool drawbg);
+    int ButtonWidth;
+    int ButtonHeight;
 
     /* Blueprint functions */
     GLuint texture[6]; //Storage for blueprint images

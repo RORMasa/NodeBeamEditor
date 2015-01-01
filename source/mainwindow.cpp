@@ -13,13 +13,14 @@
 #include <QTimerEvent>
 #include <QPixmap>
 #include <QJsonDocument>
+#include "blueprints.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     /* About box : Version and compliation time , link to GitHub */
-    AboutBox = "<br><br><br><b>Version: 0.32</b><br><br>Built on ";
+    AboutBox = "<br><br><br><b>Version: 0.33</b><br><br>Built on ";
     AboutBox.append(__DATE__);
     AboutBox.append(", ");
     AboutBox.append(__TIME__);
@@ -40,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         GLWidgetOrtho * widget1 = new GLWidgetOrtho;
         glWidgetOViews[i] = widget1;
+        glWidgetOViews[i]->WidgetID = i;
+        qDebug() << " idtä " << glWidgetOViews[i]->WidgetID;
     }
 
     /* 3D perspective view */
@@ -151,6 +154,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QObject::connect(glWidgetOViews[i], SIGNAL(SelectionUpdated()), this, SLOT(UpdateSelection()));
         QObject::connect(glWidgetOViews[i], SIGNAL(JBEAM_AddNodeO()), this, SLOT(JBEAM_AddNode()));
         QObject::connect(glWidgetOViews[i], SIGNAL(JBEAM_UpdateO()), this, SLOT(JBEAM_Update()));
+        QObject::connect(glWidgetOViews[i], SIGNAL(AdjustBlueprint(int)), this, SLOT(AdjustBlueprint(int)));
     }
     for(int i=0; i<2; i++)
     {
@@ -160,9 +164,16 @@ MainWindow::MainWindow(QWidget *parent) :
             QObject::connect(glWidgetViews[i], SIGNAL(NodeBeamUpdated()), glWidgetOViews[i2], SLOT(updateGL()));
         }
     }
+    for(int i=0; i<4; i++)
+    {
+        int i2[7] = {0,1,2,3,0,1,2};
+        QObject::connect(glWidgetOViews[i], SIGNAL(NodeBeamUpdated()), glWidgetOViews[i2[i+1]], SLOT(updateGL()));
+        QObject::connect(glWidgetOViews[i], SIGNAL(NodeBeamUpdated()), glWidgetOViews[i2[i+2]], SLOT(updateGL()));
+        QObject::connect(glWidgetOViews[i], SIGNAL(NodeBeamUpdated()), glWidgetOViews[i2[i+3]], SLOT(updateGL()));
+    }
+
 
     //JBEAM widget
-
     JBEAM_NodeCursor = -1;
     JBEAM_BeamCursor = -1;
 
@@ -1458,7 +1469,7 @@ void MainWindow::on_toolButton_4_clicked()
             glWidgetViews[i]->RotatingNodes = 1;
             glWidgetViews[i]->updateGL();
         }
-        ui->statusBar->showMessage("Press X, Y or Z to choose lock rotating axis");
+        ui->statusBar->showMessage("Hold CTRL to rotate in 10 degree steps.",5000);
         ui->stackedWidget->setCurrentIndex(4);
     }
 
@@ -1924,6 +1935,7 @@ void MainWindow::keyPressEvent(QKeyEvent * eventti)
             }
         }
     }
+    /* Add to rectangle selection */
     else if(eventti->key() == Qt::Key_Shift)
     {
         for(int i=0; i<2; i++)
@@ -1940,6 +1952,14 @@ void MainWindow::keyReleaseEvent(QKeyEvent *eventti)
         for(int i=0; i<2; i++)
         {
             glWidgetViews[i]->Select_AddToSelection=0;
+        }
+    }
+    /* Move/Scale/Rotate by step */
+    else if(eventti->key() == Qt::Key_Control)
+    {
+        for(int i=0; i<2; i++)
+        {
+            glWidgetViews[i]->ManipulateByStep=0;
         }
     }
 
@@ -2286,58 +2306,58 @@ void MainWindow::on_lineEdit_textChanged(const QString &arg1)
 //Change orthographic view direction
 void MainWindow::on_comboBox_3_views_activated(int index)
 {
-    /*
+
     if(index == 0)
     {
         //top
-        glWidgetO->setViewTop();
+        glWidgetOViews[0]->setViewTop();
         ui->label_11_currView->setText("TOP VIEW");
-        glWidgetO->textureid = 0;
-        ui->horizontalSlider->setValue(glWidgetO->blueprint_opa[0]*100);
+        glWidgetOViews[0]->textureid = 0;
+        ui->horizontalSlider->setValue(glWidgetOViews[0]->blueprint_opa[0]*100);
     }
     else if(index == 1)
     {
         //bottom
-        glWidgetO->setViewBottom();
+        glWidgetOViews[0]->setViewBottom();
         ui->label_11_currView->setText("BOTTOM VIEW");
-        glWidgetO->textureid = 1;
-        ui->horizontalSlider->setValue(glWidgetO->blueprint_opa[1]*100);
+        glWidgetOViews[0]->textureid = 1;
+        ui->horizontalSlider->setValue(glWidgetOViews[0]->blueprint_opa[1]*100);
     }
     else if(index == 2)
     {
         //front
-        glWidgetO->setViewFront();
+        glWidgetOViews[0]->setViewFront();
         ui->label_11_currView->setText("FRONT VIEW");
-        glWidgetO->textureid = 2;
-        ui->horizontalSlider->setValue(glWidgetO->blueprint_opa[2]*100);
+        glWidgetOViews[0]->textureid = 2;
+        ui->horizontalSlider->setValue(glWidgetOViews[0]->blueprint_opa[2]*100);
     }
     else if(index == 3)
     {
         //back
-        glWidgetO->setViewBack();
+        glWidgetOViews[0]->setViewBack();
         ui->label_11_currView->setText("BACK VIEW");
-        glWidgetO->textureid = 3;
-        ui->horizontalSlider->setValue(glWidgetO->blueprint_opa[3]*100);
+        glWidgetOViews[0]->textureid = 3;
+        ui->horizontalSlider->setValue(glWidgetOViews[0]->blueprint_opa[3]*100);
     }
     else if(index == 4)
     {
         //right
-        glWidgetO->setViewRight();
+        glWidgetOViews[0]->setViewRight();
         ui->label_11_currView->setText("RIGHT VIEW");
-        glWidgetO->textureid = 4;
-        ui->horizontalSlider->setValue(glWidgetO->blueprint_opa[4]*100);
+        glWidgetOViews[0]->textureid = 4;
+        ui->horizontalSlider->setValue(glWidgetOViews[0]->blueprint_opa[4]*100);
     }
     else if(index == 5)
     {
         //left
-        glWidgetO->setViewLeft();
+        glWidgetOViews[0]->setViewLeft();
         ui->label_11_currView->setText("LEFT VIEW");
-        glWidgetO->textureid = 5;
-        ui->horizontalSlider->setValue(glWidgetO->blueprint_opa[5]*100);
+        glWidgetOViews[0]->textureid = 5;
+        ui->horizontalSlider->setValue(glWidgetOViews[0]->blueprint_opa[5]*100);
     }
 
-    ui->lineEdit_bluep_scale->setText(QString::number(glWidgetO->blueprint_scale[glWidgetO->textureid]));
-    QString texti = glWidgetO->blueprint_file[glWidgetO->textureid];
+    ui->lineEdit_bluep_scale->setText(QString::number(glWidgetOViews[0]->blueprint_scale[glWidgetOViews[0]->textureid]));
+    QString texti = glWidgetOViews[0]->blueprint_file[glWidgetOViews[0]->textureid];
     for(int i = texti.length(); i>0;i--)
     {
         if(texti[i] == '/')
@@ -2347,9 +2367,9 @@ void MainWindow::on_comboBox_3_views_activated(int index)
         }
     }
     ui->label_10_bluepname->setText(texti);
-    glWidgetO->updateGL();
+    glWidgetOViews[0]->updateGL();
 
-    */
+
 }
 
 /* show arrows */
@@ -3027,8 +3047,11 @@ void MainWindow::JBEAM_Update()
     */
 }
 
-/* Change 3D view to ortographic */
-void MainWindow::on_pushButton_ViewTest_clicked()
+/* Open blueprint adjustment widget for ortographic view */
+void MainWindow::AdjustBlueprint(int WidgetID)
 {
-
+    blueprints bps;
+    bps.glwidgetortho = glWidgetOViews[WidgetID];
+    QObject::connect(&bps,SIGNAL(updateGL()),glWidgetOViews[0],SLOT(updateGL()));
+    bps.exec();
 }

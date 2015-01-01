@@ -218,13 +218,17 @@ void GLWidget::draw()
 
     glEnd();
 
-    glLineWidth(2);
+    glColor3f(0,1,0);
+    glLineWidth(1);
     glBegin(GL_LINES);
     glVertex3d(0, y_min, 0);
     glVertex3d(0, y_max, 0);
+    glColor3f(1,0,0);
     glVertex3d(x_min, 0, 0);
     glVertex3d(x_max, 0, 0);
-
+    glColor3f(0,0,1);
+    glVertex3d(0, 0, x_min);
+    glVertex3d(0, 0, x_max);
     glEnd();
 
     /* Drawing nodes */
@@ -388,7 +392,7 @@ void GLWidget::drawpicking()
 
 
     PickedNode1=9999;
-    glPointSize(10);
+    glPointSize(20);
     glBegin(GL_POINTS);
 
     int i3 = 0;
@@ -715,7 +719,7 @@ void GLWidget::paintGL()
     if(MovingNodes > 0) Draw3DCursor();
     else if(ScalingNodes > 0) Draw3DCursor_Scale();
     else if(RotatingNodes > 0) Draw3DCursor_Rotate();
-    else if(ShowArrows) DrawAxisArrows();
+    else if(ShowArrows); //DrawAxisArrows();
     glColor3f(0.6, 0.6, 0.6);  //Set text color
     renderText(10, yHeight-20, TextOverlay, QFont( "Arial", 14, QFont::Bold, 0 ) );
     if(ShowNodeNumbers) RenderTextInScene(1);
@@ -1246,11 +1250,22 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
                 else angle = -(angle - angle3);
             }
 
-            //Rounding to 0.1 degrees resolution
-            angle = angle*(360.0f/(2*pii));
-            QString angletemp = QString::number(angle, 'f', 1);
-            angle = angletemp.toFloat();
-            angle = angle*((2*pii)/360.0f);
+            if(ManipulateByStep)
+            {
+                //Rounding to 10 degrees resolution
+                angle = angle*(360.0f/(2*pii))/10;
+                QString angletemp = QString::number(angle, 'f', 0);
+                angle = angletemp.toFloat();
+                angle = angle*((2*pii)/360.0f)*10;
+            }
+            else
+            {
+                //Rounding to 0.1 degrees resolution
+                angle = angle*(360.0f/(2*pii));
+                QString angletemp = QString::number(angle, 'f', 1);
+                angle = angletemp.toFloat();
+                angle = angle*((2*pii)/360.0f);
+            }
 
             if(Rotating3D_ModeX)
             {
@@ -1270,6 +1285,10 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
                     NBPointer->Nodes[NBPointer->SelectedNodes[i]].locY = a1*YCoordinate - b1*ZCoordinate + NBPointer->SelectionCenterPos.y();
                     NBPointer->Nodes[NBPointer->SelectedNodes[i]].locZ = a2*YCoordinate + b2*ZCoordinate + NBPointer->SelectionCenterPos.z();
                 }
+                QString Message = "Rotating X: ";
+                Message.append(QString::number((angle*360.0f/(2*pii))));
+                TextOverlay = Message;
+
             }
             else if(Rotating3D_ModeY)
             {
@@ -1288,6 +1307,11 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
                     NBPointer->Nodes[NBPointer->SelectedNodes[i]].locX = a1*XCoordinate - b1*ZCoordinate + NBPointer->SelectionCenterPos.x();
                     NBPointer->Nodes[NBPointer->SelectedNodes[i]].locZ = a2*XCoordinate + b2*ZCoordinate + NBPointer->SelectionCenterPos.z();
                 }
+
+                QString Message = "Rotating Y: ";
+                Message.append(QString::number((angle*360.0f/(2*pii))));
+                TextOverlay = Message;
+
             }
             else if(Rotating3D_ModeZ)
             {
@@ -1304,12 +1328,12 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
                     NBPointer->Nodes[NBPointer->SelectedNodes[i]].locY = a1*YCoordinate - b1*XCoordinate + NBPointer->SelectionCenterPos.y();
                     NBPointer->Nodes[NBPointer->SelectedNodes[i]].locX = a2*YCoordinate + b2*XCoordinate + NBPointer->SelectionCenterPos.x();
                 }
+
+                QString Message = "Rotating Z: ";
+                Message.append(QString::number((angle*360.0f/(2*pii))));
+                TextOverlay = Message;
+
             }
-
-            QString Message = "Rotating: ";
-            Message.append(QString::number((angle*360.0f/(2*pii))));
-            TextOverlay = Message;
-
             updateGL();
         }
         else if(RectSelect > 0)
@@ -1993,7 +2017,7 @@ void GLWidget::Draw3DCursor_Picking(int Mode)
     else if(Mode == 2) Draw3DCursor_Rotate();
 
     glReadPixels(lastPos.x(), viewport[3]-lastPos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, (void *) pixel);
-    qDebug() << "3D cursor picking " << pixel[0] << ", " << pixel[1] << "," << pixel[2];
+    //qDebug() << "3D cursor picking " << pixel[0] << ", " << pixel[1] << "," << pixel[2];
 
     if(Mode == 0)
     {
@@ -2004,7 +2028,7 @@ void GLWidget::Draw3DCursor_Picking(int Mode)
     }
     else if(Mode == 1)
     {
-        qDebug() << "skaalaus";
+
         if(pixel[0] == 255) Scaling3D_Mode = 1;
         else if(pixel[1] == 255) Scaling3D_Mode = 2;
         else if(pixel[2] == 255) Scaling3D_Mode = 3;
@@ -2257,6 +2281,14 @@ void GLWidget::keyPressEvent(QKeyEvent * event)
         ViewOffsetZ += 0.1f;
         updateGL();
     }
+    /* Move/Scale/Rotate by step */
+    else if(event->key() == Qt::Key_Control)
+    {
+        ManipulateByStep=1;
+    }
+
+
+
 }
 
 /* Get projection and model view matrix as transposed */

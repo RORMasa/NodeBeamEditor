@@ -132,6 +132,9 @@ GLWidgetOrtho::GLWidgetOrtho(QWidget *parent)
     gridcolor[2] = 1.0;
     gridcolor[3] = 0.3;
 
+    //Draw UI
+    ButtonHeight = 23;
+    DrawUI_MenuOpen = 0;
 }
 
 GLWidgetOrtho::~GLWidgetOrtho()
@@ -248,7 +251,6 @@ void GLWidgetOrtho::setViewLeft()
     textureid=5;
 }
 
-//! [6]
 void GLWidgetOrtho::draw()
 {
     /* Light positions */
@@ -269,6 +271,20 @@ void GLWidgetOrtho::draw()
 
     glDisable(GL_LIGHTING);
     glPushMatrix();
+
+    glColor3f(0,1,0);
+    glLineWidth(1);
+    glBegin(GL_LINES);
+    glVertex3d(0, y_min, 0);
+    glVertex3d(0, y_max, 0);
+    glColor3f(1,0,0);
+    glVertex3d(x_min, 0, 0);
+    glVertex3d(x_max, 0, 0);
+    glColor3f(0,0,1);
+    glVertex3d(0, 0, x_min);
+    glVertex3d(0, 0, x_max);
+    glEnd();
+
     glColor4f(0.25f,0.25f,0.25f,0.2f);
     if((CurrentViewMode==VIEW_TOP) || (CurrentViewMode==VIEW_BOTTOM) )
     {
@@ -321,14 +337,7 @@ void GLWidgetOrtho::draw()
     }
     glEnd();
 
-    glLineWidth(2);
-    glBegin(GL_LINES);
-    glVertex3d(0, y_min, 0);
-    glVertex3d(0, y_max, 0);
-    glVertex3d(x_min, 0, 0);
-    glVertex3d(x_max, 0, 0);
 
-    glEnd();
 
     glPopMatrix();
     glEnable(GL_LIGHTING);
@@ -572,7 +581,7 @@ void GLWidgetOrtho::paintGL()
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glColor4ub(255, 255, 255, 20);
-    if(ShowArrows) DrawAxisArrows();
+    if(ShowArrows); //DrawAxisArrows();
     DrawRect();
     DrawUI();
     //glRectf(Rx0, Ry0, Rx1, Ry1);
@@ -606,6 +615,56 @@ void GLWidgetOrtho::resizeGL(int width, int height)
 
 void GLWidgetOrtho::mousePressEvent(QMouseEvent *event)
 {
+    qDebug() << event->x() << ", " << event->y();
+    qDebug() << ButtonWidth << ", " << ButtonHeight;
+    /* Top left corner menu */
+    if((event->x()<ButtonWidth) && (event->y()<ButtonHeight))
+    {
+        //Open menu.
+        DrawUI_MenuOpen = 1;
+        updateGL();
+    }
+    else if(DrawUI_MenuOpen && (event->x()<ButtonWidth))
+    {
+        //If menu is open, test if a button is clicked
+        if((event->y()>ButtonHeight) && (event->y()<ButtonHeight*2))
+        {
+            setViewFront();
+        }
+        else if((event->y()>ButtonHeight*2) && (event->y()<ButtonHeight*3))
+        {
+            setViewBack();
+        }
+        else if((event->y()>ButtonHeight*3) && (event->y()<ButtonHeight*4))
+        {
+            setViewTop();
+        }
+        else if((event->y()>ButtonHeight*4) && (event->y()<ButtonHeight*5))
+        {
+            setViewBottom();
+        }
+        else if((event->y()>ButtonHeight*5) && (event->y()<ButtonHeight*6))
+        {
+            setViewRight();
+        }
+        else if((event->y()>ButtonHeight*6) && (event->y()<ButtonHeight*7))
+        {
+            setViewLeft();
+        }
+        else if((event->y()>ButtonHeight*7) && (event->y()<ButtonHeight*8))
+        {
+            //Blueprints button
+            emit AdjustBlueprint(WidgetID);
+        }
+        DrawUI_MenuOpen = 0;
+        updateGL();
+    }
+    else
+    {
+        //Close menu
+        DrawUI_MenuOpen = 0;
+        updateGL();
+    }
     if(AddingNodes)
     {
         if (event->buttons() & Qt::LeftButton) {
@@ -968,6 +1027,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
             if(inverse_Y) Ry1 = -Ry1;
 
             updateGL();
+            emit NodeBeamUpdated();
         }
         else if(MovingNodes==1)
         {
@@ -991,6 +1051,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                 NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ += -viewscalefactor*(**ZPointer2);
             }
             updateGL();
+            emit NodeBeamUpdated();
         }
         else if(MovingNodes==2)
         {
@@ -1011,6 +1072,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                     NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX += -viewscalefactor*(**XPointer2);
             }
             updateGL();
+            emit NodeBeamUpdated();
         }
         else if(MovingNodes==3)
         {
@@ -1031,6 +1093,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                     NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY += -viewscalefactor*(**YPointer2);
             }
             updateGL();
+            emit NodeBeamUpdated();
         }
         else if(MovingNodes==4)
         {
@@ -1051,6 +1114,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                     NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ += -viewscalefactor*(**ZPointer2);
             }
             updateGL();
+            emit NodeBeamUpdated();
         }
         else if(ScalingNodes==1)
         {
@@ -1069,6 +1133,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
 
             }
             updateGL();
+            emit NodeBeamUpdated();
         }
         else if(ScalingNodes==2)
         {
@@ -1085,6 +1150,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
 
             }
             updateGL();
+            emit NodeBeamUpdated();
         }
         else if(ScalingNodes==3)
         {
@@ -1101,6 +1167,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
 
             }
             updateGL();
+            emit NodeBeamUpdated();
         }
         else if(ScalingNodes==4)
         {
@@ -1117,6 +1184,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
 
             }
             updateGL();
+            emit NodeBeamUpdated();
         }
         else if(RotatingNodes==1)
         {
@@ -1162,6 +1230,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                 NBPointer->Nodes[NBPointer->SelectedNodes[i2]].locZ = a2*XCoordinate + b2*YCoordinate;
             }
             updateGL();
+            emit NodeBeamUpdated();
             QString Message = "Rotating X: ";
             Message.append(QString::number((angle*360.0f/(2*pii))));
             TextOverlay = Message;
@@ -1211,6 +1280,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                 NBPointer->Nodes[NBPointer->SelectedNodes[i2]].locZ = a2*XCoordinate + b2*YCoordinate;
             }
             updateGL();
+            emit NodeBeamUpdated();
             QString Message = "Rotating Y: ";
             Message.append(QString::number((angle*360.0f/(2*pii))));
             TextOverlay = Message;
@@ -1263,6 +1333,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                 NBPointer->Nodes[NBPointer->SelectedNodes[i2]].locY = a2*XCoordinate + b2*YCoordinate;
             }
             updateGL();
+            emit NodeBeamUpdated();
             QString Message = "Rotating Z: ";
             Message.append(QString::number((angle*360.0f/(2*pii))));
             TextOverlay = Message;
@@ -1276,8 +1347,9 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
         ViewOffsetX = ViewOffsetX + 2*(ViewHeight/yHeight)*(event->x() - lastPos.x());
         ViewOffsetY = ViewOffsetY + -2*(ViewHeight/yHeight)*(event->y() - lastPos.y());
 
-        qDebug() << "näkymä siirtyy: " << ViewOffsetX << ", " << ViewOffsetY;
+        //qDebug() << "näkymä siirtyy: " << ViewOffsetX << ", " << ViewOffsetY;
         updateGL();
+        emit NodeBeamUpdated();
 
     }
     //qDebug()<< "ortogonal view "<< event->pos();
@@ -1596,6 +1668,8 @@ void GLWidgetOrtho::DrawWheel(float radius, float width, int rays)
     glPopMatrix();
 }
 
+/* These functions draws the buttons in left up corner */
+/* Mouse press event takes care of handling the mouse click events of these buttons */
 void GLWidgetOrtho::DrawUI()
 {
     glRotatef(-zRot / 16.0, 0.0, 0.0, 1.0);
@@ -1608,45 +1682,55 @@ void GLWidgetOrtho::DrawUI()
 
     glTranslatef(-ViewWidth, ViewHeight, 0.0);
 
-    //qDebug() << ScaleFactor;
-    //qDebug() << ViewHeight;
-    //qDebug() << ViewWidth;
+    if(DrawUI_MenuOpen)
+    {
+        DrawUI_Button(tr("Change View"),0, 0,ScaleFactor,4,1);
+        DrawUI_Button(tr("Front"),0, 23,ScaleFactor,4,1);
+        DrawUI_Button(tr("Back"),0, 46,ScaleFactor,4,1);
+        DrawUI_Button(tr("Top"),0, 69,ScaleFactor,4,1);
+        DrawUI_Button(tr("Bottom"),0, 92,ScaleFactor,4,1);
+        DrawUI_Button(tr("Right"),0, 115,ScaleFactor,4,1);
+        DrawUI_Button(tr("Left"),0, 138,ScaleFactor,4,1);
+        DrawUI_Button(tr("Blueprints"),0, 161,ScaleFactor,4,1);
+    }
+    else
+    {
+        if(CurrentViewMode == VIEW_FRONT) DrawUI_Button(tr("Front"),0, 0,ScaleFactor,2.6f,1);
+        else if(CurrentViewMode == VIEW_BACK) DrawUI_Button(tr("Back"),0, 0,ScaleFactor,2.6f,1);
+        else if(CurrentViewMode == VIEW_TOP) DrawUI_Button(tr("Top"),0, 0,ScaleFactor,2.6f,1);
+        else if(CurrentViewMode == VIEW_BOTTOM) DrawUI_Button(tr("Bottom"),0, 0,ScaleFactor,2.6f,1);
+        else if(CurrentViewMode == VIEW_RIGHT) DrawUI_Button(tr("Right"),0, 0,ScaleFactor,2.6f,1);
+        else if(CurrentViewMode == VIEW_LEFT) DrawUI_Button(tr("Left"),0, 0,ScaleFactor,2.6f,1);
+    }
 
-    if(CurrentViewMode == VIEW_FRONT) DrawUI_Button(tr("Front"),0, 0,ScaleFactor);
-    else if(CurrentViewMode == VIEW_BACK) DrawUI_Button(tr("Back"),0, 0,ScaleFactor);
-    else if(CurrentViewMode == VIEW_TOP) DrawUI_Button(tr("Top"),0, 0,ScaleFactor);
-    else if(CurrentViewMode == VIEW_BOTTOM) DrawUI_Button(tr("Bottom"),0, 0,ScaleFactor);
-    else if(CurrentViewMode == VIEW_RIGHT) DrawUI_Button(tr("Right"),0, 0,ScaleFactor);
-    else if(CurrentViewMode == VIEW_LEFT) DrawUI_Button(tr("Left"),0, 0,ScaleFactor);
 }
 
-void GLWidgetOrtho::DrawUI_Button(QString text, int ButtonLocX, int ButtonLocY, float ScaleFactor)
+void GLWidgetOrtho::DrawUI_Button(QString text, int ButtonLocX, int ButtonLocY, float ScaleFactor, float width, bool drawbg)
 {
-
-
-
-
-    double ButtonHeight = 20;
     double usize = ButtonHeight*ScaleFactor;
+    ButtonWidth = (width*usize)/ScaleFactor;
 
     glTranslatef(ButtonLocX*ScaleFactor, -ButtonLocY*ScaleFactor, 0.0);
 
-    glDisable(GL_DEPTH_TEST);
-    glColor4f(0,0,0,0.5);
-    glBegin(GL_TRIANGLE_STRIP);
-    glVertex3f(0,-1*usize,0);
-    glVertex3f(2.7f*usize,-1*usize,0);
-    glVertex3f(0,0,0);
-    glVertex3f(2.7f*usize,0,0.5);
+    //Draw background box for the button
+    if(drawbg)
+    {
+        //Disable depth test to draw on top of the scene
+        glDisable(GL_DEPTH_TEST);
+        glColor4f(0,0,0,0.5);
+        glBegin(GL_TRIANGLE_STRIP);
+        glVertex3f(0,-1*usize,0);
+        glVertex3f(width*usize,-1*usize,0);
+        glVertex3f(0,0,0);
+        glVertex3f(width*usize,0,0);
 
-    glEnd();
-    glEnable(GL_DEPTH_TEST);
-
-    glColor4f(0.5,0.5,0.5,1);
+        glEnd();
+        glEnable(GL_DEPTH_TEST);
+    }
+    glColor4f(0.6,0.6,0.6,1);
     glTranslatef(-ButtonLocX*ScaleFactor, ButtonLocY*ScaleFactor, 0.0);
 
+    //Button text
     renderText(ButtonLocX+4, ButtonLocY+ButtonHeight-5, text, QFont(  "Arial", 8, QFont::Bold, 0 ));
-
-
 }
 

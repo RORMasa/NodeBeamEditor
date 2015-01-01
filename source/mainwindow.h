@@ -41,6 +41,7 @@ public slots:
     void JBEAM_UpdateSelectedNodes();
     void JBEAM_UpdateAllNodes();
     void JBEAM_Update();
+    void AdjustBlueprint(int WidgetID);
 
 signals:
     void ZoomChanged();
@@ -229,8 +230,6 @@ private slots:
     void on_toolButton_29_clicked();
 
     void on_toolButton_28_clicked();
-
-    void on_pushButton_ViewTest_clicked();
 
 private:
     Ui::MainWindow *ui;
