@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <QStringList>
 #include <QVector>
 #include <QObject>
 #include <QXmlStreamReader>
@@ -17,6 +18,21 @@ extern "C"
 #include "LuaBridge/LuaBridge.h"
 
 /**Node Beam Editor **/
+
+
+class Comments
+{
+public:
+    Comments();
+    ~Comments();
+    bool AddComment(QString Comment);
+    bool RemoveComment(int id);
+    QString ReadComment(int id);
+    int size();
+    void clear();
+private:
+    QStringList JBEAM_Comments;
+};
 
 struct Node
 {
@@ -37,6 +53,11 @@ struct Node
     int green;
     int blue;
 
+    //Comments for JBEAM file, comment will be in file
+    //before this node
+    Comments comments;
+
+    void clear();
 };
 
 struct NodeGroup
@@ -61,6 +82,11 @@ struct Beam
     bool HasBeamDefs;
     bool draw;
 
+    //Comments for JBEAM file, comment will be in file
+    //before this node
+    Comments comments;
+
+    void clear();
 };
 
 struct KeyValue
@@ -117,11 +143,30 @@ struct Hubwheel
     float radius;
 };
 
+//Temp nodes and beams going to JBEAM
+class JBEAM_Temp
+{
+public:
+    JBEAM_Temp();
+    ~JBEAM_Temp();
+
+    QVector < QVector <Node> > nodes;
+    QVector < QVector <Beam> > beams;
+
+    bool NodesToAdd;
+    bool BeamsToAdd;
+
+    void clear();
+    void AddNode(Node node);
+    void AddBeam(Beam beam);
+    void NewNodeGroup();
+    void NewBeamGroup();
+};
+
 class NodeBeam
 {
 
 public:
-
     bool EditorMode; //BeamNG <==> ROR axises
 
     QVector<Node> Nodes;
@@ -196,6 +241,11 @@ public:
     BeamGroup TempBeamGroup;
     BeamDefs TempBeamDefaults;
 
+    //JBEAM temp containers, for new nodes
+    //and beams going to JBEAM
+    JBEAM_Temp JBEAM_temp;
+
+
     //Currently selected nodes, by GlobalID
     QVector <int> SelectedNodes;
     QVector <int> SelectedNodes2;
@@ -263,12 +313,14 @@ public:
 
     /* LUA Script */
     void RunLUAScript();
-    //int LUAtesti(lua_State *L);
 
     //Functions for LUA
     void LuaPRINT();
-    void LuaAddNode(const std::string &name, float locx, float locy, float locz);
-
+    void LuaAddNode(const std::string name, float locx, float locy, float locz);
+    void LuaAddBeam(const std::string node1, const std::string node2);
+    void LuaAddComment(const std::string comment);
+    Comments LuaComments;
+    bool LuaComment;
 
     /* 3D Editing */
     bool Editing3D_CalculateSelectionCenter();

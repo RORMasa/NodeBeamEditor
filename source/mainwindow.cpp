@@ -619,7 +619,7 @@ void MainWindow::MainNodeBeamUpdated()
 
     for (int i = 0; i < ui->treeWidget->topLevelItemCount(); i++)
     {
-        QTreeWidgetItem *item =  ui->treeWidget->topLevelItem ( i );
+       QTreeWidgetItem *item =  ui->treeWidget->topLevelItem ( i );
         if(CurrentNodeBeam->NodeGroups[i].draw==1) item->setExpanded(1);
     }
 
@@ -791,11 +791,14 @@ void MainWindow::on_treeWidget_itemCollapsed(QTreeWidgetItem *item)
 
 void MainWindow::on_treeWidget_itemExpanded(QTreeWidgetItem *item)
 {
+    /*
     CurrentNodeBeam->NodeGroups[item->text(3).toInt()].draw=1;
     for(int i=0; i<2; i++)
     {
         glWidgetViews[i]->updateGL();
+        qDebug() << "updating gl " << i;
     }
+    */
 }
 
 /* Beams Tree Widget */
@@ -2155,9 +2158,15 @@ void MainWindow::UpdateSelection()
 /* Duplicate nodes */
 void MainWindow::on_toolButton_5_clicked()
 {
+    CurrentNodeBeam->JBEAM_temp.clear();
+
     CurrentNodeBeam->DuplicateNodes();
     MainNodeBeamUpdated();
     UpdateSelection();
+
+    JBEAM_AddFromTemp();
+
+    /*
     for(int i=0; i< CurrentNodeBeam->SelectedNodes2.size();i++)
     {
         CurrentNodeBeam->TempNode = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes2[i]];
@@ -2168,6 +2177,7 @@ void MainWindow::on_toolButton_5_clicked()
         CurrentNodeBeam->TempBeam = CurrentNodeBeam->TempBeams[i];
         JBEAM_AddBeam();
     }
+    */
 }
 
 
@@ -2266,9 +2276,13 @@ void MainWindow::on_toolButton_10_clicked()
 /* Extrude node beam from selected nodes */
 void MainWindow::on_toolButton_14_clicked()
 {
+    CurrentNodeBeam->JBEAM_temp.clear();
+
     CurrentNodeBeam->ExtrudeNodes();
     MainNodeBeamUpdated();
     UpdateSelection();
+    JBEAM_AddFromTemp();
+    /*
     for(int i=0; i< CurrentNodeBeam->SelectedNodes2.size();i++)
     {
         CurrentNodeBeam->TempNode = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes2[i]];
@@ -2283,6 +2297,10 @@ void MainWindow::on_toolButton_14_clicked()
             JBEAM_AddBeam();
         }
     }
+    */
+
+
+
 }
 
 void MainWindow::on_lineEdit_editingFinished()
@@ -2672,10 +2690,15 @@ void MainWindow::on_actionBeamNG_Wiki_triggered()
     QDesktopServices::openUrl(QUrl(wiki));
 }
 
+/* Run Lua script */
 void MainWindow::on_actionRun_triggered()
 {
+    CurrentNodeBeam->JBEAM_temp.clear();
     QString tiedostonimi = "luascripts/testi.lua";
     CurrentNodeBeam->RunLUAScript();
+    JBEAM_AddFromTemp();
+    MainNodeBeamUpdated();
+    qDebug() << "something";
 }
 
 /* Parse JBEAM widget refresh button clicked */
@@ -3046,4 +3069,29 @@ void MainWindow::AdjustBlueprint(int WidgetID)
     bps.glwidgetortho = glWidgetOViews[WidgetID];
     QObject::connect(&bps,SIGNAL(updateGL()),glWidgetOViews[0],SLOT(updateGL()));
     bps.exec();
+}
+
+/* Add beams and nodes from temp */
+void MainWindow::JBEAM_AddFromTemp()
+{
+    //Add all nodes from TEMP
+    for(int i=0; i<CurrentNodeBeam->JBEAM_temp.nodes.size();i++)
+    {
+        for(int i2=0; i2<CurrentNodeBeam->JBEAM_temp.nodes.at(i).size();i2++)
+        {
+            CurrentNodeBeam->TempNode = CurrentNodeBeam->JBEAM_temp.nodes.at(i).at(i2);
+            JBEAM_AddNode();
+        }
+    }
+
+    //Add all beams from TEMP
+    for(int i=0; i<CurrentNodeBeam->JBEAM_temp.beams.size();i++)
+    {
+        for(int i2=0; i2<CurrentNodeBeam->JBEAM_temp.beams.at(i).size();i2++)
+        {
+            CurrentNodeBeam->TempBeam = CurrentNodeBeam->JBEAM_temp.beams.at(i).at(i2);
+            JBEAM_AddBeam();
+        }
+    }
+    CurrentNodeBeam->JBEAM_temp.clear();
 }

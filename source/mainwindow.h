@@ -274,6 +274,8 @@ private:
     //Beam JBEAM cursor; if is set, add new beams at cursor position. Value is -1 if not set
     int JBEAM_BeamCursor;
 
+    void JBEAM_AddFromTemp();
+
     QString EditorTitle;
 
 };

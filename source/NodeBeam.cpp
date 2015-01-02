@@ -20,6 +20,18 @@
 #include "LuaBridge/RefCountedPtr.h"
 #include "LuaBridge/RefCountedObject.h"
 
+void Node::clear()
+{
+    GroupID = 0;
+}
+
+void Beam::clear()
+{
+    BeamGroupID = 0;
+    HasBeamDefs=0;
+    draw = 0;
+}
+
 NodeBeam::NodeBeam()
 {
     VehicleName = "";
@@ -32,6 +44,9 @@ NodeBeam::NodeBeam()
     ActiveBeamGroup=-1;
 
     DefaultPrefixCalculator=0;
+    LuaComment=0;
+    TempNode.clear();
+    TempBeam.clear();
 
 }
 
@@ -1322,6 +1337,10 @@ int NodeBeam::AddNode(int NodeGroupID)
         blue++;
     }
 
+    //Add node to JBEAM node buffer
+    //To be written on JBEAM widget next time it is refreshed
+    JBEAM_temp.AddNode(TempNode);
+
     return TempNode.GlobalID;
 }
 
@@ -1387,44 +1406,15 @@ void NodeBeam::DeleteNode(int NodeGlobalID)
 /* Add beam */
 void NodeBeam::AddBeam(int Node1ID, int Node2ID, int BeamGroup)
 {
-
     TempBeam.Node1GlobalID = Node1ID;
     TempBeam.Node2GlobalID = Node2ID;
     TempBeam.Node1Name = Nodes[Node1ID].NodeName;
     TempBeam.Node2Name = Nodes[Node2ID].NodeName;
     TempBeam.HasBeamDefs=0;
     TempBeam.draw=1;
+    qDebug() << BeamGroup;
 
-    //Adding to group
-    //If beam group exists, add in that
-    if(BeamGroups.size() > 0)
-    {
-        //Calculate location
-        int BeamNumber = 0;
-        for(int i=0; i<BeamGroup;i++)
-        {
-            BeamNumber = BeamNumber + BeamGroups[i].BeamAmount;
-        }
-
-        TempBeam.BeamGroupID = BeamGroup;
-        Beams.insert(BeamNumber,TempBeam);
-        BeamGroups[BeamGroup].BeamAmount++;
-        qDebug()<<"Adding beam to group :" << Beams[BeamNumber].BeamGroupID << "Beams in group: "<< BeamGroups[BeamGroup].BeamAmount;
-
-    }
-    //else create empty group.
-    else
-    {
-        qDebug()<<"Creating 1.st beam group.";
-        BeamGroups.resize(BeamGroups.size()+1);
-        BeamGroups[BeamGroups.size()-1].BeamGroupName = "Beam Group 1.";
-        BeamGroups[BeamGroups.size()-1].BeamGroupID = 0;
-        BeamGroups[BeamGroups.size()-1].draw=1;
-        BeamGroups[BeamGroups.size()-1].BeamAmount = 1;
-        TempBeam.BeamGroupID = 0;
-        Beams.insert(0,TempBeam);
-    }
-
+    AddBeamT();
 }
 
 /* Add beam from TempBeam */
@@ -1436,6 +1426,7 @@ void NodeBeam::AddBeamT()
     if(BeamGroups.size() > 0)
     {
         int BeamGroup = TempBeam.BeamGroupID;
+         qDebug() << BeamGroup;
         //Calculate location
         int BeamNumber = 0;
         for(int i=0; i<BeamGroup;i++)
@@ -1461,6 +1452,7 @@ void NodeBeam::AddBeamT()
         Beams.insert(0,TempBeam);
     }
 
+    JBEAM_temp.AddBeam(TempBeam);
 }
 
 /* Add empty beam group at the end of the list  */
