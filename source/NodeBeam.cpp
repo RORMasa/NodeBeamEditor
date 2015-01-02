@@ -14,8 +14,11 @@
 
 #include <QJsonValue>
 #include <QJsonArray>
-
 #include <QJsonObject>
+
+#include "LuaBridge/LuaBridge.h"
+#include "LuaBridge/RefCountedPtr.h"
+#include "LuaBridge/RefCountedObject.h"
 
 NodeBeam::NodeBeam()
 {
@@ -1505,6 +1508,7 @@ void NodeBeam::DuplicateNodes()
 
     //List of copied nodes
     SelectedNodes2 = Copied;
+    TempBeamsL.clear();
     TempBeams.clear();
 
     for(int i=0; i<SelectedNodes.size(); i++)
@@ -1539,29 +1543,29 @@ void NodeBeam::DuplicateNodes()
         TempBeam = TempBeams[i];
         AddBeamT();
     }
+    TempBeamsL.append(TempBeams);
 }
 
 void NodeBeam::ExtrudeNodes()
 {
     if(SelectedNodes.size()>0)
     {
-        TempBeams2.clear();
-        TempBeams3.clear();
         //Copying selected nodes
         DuplicateNodes();
+        TempBeams.clear();
 
         //Add beams between the extruded part and exsisting part
 
-        //ActiveBeamGroup = NewBeamGroup("Extruded");
         ActiveBeamGroup = BeamGroups.size()-1;
         if(ActiveBeamGroup < 0) ActiveBeamGroup = NewBeamGroup("Extruded");
         for(int i=0; i<SelectedNodes.size(); i++)
         {
-
             AddBeam(SelectedNodes[i], SelectedNodes2[i], ActiveBeamGroup);
-            TempBeams3.append(TempBeam); //Add beam in tempbeams, to append later in JBEAM text window
+            TempBeams.append(TempBeam); //Add beam in tempbeams, to append later in JBEAM text window
 
         }
+        TempBeamsL.append(TempBeams);
+        TempBeams.clear();
 
         for(int i=0; i<SelectedNodes.size(); i++)
         {
@@ -1582,8 +1586,7 @@ void NodeBeam::ExtrudeNodes()
                             TempBeam.Node2Name = Nodes[TempBeam.Node2GlobalID].NodeName;
                             TempBeam.Properties = TempBeam.Properties;
                             TempBeam.draw = 1;
-                            TempBeams2.append(TempBeam);
-
+                            TempBeams.append(TempBeam);
 
                             TempBeam.BeamDefsID = Beams[i2].BeamDefsID;
                             TempBeam.BeamGroupID = Beams[i2].BeamGroupID;
@@ -1594,7 +1597,7 @@ void NodeBeam::ExtrudeNodes()
                             TempBeam.Node2Name = Nodes[TempBeam.Node2GlobalID].NodeName;
                             TempBeam.Properties = TempBeam.Properties;
                             TempBeam.draw = 1;
-                            TempBeams2.append(TempBeam);
+                            TempBeams.append(TempBeam);
                         }
                     }
                 }
@@ -1602,11 +1605,12 @@ void NodeBeam::ExtrudeNodes()
             }
         }
 
-        for(int i=0; i<TempBeams2.size(); i++)
+        for(int i=0; i<TempBeams.size(); i++)
         {
-            TempBeam = TempBeams2[i];
+            TempBeam = TempBeams[i];
             AddBeamT();
         }
+        TempBeamsL.append(TempBeams);
     }
 
 }
@@ -2720,6 +2724,8 @@ void NodeBeam::clear()
 
     ActiveNodeGroup=-1;
     ActiveBeamGroup=-1;
+
+    qDebug() << "Tyhjennys";
 }
 
 /* Parse contents of the JBEAM text edit box */
@@ -3181,31 +3187,5 @@ bool NodeBeam::Editing3D_CalculateSelectionCenter()
     SelectionCenterPos.setY(MinY+((MaxY-MinY)/2));
     SelectionCenterPos.setZ(MinZ+((MaxZ-MinZ)/2));
 
-    qDebug() << "Selection center is " << SelectionCenterPos.x() << ", " << SelectionCenterPos.y() << ", " << SelectionCenterPos.z();
+    //qDebug() << "Selection center is " << SelectionCenterPos.x() << ", " << SelectionCenterPos.y() << ", " << SelectionCenterPos.z();
 }
-
-
-/*
-static void LUAtesti(lua_State *L)
-{
-
-    //int n = lua_gettop(L);
-    qDebug() << "toimii! ";
-
-}
-
-void NodeBeam::RunLUAScript()
-{
-
-    qDebug() << "hello world!";
-    //register our function
-    lua_State *L = luaL_newstate();
-    luaL_openlibs(L);
-
-    lua_setglobal(L,"testi");
-    luaL_dofile(L, "testi.lua");
-    lua_close(L);
-}
-*/
-
-

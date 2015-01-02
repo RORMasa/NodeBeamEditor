@@ -42,7 +42,6 @@ MainWindow::MainWindow(QWidget *parent) :
         GLWidgetOrtho * widget1 = new GLWidgetOrtho;
         glWidgetOViews[i] = widget1;
         glWidgetOViews[i]->WidgetID = i;
-        qDebug() << " idtä " << glWidgetOViews[i]->WidgetID;
     }
 
     /* 3D perspective view */
@@ -2275,22 +2274,15 @@ void MainWindow::on_toolButton_14_clicked()
         CurrentNodeBeam->TempNode = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes2[i]];
         JBEAM_AddNode();
     }
-    for(int i=0; i< CurrentNodeBeam->TempBeams.size();i++)
-    {
-        CurrentNodeBeam->TempBeam = CurrentNodeBeam->TempBeams[i];
-        JBEAM_AddBeam();
-    }
-    for(int i=0; i< CurrentNodeBeam->TempBeams2.size();i++)
-    {
-        CurrentNodeBeam->TempBeam = CurrentNodeBeam->TempBeams2[i];
-        JBEAM_AddBeam();
-    }
-    for(int i=0; i< CurrentNodeBeam->TempBeams3.size();i++)
-    {
-        CurrentNodeBeam->TempBeam = CurrentNodeBeam->TempBeams3[i];
-        JBEAM_AddBeam();
-    }
 
+    for(int i2=0; i2< CurrentNodeBeam->TempBeamsL.size(); i2++)
+    {
+        for(int i=0; i< CurrentNodeBeam->TempBeamsL.at(i2).size();i++)
+        {
+            CurrentNodeBeam->TempBeam = CurrentNodeBeam->TempBeamsL[i2][i];
+            JBEAM_AddBeam();
+        }
+    }
 }
 
 void MainWindow::on_lineEdit_editingFinished()
@@ -2683,7 +2675,7 @@ void MainWindow::on_actionBeamNG_Wiki_triggered()
 void MainWindow::on_actionRun_triggered()
 {
     QString tiedostonimi = "luascripts/testi.lua";
-    //CurrentNodeBeam->RunLUAScript();
+    CurrentNodeBeam->RunLUAScript();
 }
 
 /* Parse JBEAM widget refresh button clicked */

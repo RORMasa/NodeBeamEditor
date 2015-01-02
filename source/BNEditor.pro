@@ -17,7 +17,6 @@ TEMPLATE = app
 
 INCLUDEPATH += . \
     Generators \
-    "F:\Program Files (x86)\Lua\5.1\include" \
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -32,7 +31,8 @@ SOURCES += main.cpp\
     jbeam_object.cpp \
     beamdefaultsdialog.cpp \
     settings.cpp \
-    NodeBeam_LUA.cpp
+    NodeBeam_LUA.cpp \
+    blueprints.cpp
 
 HEADERS  += mainwindow.h \
     glwidget.h \
@@ -45,7 +45,8 @@ HEADERS  += mainwindow.h \
     jbeam.h \
     jbeam_object.h \
     beamdefaultsdialog.h \
-    settings.h
+    settings.h \
+    blueprints.h
 
 
 FORMS    += mainwindow.ui \
@@ -54,10 +55,16 @@ FORMS    += mainwindow.ui \
     inputdialog.ui \
     Generators/tracksgenerator.ui \
     beamdefaultsdialog.ui \
-    settings.ui
+    settings.ui \
+    blueprints.ui
 
 RESOURCES += \
     icons.qrc
 
 LIBS += \
-    #-L"F:\Program Files (x86)\Lua\5.1\lib\lua5.1.lib" -llua51
+
+    win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../lua/ -llua52
+    win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../lua/ -llua52
+
+    INCLUDEPATH += $$PWD/lua
+    DEPENDPATH += $$PWD/lua

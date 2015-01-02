@@ -8,13 +8,13 @@
 #include <QVector3D>
 
 /*LUA*/
-//extern "C"
-//{
-//#include "lua.h"
-//#include "lualib.h"
-//#include "lauxlib.h"
-//}
-//#include "LuaBridge/LuaBridge.h"
+extern "C"
+{
+    #include "lua.h"
+    #include "lualib.h"
+    #include "lauxlib.h"
+}
+#include "LuaBridge/LuaBridge.h"
 
 /**Node Beam Editor **/
 
@@ -187,8 +187,8 @@ public:
     //Temprorary values can be saved in these
     Beam TempBeam;
     QVector <Beam> TempBeams;
-    QVector <Beam> TempBeams2;
-    QVector <Beam> TempBeams3;
+    QList < QVector <Beam> > TempBeamsL;
+
     Node TempNode;
     QVector <Node> TempNodes;
     Hubwheel TempHubwheel;
@@ -262,8 +262,13 @@ public:
     double calculate_length(double x, double y);
 
     /* LUA Script */
-    //void RunLUAScript();
+    void RunLUAScript();
     //int LUAtesti(lua_State *L);
+
+    //Functions for LUA
+    void LuaPRINT();
+    void LuaAddNode(const std::string &name, float locx, float locy, float locz);
+
 
     /* 3D Editing */
     bool Editing3D_CalculateSelectionCenter();
