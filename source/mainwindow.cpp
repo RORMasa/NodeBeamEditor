@@ -354,12 +354,12 @@ void MainWindow::on_actionNew_triggered()
                    "            \"authors\":\"Your name\"      \n"
                    "        },\n"
                    "        \"nodes\":[\n"
-                   "            [\"id\", \"posX\", \"posY\", \"posZ\"],\n"
+                   "            [\"id\", \"posX\", \"posY\", \"posZ\"],\n\n"
                    "            //BNEnodes\n"
                    "   \n"
                    "        ],\n"
                    "        \"beams\":[\n"
-                   "            [\"id1:\", \"id2:\"],\n"
+                   "            [\"id1:\", \"id2:\"],\n\n"
                    "            //BNEbeams\n"
                    "   \n"
                    "   \n"
@@ -2693,12 +2693,33 @@ void MainWindow::on_actionBeamNG_Wiki_triggered()
 /* Run Lua script */
 void MainWindow::on_actionRun_triggered()
 {
-    CurrentNodeBeam->JBEAM_temp.clear();
-    QString tiedostonimi = "luascripts/testi.lua";
-    CurrentNodeBeam->RunLUAScript();
+    QDir luafolder;
+    luafolder.current();
+    luafolder.cd(tr("lua"));
+
+    CurrentNodeBeam->JBEAM_temp.clear();   
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Run Lua script"),
+                                              luafolder.path(),
+                                              tr("Lua script (*.lua *.*)"));
+    if (!fileName.isEmpty())
+    {
+        CurrentNodeBeam->RunLUAScript(fileName);
+        LastScript=fileName;
+    }
     JBEAM_AddFromTemp();
     MainNodeBeamUpdated();
-    qDebug() << "something";
+}
+
+/* Run Lua script again */
+void MainWindow::on_actionRun_again_triggered()
+{
+    if(LastScript.size()>0)
+    {
+        CurrentNodeBeam->JBEAM_temp.clear();
+        CurrentNodeBeam->RunLUAScript(LastScript);
+        JBEAM_AddFromTemp();
+        MainNodeBeamUpdated();
+    }
 }
 
 /* Parse JBEAM widget refresh button clicked */
@@ -2746,11 +2767,15 @@ void MainWindow::JBEAM_AddNode()
     nodeline+= ", ";
     nodeline+= QString::number(CurrentNodeBeam->TempNode.locZ,'f',5);
     nodeline.append("],\n");
-    qDebug() << "adding node to JBEAM widget";
     QTextCursor textcursor = ui->textEdit_JBEAM->textCursor();
     if(JBEAM_NodeCursor >= 0)
     {
         textcursor.setPosition(JBEAM_NodeCursor);
+    }
+
+    for(int i=0; i<CurrentNodeBeam->TempNode.comments.size();i++)
+    {
+        JBEAM_AddComment(JBEAM_NodeCursor, CurrentNodeBeam->TempNode.comments.ReadComment(i));
     }
     textcursor.insertText(nodeline);
     ui->textEdit_JBEAM->setTextCursor(textcursor);
@@ -2770,7 +2795,27 @@ void MainWindow::JBEAM_AddBeam()
     {
         textcursor.setPosition(JBEAM_BeamCursor);
     }
+
+    for(int i=0; i<CurrentNodeBeam->TempBeam.comments.size();i++)
+    {
+        JBEAM_AddComment(JBEAM_BeamCursor, CurrentNodeBeam->TempBeam.comments.ReadComment(i));
+    }
+
     textcursor.insertText(beamline);
+    ui->textEdit_JBEAM->setTextCursor(textcursor);
+}
+
+void MainWindow::JBEAM_AddComment(int CursorPos, QString Comment)
+{
+    QString commentline = "\u0009\u0009\u0009//";
+    commentline+= Comment;
+    commentline+= "\n";
+    QTextCursor textcursor = ui->textEdit_JBEAM->textCursor();
+    if(CursorPos >= 0)
+    {
+        textcursor.setPosition(CursorPos);
+    }
+    textcursor.insertText(commentline);
     ui->textEdit_JBEAM->setTextCursor(textcursor);
 }
 
@@ -2986,12 +3031,12 @@ void MainWindow::on_pushButton_SetNodeCursor_clicked()
     int CurrentCursorPos = ui->textEdit_JBEAM->textCursor().position();
     //Remove old cursor
     QString JBEAM_text = ui->textEdit_JBEAM->toPlainText();
-    JBEAM_text.replace("\u0009\u0009\u0009//BNEnodes\n", "             \n");
+    JBEAM_text.replace("//BNEnodes\n", "          \n");
     ui->textEdit_JBEAM->setText(JBEAM_text);
 
     QTextCursor cursor = ui->textEdit_JBEAM->textCursor();
     cursor.setPosition(CurrentCursorPos);
-    cursor.insertText("\u0009\u0009\u0009//BNEnodes\n");
+    cursor.insertText("\n\u0009\u0009\u0009//BNEnodes\n");
     ui->textEdit_JBEAM->setTextCursor(cursor);
 
 }
@@ -3002,12 +3047,12 @@ void MainWindow::on_pushButton_SetBeamCursor_clicked()
     int CurrentCursorPos = ui->textEdit_JBEAM->textCursor().position();
     //Remove old cursor
     QString JBEAM_text = ui->textEdit_JBEAM->toPlainText();
-    JBEAM_text.replace("\u0009\u0009\u0009//BNEbeams\n", "             \n");
+    JBEAM_text.replace("//BNEbeams\n", "          \n");
     ui->textEdit_JBEAM->setText(JBEAM_text);
 
     QTextCursor cursor = ui->textEdit_JBEAM->textCursor();
     cursor.setPosition(CurrentCursorPos);
-    cursor.insertText("\u0009\u0009\u0009//BNEbeams\n");
+    cursor.insertText("\n\u0009\u0009\u0009//BNEbeams\n");
     ui->textEdit_JBEAM->setTextCursor(cursor);
 
 }
@@ -3019,31 +3064,30 @@ void MainWindow::JBEAM_UpdateCursors(QString JBEAM_box)
     JBEAM_NodeCursor = JBEAM_box.indexOf("//BNEnodes");
     if(JBEAM_NodeCursor>=0)
     {
-        for(int i=JBEAM_NodeCursor; i<JBEAM_texti.length();i++)
+        for(int i=JBEAM_NodeCursor; i>0;i--)
         {
             if(JBEAM_texti[i] == '\n')
             {
-                JBEAM_NodeCursor += i+2;
+                JBEAM_NodeCursor = i;
                 break;
             }
             else JBEAM_NodeCursor = -1;
         }
     }
-
     JBEAM_BeamCursor = JBEAM_box.indexOf("//BNEbeams");
     if(JBEAM_BeamCursor>=0)
     {
-        for(int i=JBEAM_BeamCursor; i<JBEAM_texti.length();i++)
+        for(int i=JBEAM_BeamCursor; i>0;i--)
         {
             if(JBEAM_texti[i] == '\n')
             {
-                JBEAM_BeamCursor += i+2;
+                JBEAM_BeamCursor = i;
                 break;
             }
             else JBEAM_BeamCursor = -1;
         }
     }
-    qDebug() << "JBEAM CURSORI" << JBEAM_BeamCursor;
+    //qDebug() << "JBEAM CURSORI" << JBEAM_BeamCursor;
 }
 
 /* JBEAM text edit box Text changed event */

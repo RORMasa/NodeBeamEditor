@@ -384,7 +384,7 @@ void NodeBeam::ParseLine(QString line, int ParsingMode)
                         {
                             Beams[(Beams.size()-1)].BeamGroupID = BeamGroups.size()-1;
                             BeamGroups[BeamGroups.size()-1].BeamAmount++;
-                            qDebug()<<"Adding beam to group :" << Beams[(Beams.size()-1)].BeamGroupID << "Beams in group: "<< BeamGroups[BeamGroups.size()-1].BeamAmount;
+                            //qDebug()<<"Adding beam to group :" << Beams[(Beams.size()-1)].BeamGroupID << "Beams in group: "<< BeamGroups[BeamGroups.size()-1].BeamAmount;
                         }
                         //else create empty group.
                         else
@@ -753,7 +753,7 @@ void NodeBeam::ImportBeamNG(const QString &fileName)
                                         {
                                             Nodes[(Nodes.size()-1)].GroupID = NodeGroups.size()-1;
                                             NodeGroups[NodeGroups.size()-1].NodeAmount++;
-                                            qDebug()<<"Adding node to group :" << Nodes[(Nodes.size()-1)].GroupID << "Nodes in group: "<< NodeGroups[NodeGroups.size()-1].NodeAmount;
+                                            //qDebug()<<"Adding node to group :" << Nodes[(Nodes.size()-1)].GroupID << "Nodes in group: "<< NodeGroups[NodeGroups.size()-1].NodeAmount;
                                         }
                                         //else create empty group.
                                         else
@@ -1426,7 +1426,6 @@ void NodeBeam::AddBeamT()
     if(BeamGroups.size() > 0)
     {
         int BeamGroup = TempBeam.BeamGroupID;
-         qDebug() << BeamGroup;
         //Calculate location
         int BeamNumber = 0;
         for(int i=0; i<BeamGroup;i++)
@@ -1436,13 +1435,10 @@ void NodeBeam::AddBeamT()
 
         Beams.insert(BeamNumber,TempBeam);
         BeamGroups[BeamGroup].BeamAmount++;
-        qDebug()<<"Adding beam to group :" << Beams[BeamNumber].BeamGroupID << "Beams in group: "<< BeamGroups[BeamGroup].BeamAmount;
-
     }
     //else create empty group.
     else
     {
-        qDebug()<<"Creating 1.st beam group.";
         BeamGroups.resize(BeamGroups.size()+1);
         BeamGroups[BeamGroups.size()-1].BeamGroupName = "Beam Group 1.";
         BeamGroups[BeamGroups.size()-1].BeamGroupID = 0;
@@ -2716,8 +2712,8 @@ void NodeBeam::clear()
 
     ActiveNodeGroup=-1;
     ActiveBeamGroup=-1;
-
-    qDebug() << "Tyhjennys";
+    TempNode.clear();
+    TempBeam.clear();
 }
 
 /* Parse contents of the JBEAM text edit box */
@@ -2814,7 +2810,6 @@ bool NodeBeam::JBEAM_ParseNodesArray(QJsonArray JbeamNodesArray)
             {
                 TempNode.locZ = Jnode.at(3).toDouble();
                 AddNode();
-                //qDebug() << "Adding node from JBEAM text box";
             }
 
         }
@@ -2843,7 +2838,6 @@ bool NodeBeam::JBEAM_ParseBeamsArray(QJsonArray JbeamBeamsArray)
                 else TempBeam.draw=1;
 
                 AddBeamT();
-                qDebug() << "Adding node from JBEAM text box";
             }
 
         }

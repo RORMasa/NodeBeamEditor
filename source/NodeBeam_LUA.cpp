@@ -5,7 +5,7 @@
 
 using namespace luabridge;
 
-void NodeBeam::RunLUAScript()
+void NodeBeam::RunLUAScript(QString filename)
 {
     qDebug() << "Lua!";
 
@@ -19,6 +19,7 @@ void NodeBeam::RunLUAScript()
             .addConstructor<void (*) (void)>()
             .addFunction("AddNode",&NodeBeam::LuaAddNode)
             .addFunction("AddBeam",&NodeBeam::LuaAddBeam)
+            .addFunction("AddComment",&NodeBeam::LuaAddComment)
             .endClass();
 
     //Link this nodebeam object to Lua
@@ -26,7 +27,7 @@ void NodeBeam::RunLUAScript()
     lua_setglobal (L, "NB");
 
     //Run Lua script
-    luaL_dofile(L, "script.lua");
+    luaL_dofile(L, filename.toStdString().c_str());
     lua_pcall(L, 0, 0, 0);
 
 }
@@ -44,6 +45,7 @@ void NodeBeam::LuaAddComment(const std::string comment)
     LuaComment = 1; //one, until comment is handled in a node or beam adding
 }
 
+//Add node from lua
 void NodeBeam::LuaAddNode(const std::string name, float locx, float locy, float locz)
 {
     TempNode.NodeName = QString::fromStdString(name);
@@ -53,13 +55,14 @@ void NodeBeam::LuaAddNode(const std::string name, float locx, float locy, float 
     TempNode.comments.clear();
     if(LuaComment)
     {
-        TempNode.comments.AddComment(LuaComments.ReadComment(0));
+        TempNode.comments = LuaComments;
         LuaComment=0;
         LuaComments.clear();
     }
     AddNode();
 }
 
+//Add beam from lua
 void NodeBeam::LuaAddBeam(const std::string node1, const std::string node2)
 {
     TempBeam.Node1Name = QString::fromStdString(node1);
@@ -71,7 +74,7 @@ void NodeBeam::LuaAddBeam(const std::string node1, const std::string node2)
     TempBeam.comments.clear();
     if(LuaComment)
     {
-        TempBeam.comments.AddComment(LuaComments.ReadComment(0));
+        TempBeam.comments = LuaComments;
         LuaComment=0;
         LuaComments.clear();
     }

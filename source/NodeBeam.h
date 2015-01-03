@@ -30,8 +30,9 @@ public:
     QString ReadComment(int id);
     int size();
     void clear();
-private:
     QStringList JBEAM_Comments;
+private:
+
 };
 
 struct Node
@@ -312,7 +313,7 @@ public:
     double calculate_length(double x, double y);
 
     /* LUA Script */
-    void RunLUAScript();
+    void RunLUAScript(QString filename);
 
     //Functions for LUA
     void LuaPRINT();

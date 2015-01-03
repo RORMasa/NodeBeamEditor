@@ -38,6 +38,7 @@ public slots:
     void ShowContextMenu_Beams(const QPoint &position);
     void JBEAM_AddNode();
     void JBEAM_AddBeam();
+    void JBEAM_AddComment(int CursorPos, QString Comment);
     void JBEAM_UpdateSelectedNodes();
     void JBEAM_UpdateAllNodes();
     void JBEAM_Update();
@@ -231,6 +232,8 @@ private slots:
 
     void on_toolButton_28_clicked();
 
+    void on_actionRun_again_triggered();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
@@ -278,5 +281,7 @@ private:
 
     QString EditorTitle;
 
+    //File name of previously ran script
+    QString LastScript;
 };
 
