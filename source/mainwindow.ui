@@ -2523,6 +2523,21 @@ p, li { white-space: pre-wrap; }
              </item>
             </layout>
            </widget>
+           <widget class="QWidget" name="tab_5_lua">
+            <attribute name="title">
+             <string>Script</string>
+            </attribute>
+            <widget class="QTextBrowser" name="textBrowser">
+             <property name="geometry">
+              <rect>
+               <x>5</x>
+               <y>5</y>
+               <width>275</width>
+               <height>421</height>
+              </rect>
+             </property>
+            </widget>
+           </widget>
           </widget>
          </item>
         </layout>

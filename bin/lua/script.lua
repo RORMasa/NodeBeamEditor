@@ -1,9 +1,10 @@
 -- LUA Example script for NodeBEAM Editor
 
---There is currently 3 functions available, each in a class NB
+--There is currently 4 functions available, each in a class NB
 -- NB:AddNode( name, location x, location y, location z)
 -- NB:AddBeam( id1, id2 )
 -- NB:AddComment( "your comment" )
+-- NB:Log("your message") writes a log message on the script tab
 
 --Exampe of using the AddNode function
 
@@ -22,3 +23,5 @@ NB:AddComment("This is a comment.")
 
 --Exampe of using the AddBeam function
 NB:AddBeam("node1", "node2")
+
+NB:Log("Hello")

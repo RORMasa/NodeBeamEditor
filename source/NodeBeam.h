@@ -58,6 +58,9 @@ struct Node
     //before this node
     Comments comments;
 
+    //Totally unique ID, should be only calculated at node creation
+    float UID;
+    void CalcUID();
     void clear();
 };
 
@@ -164,8 +167,9 @@ public:
     void NewBeamGroup();
 };
 
-class NodeBeam
+class NodeBeam : public QObject
 {
+   Q_OBJECT
 
 public:
     bool EditorMode; //BeamNG <==> ROR axises
@@ -179,7 +183,7 @@ public:
     QVector<BeamDefs> BeamDefaults; //Beam arguments
     QVector<BeamDefs> HWArguments; //Hubwheel arguments
 
-    NodeBeam();
+    NodeBeam(QObject *parent  = 0);
     ~NodeBeam(void);
 
     int ActiveNode;
@@ -277,6 +281,10 @@ public:
     /* Duplicate nodes */
     void DuplicateNodes();
 
+    /* Merge nodes */
+    void MergeSelectedNodes(float distance);
+    float CalcDistance(Node node1, Node node2);
+
     /* Select nodes */
     void SelectNodesLoc(float x0, float y0, float z0, float x1, float y1, float z1); //2D Rectangle selection
     void SelectNodes3D(QVector4D RectSel_1V, QVector4D RectSel_2V, //3D Rectangle selection
@@ -316,7 +324,7 @@ public:
     void RunLUAScript(QString filename);
 
     //Functions for LUA
-    void LuaPRINT();
+    void LuaLog(const std::string msg);
     void LuaAddNode(const std::string name, float locx, float locy, float locz);
     void LuaAddBeam(const std::string node1, const std::string node2);
     void LuaAddComment(const std::string comment);
@@ -338,6 +346,9 @@ public:
 
     /* JBEAM Save As */
     bool JBEAM_SaveAs(const QString &fileName, QString JBEAM_Text);
+
+signals:
+    void LUA_log(QString msg);
 
 private:
 

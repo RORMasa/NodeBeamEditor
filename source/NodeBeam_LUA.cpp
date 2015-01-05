@@ -8,6 +8,9 @@ using namespace luabridge;
 void NodeBeam::RunLUAScript(QString filename)
 {
     qDebug() << "Lua!";
+    QStringList filenamel = filename.split("/");
+    QString msg = "Running Lua script " + filenamel.last();
+    emit LUA_log(msg);
 
     //Intialize Lua state
     lua_State* L = luaL_newstate();
@@ -20,6 +23,7 @@ void NodeBeam::RunLUAScript(QString filename)
             .addFunction("AddNode",&NodeBeam::LuaAddNode)
             .addFunction("AddBeam",&NodeBeam::LuaAddBeam)
             .addFunction("AddComment",&NodeBeam::LuaAddComment)
+            .addFunction("Log",&NodeBeam::LuaLog)
             .endClass();
 
     //Link this nodebeam object to Lua
@@ -30,12 +34,15 @@ void NodeBeam::RunLUAScript(QString filename)
     luaL_dofile(L, filename.toStdString().c_str());
     lua_pcall(L, 0, 0, 0);
 
+    msg = "Script finished";
+    emit LUA_log(msg);
+
 }
 
-
-void NodeBeam::LuaPRINT()
+//Add message to script log
+void NodeBeam::LuaLog(const std::string msg)
 {
-    qDebug() << "Lua function call test.";
+    emit LUA_log(QString::fromStdString(msg));
 }
 
 //Ability to add comments from LUA script into the JBEAM

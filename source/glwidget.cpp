@@ -176,7 +176,7 @@ void GLWidget::setDRotation(int angle)
 
         //yRot = dRot*(zRot/5760);
         xRot = dRot*(1-(zRot/5760));
-        qDebug() << "kamera rotaatio " << xRot << ", " << yRot;
+        //qDebug() << "kamera rotaatio " << xRot << ", " << yRot;
         updateGL();
     }
 }
@@ -1441,7 +1441,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
             RectSelect = 1;
         }
 
-        qDebug() << "Left released";
+        //qDebug() << "Left released";
 
     }
 
@@ -2208,7 +2208,7 @@ void GLWidget::DrawRectSelect()
     QVector3D normal_2 = QVector3D::crossProduct(vec3,vec1);
     QVector3D normal_3 = QVector3D::crossProduct(vec4,vec3);
     QVector3D normal_4 = QVector3D::crossProduct(vec2,vec4);
-    qDebug() << normal_1 << normal_2 << normal_3 << normal_4;
+    //qDebug() << normal_1 << normal_2 << normal_3 << normal_4;
 
     /* Draw selection plane normals
     glBegin(GL_LINES);

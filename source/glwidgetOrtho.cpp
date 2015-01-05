@@ -411,10 +411,8 @@ void GLWidgetOrtho::draw()
                           int Bnode2 = NBPointer->Beams[i3].Node2GlobalID;
                           if((Bnode1<NodeAmount) && (Bnode2<NodeAmount))
                           {
-                              //qDebug()<<"Rendering beams 7 .... " << Bnode1 << ", " << Bnode2;
                               glVertex3f(NBPointer->Nodes[Bnode1].locX, NBPointer->Nodes[Bnode1].locY, NBPointer->Nodes[Bnode1].locZ);
                               glVertex3f(NBPointer->Nodes[Bnode2].locX, NBPointer->Nodes[Bnode2].locY, NBPointer->Nodes[Bnode2].locZ);
-                              //qDebug()<<"Rendering beams 8 .... ";
                           }
                           glEnd();
                           glLineWidth(2);
@@ -440,10 +438,8 @@ void GLWidgetOrtho::draw()
                           int Bnode2 = NBPointer->Beams[i3].Node2GlobalID;
                           if((Bnode1<NodeAmount) && (Bnode2<NodeAmount))
                           {
-                              //qDebug()<<"Rendering beams 7 .... " << Bnode1 << ", " << Bnode2;
                               glVertex3f(NBPointer->Nodes[Bnode1].locX, NBPointer->Nodes[Bnode1].locY, NBPointer->Nodes[Bnode1].locZ);
                               glVertex3f(NBPointer->Nodes[Bnode2].locX, NBPointer->Nodes[Bnode2].locY, NBPointer->Nodes[Bnode2].locZ);
-                              //qDebug()<<"Rendering beams 8 .... ";
                           }
 
 
@@ -480,7 +476,6 @@ void GLWidgetOrtho::draw()
 
 void GLWidgetOrtho::initializeGL()
 {
-    //qglClearColor(qtGrey.darker());
     glClearColor(backgroundcolor[0], backgroundcolor[1], backgroundcolor[2], backgroundcolor[3]);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -495,7 +490,6 @@ void GLWidgetOrtho::initializeGL()
 //    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 
     setAutoBufferSwap(true);
-    //LoadBlueprint();
 }
 
 /* Draw rectangle for rect selection tool */

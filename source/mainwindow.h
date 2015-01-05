@@ -43,6 +43,7 @@ public slots:
     void JBEAM_UpdateAllNodes();
     void JBEAM_Update();
     void AdjustBlueprint(int WidgetID);
+    void LUA_message(QString msg);
 
 signals:
     void ZoomChanged();
@@ -165,6 +166,8 @@ private slots:
 
     void keyPressEvent(QKeyEvent * eventti);
     void keyReleaseEvent(QKeyEvent *eventti);
+    void dropEvent(QDropEvent * dropevent);
+    void dragEnterEvent(QDragEnterEvent *event);
 
     void on_comboBox_3_views_activated(int index);
 

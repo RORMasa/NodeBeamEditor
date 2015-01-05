@@ -91,6 +91,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Active working file
     CurrentNodeBeam = new NodeBeam;
+    QObject::connect(CurrentNodeBeam,SIGNAL(LUA_log(QString)),this,SLOT(LUA_message(QString)));
 
     //Link nodebeam to glwidgets
     for(int i=0; i<2; i++)
@@ -262,6 +263,13 @@ MainWindow::MainWindow(QWidget *parent) :
     //Change Quad view default views
     glWidgetOViews[1]->setViewFront();
     glWidgetOViews[2]->setViewLeft();
+
+    //Accept drops
+    this->setAcceptDrops(true);
+
+    //Set font to script log
+    ui->textBrowser->setFont(QFont("Courier"));
+
 }
 
 MainWindow::~MainWindow()
@@ -378,16 +386,13 @@ void MainWindow::on_actionNew_triggered()
 /* File menu / Import RoR NB triggered */
 void MainWindow::on_actionImport_Rigs_of_Rods_triggered()
 {
+    CurrentNodeBeam->JBEAM_temp.clear();
     QString fileName = QFileDialog::getOpenFileName(this);
     if (!fileName.isEmpty())
         CurrentNodeBeam->ImportNBFile(fileName);
 
-    for(int i=0; i<2; i++)
-    {
-        glWidgetViews[i]->setNBPointer(CurrentNodeBeam);
-    }
-
     MainNodeBeamUpdated();
+    JBEAM_AddFromTemp();
 }
 
 /* File menu / Save as BeamNG JBEAM triggered */
@@ -2708,6 +2713,7 @@ void MainWindow::on_actionRun_triggered()
     }
     JBEAM_AddFromTemp();
     MainNodeBeamUpdated();
+    JBEAM_ParseTextEdit();
 }
 
 /* Run Lua script again */
@@ -2719,6 +2725,7 @@ void MainWindow::on_actionRun_again_triggered()
         CurrentNodeBeam->RunLUAScript(LastScript);
         JBEAM_AddFromTemp();
         MainNodeBeamUpdated();
+        JBEAM_ParseTextEdit();
     }
 }
 
@@ -3138,4 +3145,102 @@ void MainWindow::JBEAM_AddFromTemp()
         }
     }
     CurrentNodeBeam->JBEAM_temp.clear();
+}
+
+/* Open files dragged and dropped on the window */
+void MainWindow::dropEvent(QDropEvent * dropevent)
+{
+    qDebug() << "tiedostoa pukkaa " << dropevent->mimeData()->urls();
+    QList <QUrl> urls = dropevent->mimeData()->urls();
+    if(urls.size()>0)
+    {
+        QString url = urls.at(0).url();
+        QString fileName = url;
+        fileName.replace("file:///","");
+
+        QStringList suffix = url.split(".");
+        QString suf = "jbeam";
+        QString suf2 = "lua";
+        if(suf.compare(suffix.last(),Qt::CaseInsensitive) == 0)
+        {
+            //Open JBEAM
+            if (!fileName.isEmpty())
+            {
+                /* JBEAM input system trough textbox */
+
+                QFile file(fileName);
+                if (!file.open(QFile::ReadOnly | QFile::Text)) {
+                    QMessageBox msgBox;
+                    msgBox.setText("Error opening file.");
+                    msgBox.exec();
+                }
+                else
+                {
+                    QTextStream in(&file);
+
+                    #ifndef QT_NO_CURSOR
+                        QApplication::setOverrideCursor(Qt::WaitCursor);
+                    #endif
+
+                    QString FileContents = in.readAll();
+
+
+                    #ifndef QT_NO_CURSOR
+                        QApplication::restoreOverrideCursor();
+                    #endif
+                    file.close();
+
+                    //Put file contents in JBEAM TextBox
+                    ui->textEdit_JBEAM->setText(FileContents);
+                    JBEAM_ParseTextEdit();
+
+                    QStringList filepath = fileName.split('/');
+                    QString title = filepath.last() + " - " + EditorTitle;
+                    setWindowTitle(title);
+
+                }
+            }
+
+            MainNodeBeamUpdated();
+        }
+        else if(suf2.compare(suffix.last(),Qt::CaseInsensitive) == 0)
+        {
+            //Run Lua script
+            CurrentNodeBeam->JBEAM_temp.clear();
+            if (!fileName.isEmpty())
+            {
+                CurrentNodeBeam->RunLUAScript(fileName);
+                LastScript=fileName;
+            }
+            JBEAM_AddFromTemp();
+            MainNodeBeamUpdated();
+            JBEAM_ParseTextEdit();
+        }
+    }
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    //User drags a file on the widget
+    QList <QUrl> urls = event->mimeData()->urls();
+    if(urls.size()>0)
+    {
+        QString url = urls.at(0).url();
+        QStringList suffix = url.split(".");
+        QString suf = "jbeam";
+        QString suf2 = "lua";
+        if(suf.compare(suffix.last(),Qt::CaseInsensitive) == 0)
+        {
+            event->acceptProposedAction();
+        }
+        else if(suf2.compare(suffix.last(),Qt::CaseInsensitive) == 0)
+        {
+            event->acceptProposedAction();
+        }
+    }
+}
+
+void MainWindow::LUA_message(QString msg)
+{
+    ui->textBrowser->append(msg);
 }

@@ -7,7 +7,9 @@
 #include <QMatrix4x4>
 #include <QVector3D>
 #include <QFile>
+#include <QTime>
 #include <QXmlStreamWriter>
+#include <QLinkedList>
 
 #include <jbeam.h>
 #include "NodeBeam.h"
@@ -25,6 +27,11 @@ void Node::clear()
     GroupID = 0;
 }
 
+void Node::CalcUID()
+{
+    UID = 0.5f*(green+blue)*(green+blue+1)+blue;
+}
+
 void Beam::clear()
 {
     BeamGroupID = 0;
@@ -32,7 +39,7 @@ void Beam::clear()
     draw = 0;
 }
 
-NodeBeam::NodeBeam()
+NodeBeam::NodeBeam(QObject *parent): QObject(parent)
 {
     VehicleName = "";
     VehicleInGameName = "";
@@ -220,122 +227,79 @@ void NodeBeam::ParseLine(QString line, int ParsingMode)
                 {
                     if (grid_index == 0)
                     {
-                        //New nodes system
-                        Nodes.resize(Nodes.size()+1);
-                        Nodes[(Nodes.size()-1)].GlobalID = (Nodes.size()-1);
-                        Nodes[(Nodes.size()-1)].NodeName = temp;
-
-                        Nodes[(Nodes.size()-1)].RoRNodeType = 0;
-
-                        //If node group exists, add in that
-                        if(NodeGroups.size() > 0)
-                        {
-                            Nodes[(Nodes.size()-1)].GroupID = NodeGroups.size()-1;
-                            NodeGroups[NodeGroups.size()-1].NodeAmount++;
-                            qDebug()<<"Adding node to group :" << Nodes[(Nodes.size()-1)].GroupID << "Nodes in group: "<< NodeGroups[NodeGroups.size()-1].NodeAmount;
-                        }
-                        //else create empty group.
-                        else
-                        {
-                            qDebug()<<"Creating 1.st node group.";
-                            NodeGroups.resize(NodeGroups.size()+1);
-                            NodeGroups[NodeGroups.size()-1].NodeGroupName = "Node Group 1.";
-                            NodeGroups[NodeGroups.size()-1].NodeGroupID = 0;
-                            Nodes[(Nodes.size()-1)].GroupID = 0;
-                            NodeGroups[NodeGroups.size()-1].draw=1;
-                            NodeGroups[NodeGroups.size()-1].NodeAmount=1;
-                        }
-
-                        //Setting node color for 3D picking feature
-                        Nodes[(Nodes.size()-1)].green=green;
-                        Nodes[(Nodes.size()-1)].blue=blue;
-
-                        if(green<255) green++;
-                        else
-                        {
-                            green=0;
-                            blue++;
-                        }
-
-                        temp = "";
-
+                        TempNode.NodeName = temp;
                         grid_index++;
-
+                        temp.clear();
                     }
                     else if(grid_index == 1)
                     {
                         if(EditorMode == 1)
                         {
-                            Nodes[(Nodes.size()-1)].locY = temp.toFloat();
+                            TempNode.locY = temp.toFloat();
                         }
                         else
                         {
-                            Nodes[(Nodes.size()-1)].locX = temp.toFloat();
+                            TempNode.locX = temp.toFloat();
                         }
 
-                        temp = "";
+                        temp.clear();
                         grid_index++;
                     }
                     else if(grid_index == 2)
                     {
                         if(EditorMode == 1)
                         {
-                            Nodes[(Nodes.size()-1)].locZ = temp.toFloat();
+                            TempNode.locZ = temp.toFloat();
                         }
                         else
                         {
-                            Nodes[(Nodes.size()-1)].locY = temp.toFloat();
+                            TempNode.locY = temp.toFloat();
                         }
 
-                        temp = "";
+                        temp.clear();
                         grid_index++;
                     }
                     else if(grid_index == 3)
                     {
                         if(EditorMode == 1)
                         {
-                            Nodes[(Nodes.size()-1)].locX = temp.toFloat();
+                            TempNode.locX = temp.toFloat();
                         }
                         else
                         {
-                            Nodes[(Nodes.size()-1)].locZ = temp.toFloat();
+                            TempNode.locZ = temp.toFloat();
                         }
 
-                        temp = "";
+                        temp.clear();
                         grid_index++;
                     }
 
                 }
                 else
                 {
-                    temp.append(line[index]);
+                    temp.append(line.at(index));
                 }
-
-
-
             }
             if(grid_index<4)
             {
                 if(EditorMode == 1)
                 {
-                    Nodes[(Nodes.size()-1)].locX = temp.toFloat();
+                    TempNode.locX = temp.toFloat();
                 }
                 else
                 {
-                    Nodes[(Nodes.size()-1)].locZ = temp.toFloat();
+                    TempNode.locZ = temp.toFloat();
                 }
 
-                temp = "";
+                temp.clear();
             }
             else
             {
 
-                Nodes[(Nodes.size()-1)].Properties.append(temp);
-
-                temp = "";
+                TempNode.Properties.append(temp);
+                AddNode();
             }
             grid_index=0;
-            qDebug() << Nodes[(Nodes.size()-1)].GlobalID << ", " << Nodes[(Nodes.size()-1)].NodeName << ", " << Nodes[(Nodes.size()-1)].locX << ", " << Nodes[(Nodes.size()-1)].locY << ", " << Nodes[(Nodes.size()-1)].locZ << ", " << Nodes[(Nodes.size()-1)].Properties;
 
         }
     }
@@ -360,8 +324,6 @@ void NodeBeam::ParseLine(QString line, int ParsingMode)
         {
             qDebug() << "Parsing Beam";
 
-
-
             grid_index = 0;
             temp = "";
             for(int index=0; index<line.length(); index++)
@@ -376,37 +338,15 @@ void NodeBeam::ParseLine(QString line, int ParsingMode)
                 {
                     if (grid_index == 0)
                     {
-                        Beams.resize(Beams.size()+1);
-                        Beams[Beams.size()-1].Node1Name = temp;
-
-                        //If beam group exists, add in that
-                        if(BeamGroups.size() > 0)
-                        {
-                            Beams[(Beams.size()-1)].BeamGroupID = BeamGroups.size()-1;
-                            BeamGroups[BeamGroups.size()-1].BeamAmount++;
-                            //qDebug()<<"Adding beam to group :" << Beams[(Beams.size()-1)].BeamGroupID << "Beams in group: "<< BeamGroups[BeamGroups.size()-1].BeamAmount;
-                        }
-                        //else create empty group.
-                        else
-                        {
-                            qDebug()<<"Creating 1.st beam group.";
-                            BeamGroups.resize(BeamGroups.size()+1);
-                            BeamGroups[BeamGroups.size()-1].BeamGroupName = "Beam Group 1.";
-                            BeamGroups[BeamGroups.size()-1].BeamGroupID = 0;
-                            Beams[(Beams.size()-1)].BeamGroupID = 0;
-                            BeamGroups[BeamGroups.size()-1].draw=1;
-                            BeamGroups[BeamGroups.size()-1].BeamAmount++;
-                        }
-
-
-                        temp = "";
+                        TempBeam.Node1Name = temp;
+                        temp.clear();
                         grid_index++;
 
                     }
                     else if(grid_index == 1)
                     {
-                        Beams[Beams.size()-1].Node2Name = temp;
-                        temp = "";
+                        TempBeam.Node2Name = temp;
+                        temp.clear();
                         grid_index++;
                     }
 
@@ -420,35 +360,35 @@ void NodeBeam::ParseLine(QString line, int ParsingMode)
 
             }
 
-            Beams[Beams.size()-1].Properties.append(temp);
+            TempBeam.Properties = temp;
 
-            temp = "";
+            temp.clear();
             grid_index=0;
 
             bool Node1Found = 0;
             bool Node2Found = 0;
             for(int luku=0; luku<Nodes.size(); luku++)
             {
-                if(Nodes[luku].NodeName == Beams[Beams.size()-1].Node1Name)
+                if(Nodes[luku].NodeName == TempBeam.Node1Name)
                 {
-                    Beams[Beams.size()-1].Node1GlobalID = Nodes[luku].GlobalID;
+                    TempBeam.Node1GlobalID = Nodes[luku].GlobalID;
                     Node1Found=1;
                 }
-                if(Nodes[luku].NodeName == Beams[Beams.size()-1].Node2Name)
+                if(Nodes[luku].NodeName == TempBeam.Node2Name)
                 {
-                    Beams[Beams.size()-1].Node2GlobalID = Nodes[luku].GlobalID;
+                    TempBeam.Node2GlobalID = Nodes[luku].GlobalID;
                     Node2Found=1;
                 }
             }
             if(Node1Found == 0)
             {
-                Beams[Beams.size()-1].Node1GlobalID = 99999;
+                TempBeam.draw=0;
             }
             if(Node2Found == 0)
             {
-                Beams[Beams.size()-1].Node2GlobalID = 99999;
+                TempBeam.draw=0;
             }
-            qDebug() << Beams[Beams.size()-1].Node1GlobalID << ", " << Beams[Beams.size()-1].Node2GlobalID << ", " << Beams[Beams.size()-1].Node1Name << ", " << Beams[Beams.size()-1].Node2Name << ", " << Beams[Beams.size()-1].Properties;
+            AddBeamT();
         }
     }
     if(ParsingMode==3)
@@ -1273,6 +1213,7 @@ int NodeBeam::AddNode(int NodeGroupID)
 {
     TempNode.green = green;
     TempNode.blue = blue;
+    TempNode.CalcUID();
 
     //If node group exists, add in that
     if(NodeGroups.size() > 0)
@@ -1397,10 +1338,9 @@ void NodeBeam::DeleteNode(int NodeGlobalID)
     for(int i=NodeGlobalID; i<Nodes.size(); i++)
     {
         Nodes[i].GlobalID--;
-        //qDebug() << "Node global ID lowered from " << (Nodes[i].GlobalID+1) << " to " <<  Nodes[i].GlobalID  ;
+        qDebug() << "Node global ID lowered from " << (Nodes[i].GlobalID+1) << " to " <<  Nodes[i].GlobalID  ;
     }
-
-
+    SelectedNodes.clear();
 }
 
 /* Add beam */
@@ -2207,7 +2147,7 @@ void NodeBeam::SelectNodes3D(QVector4D RectSel_1V, QVector4D RectSel_2V,
     QVector3D normal_2 = QVector3D::crossProduct(vec3,vec1);
     QVector3D normal_3 = QVector3D::crossProduct(vec4,vec3);
     QVector3D normal_4 = QVector3D::crossProduct(vec2,vec4);
-    qDebug() << normal_1 << normal_2 << normal_3 << normal_4;
+    //qDebug() << normal_1 << normal_2 << normal_3 << normal_4;
 
     /* Transform each node coordinate to camera coordinate, and calculate
         the dot product. If dot product with all planes is the same,
@@ -2685,6 +2625,180 @@ void NodeBeam::DeleteNodeGroup(int NodeGroupID)
     }
 }
 
+/* Merge selected nodes that are closer to each other than given distance */
+void NodeBeam::MergeSelectedNodes(float distance)
+{
+    QTime aika;
+    aika.start();
+
+    if(SelectedNodes.size()>150)
+    {
+        //If there is a lot of nodes, divide the volume in smaller spaces
+        float checkd = distance/2;
+        QList < QList <int> > Selected;
+        QList <int> list;
+        for(int i=0; i<14; i++) Selected.append(list);
+        for(int i=0 ;i< SelectedNodes.size(); i++)
+        {
+            if(Nodes.at(SelectedNodes.at(i)).locX<0)
+            {
+                if(Nodes.at(SelectedNodes.at(i)).locY<0)
+                {
+                    if(Nodes.at(SelectedNodes.at(i)).locZ<0)
+                    {
+                        Selected[0].append(SelectedNodes.at(i));
+                    }
+                    else
+                    {
+                        Selected[1].append(SelectedNodes.at(i));
+                    }
+                }
+                else
+                {
+                    if(Nodes.at(SelectedNodes.at(i)).locZ<0)
+                    {
+                        Selected[2].append(SelectedNodes.at(i));
+                    }
+                    else
+                    {
+                        Selected[3].append(SelectedNodes.at(i));
+                    }
+                }
+            }
+            else
+            {
+                if(Nodes.at(SelectedNodes.at(i)).locY<0)
+                {
+                    if(Nodes.at(SelectedNodes.at(i)).locZ<0)
+                    {
+                        Selected[4].append(SelectedNodes.at(i));
+                    }
+                    else
+                    {
+                        Selected[5].append(SelectedNodes.at(i));
+                    }
+                }
+                else
+                {
+                    if(Nodes.at(SelectedNodes.at(i)).locZ<0)
+                    {
+                        Selected[6].append(SelectedNodes.at(i));
+                    }
+                    else
+                    {
+                        Selected[7].append(SelectedNodes.at(i));
+                    }
+                }
+            }
+        }
+        for(int i=0 ;i< SelectedNodes.size(); i++)
+        {
+            if((Nodes.at(SelectedNodes.at(i)).locX<0) &&
+                    Nodes.at(SelectedNodes.at(i)).locX> (-checkd))
+            {
+                Selected[8].append(SelectedNodes.at(i));
+            }
+            else if((Nodes.at(SelectedNodes.at(i)).locX>0) &&
+                    Nodes.at(SelectedNodes.at(i)).locX< checkd)
+            {
+                Selected[9].append(SelectedNodes.at(i));
+            }
+            if((Nodes.at(SelectedNodes.at(i)).locY<0) &&
+                    Nodes.at(SelectedNodes.at(i)).locY> (-checkd))
+            {
+                Selected[10].append(SelectedNodes.at(i));
+            }
+            else if((Nodes.at(SelectedNodes.at(i)).locY>0) &&
+                    Nodes.at(SelectedNodes.at(i)).locY< checkd)
+            {
+                Selected[11].append(SelectedNodes.at(i));
+            }
+            if((Nodes.at(SelectedNodes.at(i)).locZ<0) &&
+                    Nodes.at(SelectedNodes.at(i)).locZ> (-checkd))
+            {
+                Selected[12].append(SelectedNodes.at(i));
+            }
+            else if((Nodes.at(SelectedNodes.at(i)).locZ>0) &&
+                    Nodes.at(SelectedNodes.at(i)).locZ< checkd)
+            {
+                Selected[13].append(SelectedNodes.at(i));
+            }
+        }
+        for(int i=0 ;i< Selected.size(); i++)
+        {
+            for(int i2=0; i2< Selected.at(i).size() ;i2++)
+            {
+                for(int i3=0; i3< Selected.at(i).size() ;i3++)
+                {
+                    if(i3 != i2)
+                    {
+                        CalcDistance(Nodes.at(Selected.at(i).at(i2)),Nodes.at(Selected.at(i).at(i3)));
+                    }
+                }
+            }
+        }
+    }
+
+
+    else
+    {
+        QList < QList <int> > merge;
+
+        //For only a few nodes, compare everything selected
+        for(int i=0; i<SelectedNodes.size();i++)
+        {
+            for(int i2=i; i2< SelectedNodes.size() ;i2++)
+            {
+                if(i != i2)
+                {
+                    if(CalcDistance(Nodes.at(SelectedNodes.at(i)),Nodes.at(SelectedNodes.at(i2)))<distance)
+                    {
+                        //Merge vertices
+                        QList <int> nodepair;
+                        nodepair.append(SelectedNodes.at(i));
+                        nodepair.append(SelectedNodes.at(i2));
+                        merge.append(nodepair);
+                        for(int i4=0; i4<Beams.size(); i4++)
+                        {
+                            if(Beams.at(i4).Node1GlobalID == SelectedNodes.at(i))
+                            {
+                                TempBeam = Beams.at(i4);
+                                TempBeam.Node1GlobalID = SelectedNodes.at(i2);
+                                AddBeamT();
+                            }
+                            else if(Beams.at(i4).Node2GlobalID == SelectedNodes.at(i))
+                            {
+                                TempBeam = Beams.at(i4);
+                                TempBeam.Node2GlobalID = SelectedNodes.at(i2);
+                                AddBeamT();
+                            }
+                            qDebug() << i4;
+                        }
+                        DeleteNode(SelectedNodes.at(i));
+
+                    }
+                }
+            }
+        }
+        qDebug() << merge;
+    }
+    qDebug() << "distance calculation took " << aika.elapsed() << " ms";
+}
+
+float NodeBeam::CalcDistance(Node node1, Node node2)
+{
+    QVector3D node1v, node2v;
+    node1v.setX(node1.locX);
+    node1v.setY(node1.locY);
+    node1v.setZ(node1.locZ);
+
+    node2v.setX(node2.locX);
+    node2v.setY(node2.locY);
+    node2v.setZ(node2.locZ);
+
+    return node1v.distanceToPoint(node2v);
+}
+
 /* Delete nodebeam contents */
 void NodeBeam::clear()
 {
@@ -2714,6 +2828,7 @@ void NodeBeam::clear()
     ActiveBeamGroup=-1;
     TempNode.clear();
     TempBeam.clear();
+
 }
 
 /* Parse contents of the JBEAM text edit box */
