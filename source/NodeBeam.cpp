@@ -1289,6 +1289,7 @@ int NodeBeam::AddNode(int NodeGroupID)
 void NodeBeam::DeleteNode(int NodeGlobalID)
 {
     qDebug()<< "Deleting node " << NodeGlobalID;
+    JBEAM_temp.DeleteNode(Nodes.at(NodeGlobalID));
 
     QVector<int> DeleteQueue;
     DeleteQueue.clear();
@@ -1315,7 +1316,7 @@ void NodeBeam::DeleteNode(int NodeGlobalID)
         DeleteBeam(DeleteQueue[i]-i);
     }
 
-
+    //Fix Beams
     for(int i = 0; i<Beams.size(); i++)
     {
         if(Beams[i].Node1GlobalID >= NodeGlobalID)
@@ -1326,9 +1327,7 @@ void NodeBeam::DeleteNode(int NodeGlobalID)
         if(Beams[i].Node2GlobalID >= NodeGlobalID)
         {
             Beams[i].Node2GlobalID--;
-
         }
-
     }
 
     //Delete node
@@ -1340,7 +1339,6 @@ void NodeBeam::DeleteNode(int NodeGlobalID)
         Nodes[i].GlobalID--;
         qDebug() << "Node global ID lowered from " << (Nodes[i].GlobalID+1) << " to " <<  Nodes[i].GlobalID  ;
     }
-    SelectedNodes.clear();
 }
 
 /* Add beam */
@@ -1410,10 +1408,12 @@ int NodeBeam::NewBeamGroup(QString groupname)
 /* Delete Beam */
 void NodeBeam::DeleteBeam(int BeamIndex)
 {
+    //Remove from JBEAM
+    JBEAM_temp.DeleteBeam(Beams.at(BeamIndex));
+
+    //Remove
     BeamGroups[Beams[BeamIndex].BeamGroupID].BeamAmount--;
-    //qDebug()<<"Beams size before delete : " << Beams.size();
     Beams.remove(BeamIndex);
-    //qDebug()<<"Deleted beam: " << BeamIndex << ", beams size: " << Beams.size();
 }
 
 void NodeBeam::DuplicateNodes()

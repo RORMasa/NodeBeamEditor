@@ -154,6 +154,8 @@ void JBEAM_Temp::clear()
 {
     nodes.clear();
     beams.clear();
+    delete_nodes.clear();
+    delete_beams.clear();
 
     QVector <Node> NewNodes;
     nodes.append(NewNodes);
@@ -174,16 +176,21 @@ void JBEAM_Temp::AddBeam(Beam beam)
 {
     beams[beams.size()-1].append(beam);
 }
-
 void JBEAM_Temp::NewNodeGroup()
 {
     QVector <Node> NewNodes;
     nodes.append(NewNodes);
 }
-
 void JBEAM_Temp::NewBeamGroup()
 {
     QVector <Beam> NewBeams;
     beams.append(NewBeams);
 }
-
+void JBEAM_Temp::DeleteNode(Node node)
+{
+    delete_nodes.append(node);
+}
+void JBEAM_Temp::DeleteBeam(Beam beam)
+{
+    delete_beams.append(beam);
+}

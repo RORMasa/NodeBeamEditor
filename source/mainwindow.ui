@@ -493,7 +493,7 @@ QTabWidget::tab-bar {
           </widget>
           <widget class="QToolButton" name="toolButton_7">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="geometry">
             <rect>
@@ -1435,45 +1435,6 @@ QTabWidget::tab-bar {
           <attribute name="title">
            <string>Editor</string>
           </attribute>
-          <widget class="QGroupBox" name="groupBox_2">
-           <property name="geometry">
-            <rect>
-             <x>800</x>
-             <y>0</y>
-             <width>141</width>
-             <height>97</height>
-            </rect>
-           </property>
-           <property name="title">
-            <string>Testing</string>
-           </property>
-           <widget class="QToolButton" name="toolButton_18">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>20</y>
-              <width>121</width>
-              <height>28</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Test in BeamNG</string>
-            </property>
-           </widget>
-           <widget class="QToolButton" name="toolButton_27">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>50</y>
-              <width>121</width>
-              <height>28</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Test in RoR</string>
-            </property>
-           </widget>
-          </widget>
           <widget class="QFrame" name="frame_10">
            <property name="geometry">
             <rect>
@@ -1489,177 +1450,51 @@ QTabWidget::tab-bar {
            <property name="frameShadow">
             <enum>QFrame::Raised</enum>
            </property>
-           <widget class="QLabel" name="label_11_bpoy">
+           <widget class="QToolButton" name="toolButton_18">
             <property name="geometry">
              <rect>
-              <x>285</x>
-              <y>53</y>
-              <width>51</width>
-              <height>31</height>
+              <x>0</x>
+              <y>0</y>
+              <width>101</width>
+              <height>101</height>
              </rect>
             </property>
             <property name="text">
-             <string>Ofsset Y</string>
+             <string>Test in BeamNG</string>
             </property>
            </widget>
-           <widget class="QLineEdit" name="lineEdit_9_bpoffX">
+           <widget class="QToolButton" name="toolButton_27">
             <property name="geometry">
              <rect>
-              <x>340</x>
-              <y>58</y>
-              <width>61</width>
-              <height>22</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>Blueprint offset Y</string>
-            </property>
-           </widget>
-           <widget class="QLineEdit" name="lineEdit_9_bpoffY">
-            <property name="geometry">
-             <rect>
-              <x>340</x>
-              <y>33</y>
-              <width>61</width>
-              <height>22</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>Blueprint offset X</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_11_bpox">
-            <property name="geometry">
-             <rect>
-              <x>285</x>
-              <y>30</y>
-              <width>51</width>
-              <height>31</height>
+              <x>101</x>
+              <y>0</y>
+              <width>101</width>
+              <height>101</height>
              </rect>
             </property>
             <property name="text">
-             <string>Offset X</string>
+             <string>Test in RoR</string>
             </property>
            </widget>
-           <widget class="QLabel" name="label_10">
-            <property name="geometry">
-             <rect>
-              <x>300</x>
-              <y>3</y>
-              <width>41</width>
-              <height>31</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Scale</string>
-            </property>
-           </widget>
-           <widget class="QLineEdit" name="lineEdit_bluep_scale">
-            <property name="geometry">
-             <rect>
-              <x>340</x>
-              <y>8</y>
-              <width>61</width>
-              <height>22</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>Blueprint width in meters</string>
-            </property>
-           </widget>
-           <widget class="QToolButton" name="toolButton_20">
-            <property name="geometry">
-             <rect>
-              <x>420</x>
-              <y>3</y>
-              <width>91</width>
-              <height>31</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>Set scale of the blueprint by showing known distance</string>
-            </property>
-            <property name="text">
-             <string>Set scale</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-           <widget class="QSlider" name="horizontalSlider">
-            <property name="geometry">
-             <rect>
-              <x>420</x>
-              <y>60</y>
-              <width>91</width>
-              <height>21</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>Blueprint opacity</string>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_10_bluepname">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>60</y>
-              <width>121</width>
-              <height>31</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>No blueprint loaded</string>
-            </property>
-           </widget>
-           <widget class="QToolButton" name="toolButton_17">
-            <property name="geometry">
-             <rect>
-              <x>150</x>
-              <y>60</y>
-              <width>91</width>
-              <height>31</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Load blueprint</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_11_currView">
-            <property name="geometry">
-             <rect>
-              <x>160</x>
-              <y>10</y>
-              <width>111</width>
-              <height>21</height>
-             </rect>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>TOP VIEW</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-           <widget class="QComboBox" name="comboBox_3">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>10</y>
-              <width>140</width>
-              <height>25</height>
-             </rect>
-            </property>
-           </widget>
+          </widget>
+          <widget class="QToolButton" name="toolButton_20">
+           <property name="geometry">
+            <rect>
+             <x>202</x>
+             <y>0</y>
+             <width>101</width>
+             <height>101</height>
+            </rect>
+           </property>
+           <property name="toolTip">
+            <string>Set scale of the blueprint by showing known distance</string>
+           </property>
+           <property name="text">
+            <string>Set scale</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
           </widget>
          </widget>
         </widget>

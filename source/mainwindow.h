@@ -270,8 +270,9 @@ private:
     //Parse JBEAM TextEdit Box
     void JBEAM_ParseTextEdit();
 
-    //Find JBEAM node from string
-    bool FindNodeContainer(QString JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd);
+    //Find JBEAM node or beam from string
+    bool FindNodeContainer(QString JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd, bool FindComma, int &RealNodeEnd);
+    bool FindBeamContainer(QString JBEAM_box, QString beam, int &Begin, int &End, bool FindComma,int &RealEnd);
 
     void JBEAM_UpdateCursors(QString JBEAM_box);
     //Node JBEAM cursor; if is set, add new nodes at cursor position. Value is -1 if not set
@@ -281,6 +282,8 @@ private:
     int JBEAM_BeamCursor;
 
     void JBEAM_AddFromTemp();
+    void JBEAM_DeleteNodes();
+    void JBEAM_DeleteBeams();
 
     QString EditorTitle;
 

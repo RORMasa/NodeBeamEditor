@@ -212,11 +212,6 @@ MainWindow::MainWindow(QWidget *parent) :
         glWidgetOViews[i]->setCursor(cursor);
     }
 
-    //Set slider range
-    ui->horizontalSlider->setRange(0, 100);
-    ui->horizontalSlider->setPageStep(2);
-    ui->horizontalSlider->setValue(100);
-
     autosave.start(); //Start timer for autosave
 
     ui->treeWidget->header()->resizeSection(0,75); //Make node ID colum narrower in nodes tree widget
@@ -1984,10 +1979,15 @@ void MainWindow::on_toolButton_7_clicked()
             CurrentNodeBeam->SelectedNodes[i2] = CurrentNodeBeam->SelectedNodes[i2]-1;
         }
     }
+    CurrentNodeBeam->SelectedNodes.clear();
+    JBEAM_DeleteNodes();
+    JBEAM_DeleteBeams();
+    CurrentNodeBeam->JBEAM_temp.clear();
+    /*
     if(ui->treeWidget->currentItem()->text(2) == "Group")
     {
         CurrentNodeBeam->DeleteNodeGroup(ui->treeWidget->currentItem()->text(3).toInt());
-    }
+    }*/
     MainNodeBeamUpdated();
 }
 
@@ -2266,6 +2266,7 @@ void MainWindow::on_toolButton_11_clicked()
 /* Delete beams */
 void MainWindow::on_toolButton_10_clicked()
 {
+    CurrentNodeBeam->JBEAM_temp.clear();
     for(int i=0; i<CurrentNodeBeam->SelectedBeams.size(); i++)
     {
         qDebug() << "Deleting Beam " << CurrentNodeBeam->SelectedBeams[i];
@@ -2275,6 +2276,7 @@ void MainWindow::on_toolButton_10_clicked()
             CurrentNodeBeam->SelectedBeams[i2] = CurrentNodeBeam->SelectedBeams[i2]-1;
         }
     }
+    JBEAM_DeleteBeams();
     MainNodeBeamUpdated();
 }
 
@@ -2326,62 +2328,39 @@ void MainWindow::on_comboBox_3_views_activated(int index)
     {
         //top
         glWidgetOViews[0]->setViewTop();
-        ui->label_11_currView->setText("TOP VIEW");
         glWidgetOViews[0]->textureid = 0;
-        ui->horizontalSlider->setValue(glWidgetOViews[0]->blueprint_opa[0]*100);
     }
     else if(index == 1)
     {
         //bottom
         glWidgetOViews[0]->setViewBottom();
-        ui->label_11_currView->setText("BOTTOM VIEW");
         glWidgetOViews[0]->textureid = 1;
-        ui->horizontalSlider->setValue(glWidgetOViews[0]->blueprint_opa[1]*100);
     }
     else if(index == 2)
     {
         //front
         glWidgetOViews[0]->setViewFront();
-        ui->label_11_currView->setText("FRONT VIEW");
         glWidgetOViews[0]->textureid = 2;
-        ui->horizontalSlider->setValue(glWidgetOViews[0]->blueprint_opa[2]*100);
     }
     else if(index == 3)
     {
         //back
         glWidgetOViews[0]->setViewBack();
-        ui->label_11_currView->setText("BACK VIEW");
         glWidgetOViews[0]->textureid = 3;
-        ui->horizontalSlider->setValue(glWidgetOViews[0]->blueprint_opa[3]*100);
     }
     else if(index == 4)
     {
         //right
         glWidgetOViews[0]->setViewRight();
-        ui->label_11_currView->setText("RIGHT VIEW");
         glWidgetOViews[0]->textureid = 4;
-        ui->horizontalSlider->setValue(glWidgetOViews[0]->blueprint_opa[4]*100);
     }
     else if(index == 5)
     {
         //left
         glWidgetOViews[0]->setViewLeft();
-        ui->label_11_currView->setText("LEFT VIEW");
         glWidgetOViews[0]->textureid = 5;
-        ui->horizontalSlider->setValue(glWidgetOViews[0]->blueprint_opa[5]*100);
     }
 
-    ui->lineEdit_bluep_scale->setText(QString::number(glWidgetOViews[0]->blueprint_scale[glWidgetOViews[0]->textureid]));
-    QString texti = glWidgetOViews[0]->blueprint_file[glWidgetOViews[0]->textureid];
-    for(int i = texti.length(); i>0;i--)
-    {
-        if(texti[i] == '/')
-        {
-            texti = texti.remove(0,i+1);
-            break;
-        }
-    }
-    ui->label_10_bluepname->setText(texti);
     glWidgetOViews[0]->updateGL();
 
 
@@ -2831,7 +2810,7 @@ void MainWindow::JBEAM_UpdateSelectedNodes()
 {
 
     int pos1; //Position containers for parsing the textbox
-    int pos2;
+    int pos2, pos3;
 
     QString TextBoxText = ui->textEdit_JBEAM->toPlainText();
     for(int i=0; i<CurrentNodeBeam->SelectedNodes.size();i++)
@@ -2839,7 +2818,7 @@ void MainWindow::JBEAM_UpdateSelectedNodes()
         QString NodeName = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].NodeName;
 
         //Find node from textbox by nodename
-        if(FindNodeContainer(TextBoxText, NodeName, pos1, pos2))
+        if(FindNodeContainer(TextBoxText, NodeName, pos1, pos2, 0, pos3))
         {
             QString nodeline = '"' + NodeName + '"';
             nodeline+= ", ";
@@ -2861,7 +2840,7 @@ void MainWindow::JBEAM_UpdateSelectedNodes()
 void MainWindow::JBEAM_UpdateAllNodes()
 {
     int pos1; //Position containers for parsing the textbox
-    int pos2;
+    int pos2, pos3;
 
     QString TextBoxText = ui->textEdit_JBEAM->toPlainText();
     for(int i=0; i<CurrentNodeBeam->Nodes.size();i++)
@@ -2869,7 +2848,7 @@ void MainWindow::JBEAM_UpdateAllNodes()
         QString NodeName = CurrentNodeBeam->Nodes[i].NodeName;
 
         //Find node from textbox by nodename
-        if(FindNodeContainer(TextBoxText, NodeName, pos1, pos2))
+        if(FindNodeContainer(TextBoxText, NodeName, pos1, pos2, 0, pos3))
         {
             QString nodeline = '"' + NodeName + '"';
             nodeline+= ", ";
@@ -2890,7 +2869,7 @@ void MainWindow::JBEAM_UpdateAllNodes()
 /* This function will find, where the node and it's 3 coordinates are in the JBEAM string.
 Results will be returned in NodeBegin and NodeEnd integer values.
 Bool will be false, if node was not found.*/
-bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd)
+bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd, bool FindComma,int &RealNodeEnd)
 {
     int NodeFound = 0;
     int linenumber=0;
@@ -2974,6 +2953,28 @@ bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &Nod
     }
 
     int node_end = i;
+    RealNodeEnd = i;
+
+    //Find comma after the node if needed, to be able ro remove it
+    //when deleting nodes
+    if(FindComma)
+    {
+        for(i=node_end+1; i<nodes_end; i++)
+        {
+            if(JBEAM_box.at(i) == ' ');
+            else if (JBEAM_box.at(i) == '\u0009');
+            else if (JBEAM_box.at(i) == '\n');
+            else if (JBEAM_box.at(i) == ',')
+            {
+                RealNodeEnd = i;
+                break;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
 
     //Find the location of the last node coordinate.
     int grid_id = 0;
@@ -3029,6 +3030,172 @@ bool MainWindow::FindNodeContainer(QString JBEAM_box, QString nodename, int &Nod
     qDebug() << temp;
     */
 
+}
+
+bool MainWindow::FindBeamContainer(QString JBEAM_box, QString beam, int &Begin, int &End, bool FindComma,int &RealEnd)
+{
+    int BeamFound = 0;
+
+    QString temp = "";
+    int i=0;
+    for(i; i<JBEAM_box.length();i++)
+    {
+        if(JBEAM_box[i] == ' ');
+        else if (JBEAM_box.at(i) == '\u0009');
+        else if (JBEAM_box.at(i) == '\n');
+        else
+        {
+            temp.append(JBEAM_box.at(i));
+            if(temp.indexOf("\"beams\":") >= 0)
+            {
+                break;
+            }
+        }
+    }
+    int beams_begin = i;
+
+    //Find beams section container END
+    int listlevel = 0;
+    for(i; i<JBEAM_box.length();i++)
+    {
+        if (JBEAM_box.at(i) == '\n');
+        else if (JBEAM_box.at(i) == '[') listlevel++;
+        else if (JBEAM_box.at(i) == ']')
+        {
+            listlevel--;
+            if(listlevel == 0) break;
+        }
+    }
+
+    int beams_end = i;
+    temp.clear();
+    QString BeamLost = "[";
+    BeamLost+=beam;
+
+    //Find beam
+    for(i=beams_begin; i<beams_end;i++)
+    {
+        if(JBEAM_box.at(i) == ' ');
+        else if (JBEAM_box.at(i) == '\u0009');
+        else if (JBEAM_box.at(i) == '\n');
+        else if (JBEAM_box.at(i) == ',');
+        else
+        {
+            temp.append(JBEAM_box.at(i));
+            if(temp.indexOf(BeamLost) >= 0)
+            {
+                BeamFound++;
+                break;
+            }
+        }
+    }
+
+    //Find beam begin
+    for(i; i>beams_begin; i--)
+    {
+        if(JBEAM_box.at(i) == '[') break;
+    }
+
+
+    int beam_begin = i;
+
+    listlevel = 0;
+    //Find beam end
+    for(i; i<beams_end; i++)
+    {
+        if(JBEAM_box.at(i) == '[') listlevel++;
+        else if(JBEAM_box.at(i) == ']')
+        {
+            listlevel--;
+            if(listlevel == 0)
+            {
+                break;
+            }
+        }
+    }
+
+    int beam_end = i;
+    RealEnd = i;
+
+    //Find comma after the beam if needed, to be able ro remove it
+    //when deleting beams
+    if(FindComma)
+    {
+        for(i=beam_end+1; i<beams_end; i++)
+        {
+            if(JBEAM_box.at(i) == ' ');
+            else if (JBEAM_box.at(i) == '\u0009');
+            else if (JBEAM_box.at(i) == '\n');
+            else if (JBEAM_box.at(i) == ',')
+            {
+                RealEnd = i;
+                break;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
+    //Still missing finding pos2
+
+    Begin = beam_begin;
+    RealEnd = beam_end;
+
+    if(BeamFound>0) return true;
+    else return false;
+}
+
+void MainWindow::JBEAM_DeleteNodes()
+{
+    int pos1; //Position containers for parsing the textbox
+    int pos2;
+    int pos3;
+
+    QString TextBoxText = ui->textEdit_JBEAM->toPlainText();
+    for(int i=0; i<CurrentNodeBeam->JBEAM_temp.delete_nodes.size();i++)
+    {
+        QString NodeName = CurrentNodeBeam->JBEAM_temp.delete_nodes.at(i).NodeName;
+
+        //Find node from textbox by nodename
+        if(FindNodeContainer(TextBoxText, NodeName, pos1, pos2, true, pos3))
+        {
+            QString nodeline = "";
+
+            TextBoxText.replace(pos1-1,pos3-pos1+2,nodeline);
+        }
+        else qDebug() << "Node not found";
+
+    }
+    ui->textEdit_JBEAM->setText(TextBoxText);
+}
+
+//Delete beams
+void MainWindow::JBEAM_DeleteBeams()
+{
+    int pos1; //Position containers for parsing the textbox
+    int pos2;
+    int pos3;
+
+    QString TextBoxText = ui->textEdit_JBEAM->toPlainText();
+    for(int i=0; i<CurrentNodeBeam->JBEAM_temp.delete_beams.size();i++)
+    {
+        QString Beam = "\"" + CurrentNodeBeam->JBEAM_temp.delete_beams.at(i).Node1Name + "\"";
+        Beam += "\"" + CurrentNodeBeam->JBEAM_temp.delete_beams.at(i).Node2Name + "\"";
+
+        //Find node from textbox by nodename
+        if(FindBeamContainer(TextBoxText, Beam, pos1, pos2, true, pos3))
+        {
+            QString beamline = "";
+
+            TextBoxText.replace(pos1,pos3-pos1+2,beamline);
+        }
+        else qDebug() << "Beam not found";
+
+    }
+    ui->textEdit_JBEAM->setText(TextBoxText);
+    CurrentNodeBeam->JBEAM_temp.clear();
 }
 
 /* Place new nodes at current text cursor location */

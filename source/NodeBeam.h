@@ -147,15 +147,22 @@ struct Hubwheel
     float radius;
 };
 
-//Temp nodes and beams going to JBEAM
+/* Temp container for nodes and beams that
+ * should be added or removed from JBEAM */
+
 class JBEAM_Temp
 {
 public:
     JBEAM_Temp();
     ~JBEAM_Temp();
 
+    //New nodes and beams
     QVector < QVector <Node> > nodes;
     QVector < QVector <Beam> > beams;
+
+    //Nodes and beams to be removed
+    QVector < Node > delete_nodes;
+    QVector < Beam > delete_beams;
 
     bool NodesToAdd;
     bool BeamsToAdd;
@@ -165,6 +172,8 @@ public:
     void AddBeam(Beam beam);
     void NewNodeGroup();
     void NewBeamGroup();
+    void DeleteNode(Node node);
+    void DeleteBeam(Beam beam);
 };
 
 class NodeBeam : public QObject
