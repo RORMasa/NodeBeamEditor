@@ -13,7 +13,7 @@ void NodeBeam::RunLUAScript(QString filename)
     emit LUA_log(msg);
 
     //Intialize Lua state
-    lua_State* L = luaL_newstate();
+    L = luaL_newstate();
     luaL_openlibs(L);
 
     //Register functions to be called from Lua
@@ -21,9 +21,14 @@ void NodeBeam::RunLUAScript(QString filename)
             .beginClass<NodeBeam>("NodeBeam")
             .addConstructor<void (*) (void)>()
             .addFunction("AddNode",&NodeBeam::LuaAddNode)
+            .addFunction("AddNodet",&NodeBeam::LuaAddNodeTag)
             .addFunction("AddBeam",&NodeBeam::LuaAddBeam)
             .addFunction("AddComment",&NodeBeam::LuaAddComment)
             .addFunction("Log",&NodeBeam::LuaLog)
+            .addFunction("GetNode", &NodeBeam::LuaGetNode)
+            .addFunction("GetNodei", &NodeBeam::LuaGetNodei)
+            .addFunction("GetNodeCount", &NodeBeam::LuaGetNodeCount)
+            .addFunction("GetNodes", &NodeBeam::LuaGetAllNodes)
             .endClass();
 
     //Link this nodebeam object to Lua
@@ -36,6 +41,8 @@ void NodeBeam::RunLUAScript(QString filename)
 
     msg = "Script finished";
     emit LUA_log(msg);
+
+    lua_close(L);
 
 }
 
@@ -59,6 +66,25 @@ void NodeBeam::LuaAddNode(const std::string name, float locx, float locy, float 
     TempNode.locX = locx;
     TempNode.locY = locy;
     TempNode.locZ = locz;
+    TempNode.tag.clear();
+    TempNode.comments.clear();
+    if(LuaComment)
+    {
+        TempNode.comments = LuaComments;
+        LuaComment=0;
+        LuaComments.clear();
+    }
+    AddNode();
+}
+
+//Add node with a tag from lua
+void NodeBeam::LuaAddNodeTag(const std::string name, float locx, float locy, float locz, const std::string tag)
+{
+    TempNode.NodeName = QString::fromStdString(name);
+    TempNode.locX = locx;
+    TempNode.locY = locy;
+    TempNode.locZ = locz;
+    TempNode.tag = tag;
     TempNode.comments.clear();
     if(LuaComment)
     {
@@ -88,7 +114,67 @@ void NodeBeam::LuaAddBeam(const std::string node1, const std::string node2)
     AddBeamT();
 }
 
-/* Comments class */
+//Get node by name in Lua
+LuaRef NodeBeam::LuaGetNode(const std::string node)
+{
+    LuaRef n = newTable(L);
+    QString name = QString::fromStdString(node);
+    for(int i=0; i<Nodes.size(); i++)
+    {
+        if(Nodes.at(i).NodeName == name)
+        {
+            n["i"] = i;
+            n["x"] = Nodes.at(i).locX;
+            n["y"] = Nodes.at(i).locY;
+            n["z"] = Nodes.at(i).locZ;
+            n["tag"] = Nodes.at(i).tag;
+            break;
+        }
+    }
+    return n;
+}
+
+//Get node by index in nodes vector in Lua
+LuaRef NodeBeam::LuaGetNodei(int i)
+{
+    LuaRef n = newTable(L);
+    if(Nodes.size()>i)
+    {
+        n["name"] = Nodes.at(i).NodeName.toStdString();
+        n["x"] = Nodes.at(i).locX;
+        n["y"] = Nodes.at(i).locY;
+        n["z"] = Nodes.at(i).locZ;
+        n["tag"] = Nodes.at(i).tag;
+    }
+    return n;
+}
+
+//Get all nodes in Lua
+LuaRef NodeBeam::LuaGetAllNodes()
+{
+    LuaRef nodes = newTable(L);
+    for(int i=0; i<Nodes.size(); i++)
+    {
+        LuaRef node = newTable(L);
+        node["name"] = Nodes.at(i).NodeName.toStdString();
+        node["x"] = Nodes.at(i).locX;
+        node["y"] = Nodes.at(i).locY;
+        node["z"] = Nodes.at(i).locZ;
+        node["tag"] = Nodes.at(i).tag;
+        nodes[i] = node;
+
+    }
+    return nodes;
+}
+
+//Get node amount in Lua
+int NodeBeam::LuaGetNodeCount()
+{
+    return Nodes.size();
+}
+
+
+/* == Comments class == */
 Comments::Comments()
 {
 

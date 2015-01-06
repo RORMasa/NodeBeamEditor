@@ -32,7 +32,7 @@ for i = 0, segments, 1 do
 end
 
 NB:AddComment("Chassis beams")
-NB:AddComment("BNEcolor:125,135,10")
+NB:AddComment("BNEcolor:125,135,100")
 --Place beams
 counter=0
 for i = 1, segments, 1 do
@@ -52,6 +52,37 @@ for i = 1, segments, 1 do
 	BeamNode2 =  nameprefix..(counter+7)
 	NB:AddBeam(BeamNode1, BeamNode2)
 	
+	BeamNode1 =  nameprefix..counter
+	BeamNode2 =  nameprefix..(counter+6)
+	NB:AddBeam(BeamNode1, BeamNode2)
+	
+	BeamNode1 =  nameprefix..(counter+1)
+	BeamNode2 =  nameprefix..(counter+7)
+	NB:AddBeam(BeamNode1, BeamNode2)
+
+	BeamNode1 =  nameprefix..(counter+2)
+	BeamNode2 =  nameprefix..(counter+4)
+	NB:AddBeam(BeamNode1, BeamNode2)
+
+	BeamNode1 =  nameprefix..(counter+3)
+	BeamNode2 =  nameprefix..(counter+5)
+	NB:AddBeam(BeamNode1, BeamNode2)
+	
+	counter = counter + 4
+end
+
+NB:AddComment("Chassis beams-side")
+NB:AddComment("BNEcolor:100,100,100")
+counter=0
+for i = 0, segments, 1 do
+	BeamNode1 =  nameprefix..counter
+	BeamNode2 =  nameprefix..(counter+2)
+	NB:AddBeam(BeamNode1, BeamNode2)
+	
+	BeamNode1 =  nameprefix..counter+1
+	BeamNode2 =  nameprefix..(counter+3)
+	NB:AddBeam(BeamNode1, BeamNode2)
+	
 	counter = counter + 4
 end
 
@@ -66,14 +97,14 @@ for i = 0, segments, 1 do
 	NB:AddBeam(BeamNode1, BeamNode2)
 	
 	BeamNode1 =  nameprefix..(counter+1)
-	BeamNode2 =  nameprefix..(counter+3)
+	BeamNode2 =  nameprefix..(counter+2)
 	NB:AddBeam(BeamNode1, BeamNode2)
 
 	BeamNode1 =  nameprefix..(counter+2)
 	BeamNode2 =  nameprefix..(counter+3)
 	NB:AddBeam(BeamNode1, BeamNode2)
 
-	BeamNode1 =  nameprefix..(counter+2)
+	BeamNode1 =  nameprefix..(counter+3)
 	BeamNode2 =  nameprefix..counter
 	NB:AddBeam(BeamNode1, BeamNode2)
 	
@@ -83,7 +114,7 @@ end
 NB:AddComment("Chassis beams-X")
 NB:AddComment("BNEcolor:20,100,175")
 counter=0
-for i = 0, segments, 1 do
+for i = 1, segments, 1 do
 	BeamNode1 =  nameprefix..counter
 	BeamNode2 =  nameprefix..(counter+5)
 	NB:AddBeam(BeamNode1, BeamNode2)
@@ -106,7 +137,7 @@ end
 NB:AddComment("Chassis beams-middle")
 NB:AddComment("BNEcolor:175,100,10")
 counter=0
-for i = 0, segments, 1 do
+for i = 1, segments, 1 do
 	BeamNode1 =  nameprefix..counter
 	BeamNode2 =  nameprefix..(counter+7)
 	NB:AddBeam(BeamNode1, BeamNode2)
@@ -121,29 +152,6 @@ for i = 0, segments, 1 do
 
 	BeamNode1 =  nameprefix..(counter+3)
 	BeamNode2 =  nameprefix..(counter+4)
-	NB:AddBeam(BeamNode1, BeamNode2)
-	
-	counter = counter + 4
-end
-
-NB:AddComment("Chassis beams-side")
-NB:AddComment("BNEcolor:100,100,100")
-counter=0
-for i = 0, segments, 1 do
-	BeamNode1 =  nameprefix..counter
-	BeamNode2 =  nameprefix..(counter+6)
-	NB:AddBeam(BeamNode1, BeamNode2)
-	
-	BeamNode1 =  nameprefix..(counter+1)
-	BeamNode2 =  nameprefix..(counter+7)
-	NB:AddBeam(BeamNode1, BeamNode2)
-
-	BeamNode1 =  nameprefix..(counter+2)
-	BeamNode2 =  nameprefix..(counter+4)
-	NB:AddBeam(BeamNode1, BeamNode2)
-
-	BeamNode1 =  nameprefix..(counter+3)
-	BeamNode2 =  nameprefix..(counter+5)
 	NB:AddBeam(BeamNode1, BeamNode2)
 	
 	counter = counter + 4

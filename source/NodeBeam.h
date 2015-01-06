@@ -62,6 +62,9 @@ struct Node
     float UID;
     void CalcUID();
     void clear();
+
+    //For Lua scripting, a way to mark a node during script.
+    std::string tag;
 };
 
 struct NodeGroup
@@ -331,12 +334,21 @@ public:
 
     /* LUA Script */
     void RunLUAScript(QString filename);
+    //Lua state
+    lua_State* L;
 
     //Functions for LUA
     void LuaLog(const std::string msg);
     void LuaAddNode(const std::string name, float locx, float locy, float locz);
+    void LuaAddNodeTag(const std::string name, float locx, float locy, float locz, const std::string tag);
     void LuaAddBeam(const std::string node1, const std::string node2);
     void LuaAddComment(const std::string comment);
+    luabridge::LuaRef LuaGetNode(const std::string node);
+    luabridge::LuaRef LuaGetNodei(int i);
+    luabridge::LuaRef LuaGetAllNodes();
+    int LuaGetNodeCount();
+
+
     Comments LuaComments;
     bool LuaComment;
 
