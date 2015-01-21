@@ -1,10 +1,15 @@
 -- LUA Example script for NodeBEAM Editor
 
---There is currently 4 functions available, each in a class NB
+--There is currently 9 functions available, each in a class NB
 -- NB:AddNode( name, location x, location y, location z)
+-- NB:AddNodet( name, location x, location y, location z, tag)
 -- NB:AddBeam( id1, id2 )
 -- NB:AddComment( "your comment" )
 -- NB:Log("your message") writes a log message on the script tab
+-- NB:GetNode("node name") returns the node location x,y,z and id
+-- NB:GetNodei(id) returns the node location  x,y,z and name
+-- NB:GetNodeCount() returns the amount of nodes in current nodebeam
+-- NB:GetNodes() returns all nodes in current nodebeam
 
 --Exampe of using the AddNode function
 

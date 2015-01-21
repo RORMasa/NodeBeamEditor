@@ -2531,6 +2531,9 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionOpen">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>../icons/document-open-7.png</normaloff>../icons/document-open-7.png</iconset>
@@ -2540,6 +2543,9 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionSave_As">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>../icons/document-save-5.png</normaloff>../icons/document-save-5.png</iconset>

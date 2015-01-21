@@ -2,10 +2,10 @@
 -- Chassis generator
 
 --Settings
-length = 5.0
-width = 0.8
+length = 6.0
+width = 1.4
 height = 0.4 
-segments = 6
+segments = 3
 
 nameprefix = "cha"
 

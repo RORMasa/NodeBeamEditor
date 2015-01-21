@@ -173,6 +173,19 @@ int NodeBeam::LuaGetNodeCount()
     return Nodes.size();
 }
 
+/*
+//Get contents of JBEAM textbox in Lua.
+LuaRef NodeBeam::LuaGetJbeamtext()
+{
+
+}
+
+//Set contents in JBEAM textbox from Lua
+LuaRef NodeBeam::LiaSetJbeamtext(std::strng text)
+{
+
+}
+*/
 
 /* == Comments class == */
 Comments::Comments()

@@ -41,13 +41,13 @@
 
 #include <QtWidgets>
 #include <QtOpenGL>
+#include <QMatrix4x4>
 
 #include <math.h>
 
 #include "glwidget.h"
 #include "NodeBeam.h"
 
-#include <QMatrix4x4>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
@@ -2328,5 +2328,10 @@ void GLWidget::GetViewMatrices(QMatrix4x4 * ModelviewMatrix, QMatrix4x4 * Projec
     /* Return matrices */
     *ModelviewMatrix = modelview;
     *ProjectionMatrix = projection;
+
+}
+
+void GLWidget::LoadDae()
+{
 
 }
