@@ -2460,10 +2460,13 @@ QTabWidget::tab-bar {
     <addaction name="actionSave_As"/>
     <addaction name="separator"/>
     <addaction name="actionImport_BeamNG"/>
+    <addaction name="actionReload"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionExport_to_BeamNG"/>
+    <addaction name="separator"/>
     <addaction name="actionImport_Rigs_of_Rods"/>
     <addaction name="actionImport_OBJ"/>
     <addaction name="separator"/>
-    <addaction name="actionExport_to_BeamNG"/>
     <addaction name="actionExport_to_Rigs_of_Rods"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -2532,7 +2535,7 @@ QTabWidget::tab-bar {
   </action>
   <action name="actionExport_to_BeamNG">
    <property name="text">
-    <string>Save As  BeamNG JBEAM ...</string>
+    <string>Save As JBEAM ...</string>
    </property>
   </action>
   <action name="actionExport_to_Rigs_of_Rods">
@@ -2552,7 +2555,7 @@ QTabWidget::tab-bar {
   </action>
   <action name="actionImport_BeamNG">
    <property name="text">
-    <string>Import BeamNG ...</string>
+    <string>Open JBEAM ...</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -2606,6 +2609,19 @@ QTabWidget::tab-bar {
    </property>
    <property name="whatsThis">
     <string>Run previous script again</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save JBEAM</string>
+   </property>
+  </action>
+  <action name="actionReload">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Reload JBEAM</string>
    </property>
   </action>
  </widget>

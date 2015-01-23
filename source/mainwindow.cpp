@@ -380,6 +380,7 @@ void MainWindow::on_actionNew_triggered()
     }
     ui->treeWidget->clear();
     ui->treeWidget_2->clear();
+    ui->actionReload->setEnabled(false);
 
     JBEAMtextbox->setPlainText(EmptyJbeamTextTemplate);
     setWindowTitle(EditorTitle);
@@ -415,6 +416,9 @@ void MainWindow::on_actionExport_to_BeamNG_triggered()
             QStringList filepath = fileName.split('/');
             QString title = filepath.last() + " - " + EditorTitle;
             setWindowTitle(title);
+
+            JBEAM_Filepath = fileName;
+            ui->actionReload->setEnabled(true);
         }
 
         int result = Timer.elapsed();
@@ -422,6 +426,20 @@ void MainWindow::on_actionExport_to_BeamNG_triggered()
         resultt.append(QString::number(result));
         resultt.append(" ms !");
         ui->statusBar->showMessage(resultt,10000);
+    }
+}
+
+/* File menu / BeamNG quick save */
+void MainWindow::on_actionSave_triggered()
+{
+    QString fileName = JBEAM_Filepath;
+    if ((!fileName.isEmpty() && (ui->actionReload->isEnabled())))
+    {
+        if(CurrentNodeBeam->JBEAM_SaveAs(fileName,JBEAMtextbox->toPlainText()))
+        {
+            QString resultt = "JBEAM saved ";
+            ui->statusBar->showMessage(resultt,10000);
+        }
     }
 }
 
@@ -692,12 +710,15 @@ void MainWindow::MainNodeBeamUpdated()
         item->setText(CurrentNodeBeam->Hubwheels[i].name);
         ui->listWidget->addItem(item);
     }
+    /*
+     * Auto save disabled
     if(autosave.elapsed()>60000)
     {
         CurrentNodeBeam->SaveAs("autosave.beamproj");
         ui->statusBar->showMessage("Autosave: vehicle saved", 1000);
         autosave.restart();
     }
+    */
 
 }
 
@@ -1094,11 +1115,55 @@ void MainWindow::on_actionImport_BeamNG_triggered()
             QString title = filepath.last() + " - " + EditorTitle;
             setWindowTitle(title);
 
+            JBEAM_Filepath = fileName;
+            ui->actionReload->setEnabled(true);
+
         }
     }
 
     MainNodeBeamUpdated();
 
+}
+
+//Reload JBEAM currently under construction
+void MainWindow::on_actionReload_triggered()
+{
+    if (!JBEAM_Filepath.isEmpty())
+    {
+        //CurrentNodeBeam->ReadJBeamTree(fileName);
+        //CurrentNodeBeam->ImportBeamNG(fileName);
+
+        /*New JBEAM input system trough textbox */
+
+        QFile file(JBEAM_Filepath);
+        if (!file.open(QFile::ReadOnly | QFile::Text)) {
+            QMessageBox msgBox;
+            msgBox.setText("Error opening file.");
+            msgBox.exec();
+        }
+        else
+        {
+            QTextStream in(&file);
+
+            #ifndef QT_NO_CURSOR
+                QApplication::setOverrideCursor(Qt::WaitCursor);
+            #endif
+
+            QString FileContents = in.readAll();
+
+
+            #ifndef QT_NO_CURSOR
+                QApplication::restoreOverrideCursor();
+            #endif
+            file.close();
+
+            //Put file contents in JBEAM TextBox
+            JBEAMtextbox->setPlainText(FileContents);
+            JBEAM_ParseTextEdit();
+        }
+    }
+
+    MainNodeBeamUpdated();
 }
 
 /* Import nodes and beams from Wavefront OBJ file */
@@ -3476,3 +3541,6 @@ void JBEAM_TextBox::resizeEvent(QResizeEvent *event)
     QRect cr = contentsRect();
     LineNumbersA->setGeometry(QRect(cr.left(), cr.top(), 26, cr.height()));
 }
+
+
+

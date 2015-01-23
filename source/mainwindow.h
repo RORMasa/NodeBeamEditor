@@ -273,6 +273,10 @@ private slots:
 
     void on_actionRun_again_triggered();
 
+    void on_actionReload_triggered();
+
+    void on_actionSave_triggered();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
@@ -329,6 +333,9 @@ private:
 
     //Empty JBEAM text template
     QString EmptyJbeamTextTemplate;
+
+    //Path to active working JBEAM file
+    QString JBEAM_Filepath;
 };
 
 
