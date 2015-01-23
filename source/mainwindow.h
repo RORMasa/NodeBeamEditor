@@ -9,11 +9,47 @@
 #include "settings.h"
 #include <QTime>
 #include <QLabel>
+#include <QPlainTextEdit>
 
 namespace Ui {
 class MainWindow;
 
 }
+
+class JBEAM_TextBox : public QPlainTextEdit
+{
+    Q_OBJECT
+public:
+    JBEAM_TextBox(QWidget *parent=0);
+    void LineNumbersPaintEvent(QPaintEvent *event);
+    int LineNumbers_Width;
+
+protected:
+    void resizeEvent(QResizeEvent *event);
+
+private slots:
+    void updateLineNumbers(const QRect &rect, int dy);
+
+private:
+    QWidget * LineNumbersA;
+};
+
+class LineNumbers : public QWidget
+{
+public:
+    LineNumbers(JBEAM_TextBox *textbox) : QWidget(textbox)
+    {
+        TextBox = textbox;
+    }
+protected:
+    void paintEvent(QPaintEvent *event) {
+        TextBox->LineNumbersPaintEvent(event);
+    }
+
+private:
+    JBEAM_TextBox * TextBox;
+};
+
 class GLWidget;
 class GLWidgetOrtho;
 class NodeBeam;
@@ -38,7 +74,7 @@ public slots:
     void ShowContextMenu_Beams(const QPoint &position);
     void JBEAM_AddNode();
     void JBEAM_AddBeam();
-    void JBEAM_AddComment(int CursorPos, QString Comment);
+    int JBEAM_AddComment(int CursorPos, QString Comment);
     void JBEAM_UpdateSelectedNodes();
     void JBEAM_UpdateAllNodes();
     void JBEAM_Update();
@@ -229,7 +265,7 @@ private slots:
 
     void on_pushButton_SetBeamCursor_clicked();
 
-    void on_textEdit_JBEAM_textChanged();
+    void on_JBEAM_textChanged();
 
     void on_toolButton_29_clicked();
 
@@ -250,6 +286,7 @@ private:
     QTreeWidgetItem *item;
     QTreeWidgetItem *item2;
     QTabWidget *OpenGLViews;
+    JBEAM_TextBox *JBEAMtextbox;
 
     QTime autosave;
 
@@ -289,5 +326,9 @@ private:
 
     //File name of previously ran script
     QString LastScript;
+
+    //Empty JBEAM text template
+    QString EmptyJbeamTextTemplate;
 };
+
 

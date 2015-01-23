@@ -2904,6 +2904,17 @@ QJsonParseError NodeBeam::ParseJBEAM_TextEdit(QByteArray JbeamInputText)
     }
     else qDebug() << "JBEAM object not found.";
 
+    if((JBEAM_ParseError.offset > 0) && (JBEAM_ParseError.offset < JbeamInputText.length()))
+    {
+        int linecount = 1;
+        for(int i=0; i<JBEAM_ParseError.offset;i++)
+        {
+            if(JbeamInputText.at(i) == '\n') linecount++;
+        }
+        JbeamErrorLine = linecount;
+        return JBEAM_ParseError;
+    }
+
     return JBEAM_ParseError;
 
 }

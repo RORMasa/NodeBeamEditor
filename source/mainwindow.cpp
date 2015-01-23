@@ -14,6 +14,7 @@
 #include <QPixmap>
 #include <QJsonDocument>
 #include "blueprints.h"
+#include <QLabel>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -172,10 +173,41 @@ MainWindow::MainWindow(QWidget *parent) :
         QObject::connect(glWidgetOViews[i], SIGNAL(NodeBeamUpdated()), glWidgetOViews[i2[i+3]], SLOT(updateGL()));
     }
 
-
     //JBEAM widget
     JBEAM_NodeCursor = -1;
     JBEAM_BeamCursor = -1;
+
+    //Create JBEAM textbox with linenumbers
+    JBEAMtextbox = new JBEAM_TextBox;
+    ui->verticalLayout_9->addWidget(JBEAMtextbox);
+    ui->verticalLayout_9->addWidget(ui->widget);
+    JBEAMtextbox->setLineWrapMode(QPlainTextEdit::NoWrap);
+    //Set smaller TAB width
+    JBEAMtextbox->setTabStopWidth(15);
+
+    EmptyJbeamTextTemplate = "{\n"
+                   "    \"Vehicle\":{\n"
+                   "        \"information\":{\n"
+                   "            \"authors\":\"Your name\"      \n"
+                   "        },\n"
+                   "        \"nodes\":[\n"
+                   "            [\"id\", \"posX\", \"posY\", \"posZ\"],\n\n"
+                   "            //BNEnodes\n"
+                   "   \n"
+                   "        ],\n"
+                   "        \"beams\":[\n"
+                   "            [\"id1:\", \"id2:\"],\n\n"
+                   "            //BNEbeams\n"
+                   "   \n"
+                   "   \n"
+                   "        ],\n"
+                   "   }\n"
+                   "}\n";
+
+    JBEAMtextbox->setPlainText(EmptyJbeamTextTemplate);
+
+    //Connect JBEAM textbox signals
+    QObject::connect(JBEAMtextbox, SIGNAL(textChanged ()), this, SLOT(on_JBEAM_textChanged()));
 
     CurrentBeamGroupi=0;
     RefreshLock=0;
@@ -249,11 +281,8 @@ MainWindow::MainWindow(QWidget *parent) :
         StatusBar_mode->setText("BeamNG");
     }
 
-    //Set smaller TAB width
-    ui->textEdit_JBEAM->setTabStopWidth(15);
-
     //Update JBEAM textbox cursor locations
-    JBEAM_UpdateCursors(ui->textEdit_JBEAM->toPlainText());
+    JBEAM_UpdateCursors(JBEAMtextbox->toPlainText());
 
     //Change Quad view default views
     glWidgetOViews[1]->setViewFront();
@@ -279,6 +308,7 @@ MainWindow::~MainWindow()
         delete glWidgetViews[i];
     }
 
+    delete JBEAMtextbox;
     delete AppSettings;
     delete CurrentNodeBeam;
     delete BeamProperties;
@@ -351,28 +381,7 @@ void MainWindow::on_actionNew_triggered()
     ui->treeWidget->clear();
     ui->treeWidget_2->clear();
 
-    QString EmptyTemplate = "{\n"
-                   "    \"Vehicle\":{\n"
-                   "        \"information\":{\n"
-                   "            \"authors\":\"Your name\"      \n"
-                   "        },\n"
-                   "        \"nodes\":[\n"
-                   "            [\"id\", \"posX\", \"posY\", \"posZ\"],\n\n"
-                   "            //BNEnodes\n"
-                   "   \n"
-                   "        ],\n"
-                   "        \"beams\":[\n"
-                   "            [\"id1:\", \"id2:\"],\n\n"
-                   "            //BNEbeams\n"
-                   "   \n"
-                   "   \n"
-                   "        ],\n"
-                   "   }\n"
-                   "}\n";
-
-
-
-    ui->textEdit_JBEAM->setText(EmptyTemplate);
+    JBEAMtextbox->setPlainText(EmptyJbeamTextTemplate);
     setWindowTitle(EditorTitle);
     //NewProjectDialog Dialog;
     //Dialog.exec();
@@ -401,7 +410,7 @@ void MainWindow::on_actionExport_to_BeamNG_triggered()
         Timer.start();
         //CurrentNodeBeam->ExportBeamNG(fileName);
 
-        if(CurrentNodeBeam->JBEAM_SaveAs(fileName,ui->textEdit_JBEAM->toPlainText()))
+        if(CurrentNodeBeam->JBEAM_SaveAs(fileName,JBEAMtextbox->toPlainText()))
         {
             QStringList filepath = fileName.split('/');
             QString title = filepath.last() + " - " + EditorTitle;
@@ -1078,7 +1087,7 @@ void MainWindow::on_actionImport_BeamNG_triggered()
             file.close();
 
             //Put file contents in JBEAM TextBox
-            ui->textEdit_JBEAM->setText(FileContents);
+            JBEAMtextbox->setPlainText(FileContents);
             JBEAM_ParseTextEdit();
 
             QStringList filepath = fileName.split('/');
@@ -1179,7 +1188,7 @@ void MainWindow::on_pushButton_DeleteNode_clicked()
 {
     //Text from text browser to QByteArray
     QByteArray JBeamInputText;
-    JBeamInputText.append(ui->textEdit_JBEAM->toPlainText());
+    JBeamInputText.append(JBEAMtextbox->toPlainText());
 
 
 }
@@ -2718,17 +2727,23 @@ void MainWindow::on_pushButton_3_clicked()
 /* Parse JBEAM widget */
 void MainWindow::JBEAM_ParseTextEdit()
 {
-    JBEAM_UpdateCursors(ui->textEdit_JBEAM->toPlainText());
+    JBEAM_UpdateCursors(JBEAMtextbox->toPlainText());
 
     QByteArray textbox;
-    textbox.append(ui->textEdit_JBEAM->toPlainText());
+    textbox.append(JBEAMtextbox->toPlainText());
     QJsonParseError ParseError;
     ParseError = CurrentNodeBeam->ParseJBEAM_TextEdit(textbox);
     if(ParseError.offset>0)
     {
         QString errormsg = "JBEAM read error: ";
         errormsg+= ParseError.errorString();
+        errormsg+= ", on line: " + QString::number(CurrentNodeBeam->JbeamErrorLine);
         StatusBar_info->setText(errormsg);
+
+        //Move cursor near error position
+        QTextCursor cursor = JBEAMtextbox->textCursor();
+        cursor.setPosition(ParseError.offset);
+        JBEAMtextbox->setTextCursor(cursor);
     }
     else StatusBar_info->clear();
     MainNodeBeamUpdated();
@@ -2753,7 +2768,7 @@ void MainWindow::JBEAM_AddNode()
     nodeline+= ", ";
     nodeline+= QString::number(CurrentNodeBeam->TempNode.locZ,'f',5);
     nodeline.append("],\n");
-    QTextCursor textcursor = ui->textEdit_JBEAM->textCursor();
+    QTextCursor textcursor = JBEAMtextbox->textCursor();
     if(JBEAM_NodeCursor >= 0)
     {
         textcursor.setPosition(JBEAM_NodeCursor);
@@ -2764,8 +2779,7 @@ void MainWindow::JBEAM_AddNode()
         JBEAM_AddComment(JBEAM_NodeCursor, CurrentNodeBeam->TempNode.comments.ReadComment(i));
     }
     textcursor.insertText(nodeline);
-    ui->textEdit_JBEAM->setTextCursor(textcursor);
-
+    JBEAMtextbox->setTextCursor(textcursor);
 }
 
 /* Add beam, in JBEAM edit widget at text cursor position */
@@ -2776,7 +2790,7 @@ void MainWindow::JBEAM_AddBeam()
     beamline+= ", ";
     beamline+= '"' + CurrentNodeBeam->TempBeam.Node2Name + '"';
     beamline+=("],\n");
-    QTextCursor textcursor = ui->textEdit_JBEAM->textCursor();
+    QTextCursor textcursor = JBEAMtextbox->textCursor();
     if(JBEAM_BeamCursor >= 0)
     {
         textcursor.setPosition(JBEAM_BeamCursor);
@@ -2788,21 +2802,23 @@ void MainWindow::JBEAM_AddBeam()
     }
 
     textcursor.insertText(beamline);
-    ui->textEdit_JBEAM->setTextCursor(textcursor);
+    JBEAMtextbox->setTextCursor(textcursor);
 }
 
-void MainWindow::JBEAM_AddComment(int CursorPos, QString Comment)
+int MainWindow::JBEAM_AddComment(int CursorPos, QString Comment)
 {
     QString commentline = "\u0009\u0009\u0009//";
     commentline+= Comment;
     commentline+= "\n";
-    QTextCursor textcursor = ui->textEdit_JBEAM->textCursor();
+    QTextCursor textcursor = JBEAMtextbox->textCursor();
     if(CursorPos >= 0)
     {
         textcursor.setPosition(CursorPos);
     }
     textcursor.insertText(commentline);
-    ui->textEdit_JBEAM->setTextCursor(textcursor);
+    JBEAMtextbox->setTextCursor(textcursor);
+
+    return commentline.length();
 }
 
 /* Update selected nodes in JBEAM edit widget */
@@ -2812,7 +2828,7 @@ void MainWindow::JBEAM_UpdateSelectedNodes()
     int pos1; //Position containers for parsing the textbox
     int pos2, pos3;
 
-    QString TextBoxText = ui->textEdit_JBEAM->toPlainText();
+    QString TextBoxText = JBEAMtextbox->toPlainText();
     for(int i=0; i<CurrentNodeBeam->SelectedNodes.size();i++)
     {
         QString NodeName = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].NodeName;
@@ -2833,7 +2849,7 @@ void MainWindow::JBEAM_UpdateSelectedNodes()
         else qDebug() << "Node not found";
 
     }
-    ui->textEdit_JBEAM->setText(TextBoxText);
+    JBEAMtextbox->setPlainText(TextBoxText);
 }
 
 /* Update all nodes */
@@ -2842,7 +2858,7 @@ void MainWindow::JBEAM_UpdateAllNodes()
     int pos1; //Position containers for parsing the textbox
     int pos2, pos3;
 
-    QString TextBoxText = ui->textEdit_JBEAM->toPlainText();
+    QString TextBoxText = JBEAMtextbox->toPlainText();
     for(int i=0; i<CurrentNodeBeam->Nodes.size();i++)
     {
         QString NodeName = CurrentNodeBeam->Nodes[i].NodeName;
@@ -2863,7 +2879,7 @@ void MainWindow::JBEAM_UpdateAllNodes()
         else qDebug() << "Node not found";
 
     }
-    ui->textEdit_JBEAM->setText(TextBoxText);
+    JBEAMtextbox->setPlainText(TextBoxText);
 }
 
 /* This function will find, where the node and it's 3 coordinates are in the JBEAM string.
@@ -3153,7 +3169,7 @@ void MainWindow::JBEAM_DeleteNodes()
     int pos2;
     int pos3;
 
-    QString TextBoxText = ui->textEdit_JBEAM->toPlainText();
+    QString TextBoxText = JBEAMtextbox->toPlainText();
     for(int i=0; i<CurrentNodeBeam->JBEAM_temp.delete_nodes.size();i++)
     {
         QString NodeName = CurrentNodeBeam->JBEAM_temp.delete_nodes.at(i).NodeName;
@@ -3168,7 +3184,7 @@ void MainWindow::JBEAM_DeleteNodes()
         else qDebug() << "Node not found";
 
     }
-    ui->textEdit_JBEAM->setText(TextBoxText);
+    JBEAMtextbox->setPlainText(TextBoxText);
 }
 
 //Delete beams
@@ -3178,7 +3194,7 @@ void MainWindow::JBEAM_DeleteBeams()
     int pos2;
     int pos3;
 
-    QString TextBoxText = ui->textEdit_JBEAM->toPlainText();
+    QString TextBoxText = JBEAMtextbox->toPlainText();
     for(int i=0; i<CurrentNodeBeam->JBEAM_temp.delete_beams.size();i++)
     {
         QString Beam = "\"" + CurrentNodeBeam->JBEAM_temp.delete_beams.at(i).Node1Name + "\"";
@@ -3194,7 +3210,7 @@ void MainWindow::JBEAM_DeleteBeams()
         else qDebug() << "Beam not found";
 
     }
-    ui->textEdit_JBEAM->setText(TextBoxText);
+    JBEAMtextbox->setPlainText(TextBoxText);
     CurrentNodeBeam->JBEAM_temp.clear();
 }
 
@@ -3202,39 +3218,39 @@ void MainWindow::JBEAM_DeleteBeams()
 void MainWindow::on_pushButton_SetNodeCursor_clicked()
 {
     //Prepare new cursor
-    int CurrentCursorPos = ui->textEdit_JBEAM->textCursor().position();
+    int CurrentCursorPos = JBEAMtextbox->textCursor().position();
     //Remove old cursor
-    QString JBEAM_text = ui->textEdit_JBEAM->toPlainText();
+    QString JBEAM_text = JBEAMtextbox->toPlainText();
     JBEAM_text.replace("//BNEnodes\n", "          \n");
-    ui->textEdit_JBEAM->setText(JBEAM_text);
+    JBEAMtextbox->setPlainText(JBEAM_text);
 
-    QTextCursor cursor = ui->textEdit_JBEAM->textCursor();
+    QTextCursor cursor = JBEAMtextbox->textCursor();
     cursor.setPosition(CurrentCursorPos);
     cursor.insertText("\n\u0009\u0009\u0009//BNEnodes\n");
-    ui->textEdit_JBEAM->setTextCursor(cursor);
+    JBEAMtextbox->setTextCursor(cursor);
 
 }
 /* Place new beams at current text cursor location */
 void MainWindow::on_pushButton_SetBeamCursor_clicked()
 {
     //Prepare new cursor
-    int CurrentCursorPos = ui->textEdit_JBEAM->textCursor().position();
+    int CurrentCursorPos = JBEAMtextbox->textCursor().position();
     //Remove old cursor
-    QString JBEAM_text = ui->textEdit_JBEAM->toPlainText();
+    QString JBEAM_text = JBEAMtextbox->toPlainText();
     JBEAM_text.replace("//BNEbeams\n", "          \n");
-    ui->textEdit_JBEAM->setText(JBEAM_text);
+    JBEAMtextbox->setPlainText(JBEAM_text);
 
-    QTextCursor cursor = ui->textEdit_JBEAM->textCursor();
+    QTextCursor cursor = JBEAMtextbox->textCursor();
     cursor.setPosition(CurrentCursorPos);
     cursor.insertText("\n\u0009\u0009\u0009//BNEbeams\n");
-    ui->textEdit_JBEAM->setTextCursor(cursor);
+    JBEAMtextbox->setTextCursor(cursor);
 
 }
 
 /* Find node and beam cursors from JBEAM string in JBEAM textbox */
 void MainWindow::JBEAM_UpdateCursors(QString JBEAM_box)
 {
-    QString JBEAM_texti = ui->textEdit_JBEAM->toPlainText();
+    QString JBEAM_texti = JBEAMtextbox->toPlainText();
     JBEAM_NodeCursor = JBEAM_box.indexOf("//BNEnodes");
     if(JBEAM_NodeCursor>=0)
     {
@@ -3248,6 +3264,7 @@ void MainWindow::JBEAM_UpdateCursors(QString JBEAM_box)
             else JBEAM_NodeCursor = -1;
         }
     }
+    //qDebug() << "Node cursor: " << JBEAM_NodeCursor;
     JBEAM_BeamCursor = JBEAM_box.indexOf("//BNEbeams");
     if(JBEAM_BeamCursor>=0)
     {
@@ -3261,14 +3278,16 @@ void MainWindow::JBEAM_UpdateCursors(QString JBEAM_box)
             else JBEAM_BeamCursor = -1;
         }
     }
-    //qDebug() << "JBEAM CURSORI" << JBEAM_BeamCursor;
+    //qDebug() << "Beam cursor: " << JBEAM_BeamCursor;
 }
 
 /* JBEAM text edit box Text changed event */
-void MainWindow::on_textEdit_JBEAM_textChanged()
+void MainWindow::on_JBEAM_textChanged()
 {
-    JBEAM_UpdateCursors(ui->textEdit_JBEAM->toPlainText());
+    JBEAM_UpdateCursors(JBEAMtextbox->toPlainText());
 }
+
+
 
 /* Signal from OpenGL view to update JBEAM */
 void MainWindow::JBEAM_Update()
@@ -3358,7 +3377,7 @@ void MainWindow::dropEvent(QDropEvent * dropevent)
                     file.close();
 
                     //Put file contents in JBEAM TextBox
-                    ui->textEdit_JBEAM->setText(FileContents);
+                    JBEAMtextbox->setPlainText(FileContents);
                     JBEAM_ParseTextEdit();
 
                     QStringList filepath = fileName.split('/');
@@ -3410,4 +3429,50 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 void MainWindow::LUA_message(QString msg)
 {
     ui->textBrowser->append(msg);
+}
+
+/* ==== JBEAM TEXT EDIT ==== */
+JBEAM_TextBox::JBEAM_TextBox(QWidget *parent) : QPlainTextEdit(parent)
+{
+    LineNumbersA = new LineNumbers(this);
+    setViewportMargins(26,0,0,0);
+    connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumbers(QRect,int)));
+}
+
+void JBEAM_TextBox::LineNumbersPaintEvent(QPaintEvent *event)
+{
+    QPainter painter(LineNumbersA);
+    painter.fillRect(event->rect(), Qt::white);
+
+    QTextBlock block = firstVisibleBlock();
+    int blockNumber = block.blockNumber();
+    int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
+    int bottom = top + (int) blockBoundingRect(block).height();
+    while (block.isValid() && top <= event->rect().bottom()) {
+        if (block.isVisible() && bottom >= event->rect().top()) {
+            QString number = QString::number(blockNumber + 1);
+            painter.setPen(Qt::gray);
+            painter.drawText(0, top, LineNumbersA->width(), fontMetrics().height(),
+                             Qt::AlignRight, number);
+        }
+
+        block = block.next();
+        top = bottom;
+        bottom = top + (int) blockBoundingRect(block).height();
+        ++blockNumber;
+    }
+}
+
+void JBEAM_TextBox::updateLineNumbers(const QRect &rect, int dy)
+{
+    if (dy) LineNumbersA->scroll(0, dy);
+    else LineNumbersA->update(0, rect.y(), LineNumbersA->width(), rect.height());
+}
+
+void JBEAM_TextBox::resizeEvent(QResizeEvent *event)
+{
+    QPlainTextEdit::resizeEvent(event);
+
+    QRect cr = contentsRect();
+    LineNumbersA->setGeometry(QRect(cr.left(), cr.top(), 26, cr.height()));
 }

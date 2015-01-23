@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     beamdefaultsdialog.cpp \
     settings.cpp \
     NodeBeam_LUA.cpp \
-    blueprints.cpp
+    blueprints.cpp \
+    colladadae.cpp
 
 HEADERS  += mainwindow.h \
     glwidget.h \
@@ -46,7 +47,8 @@ HEADERS  += mainwindow.h \
     jbeam_object.h \
     beamdefaultsdialog.h \
     settings.h \
-    blueprints.h
+    blueprints.h \
+    colladadae.h
 
 
 FORMS    += mainwindow.ui \
@@ -60,6 +62,8 @@ FORMS    += mainwindow.ui \
 
 RESOURCES += \
     icons.qrc
+
+RC_FILE = BNE.rc
 
 LIBS += \
 

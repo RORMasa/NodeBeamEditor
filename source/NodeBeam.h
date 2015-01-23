@@ -261,7 +261,7 @@ public:
     //JBEAM temp containers, for new nodes
     //and beams going to JBEAM
     JBEAM_Temp JBEAM_temp;
-
+    int JbeamErrorLine;
 
     //Currently selected nodes, by GlobalID
     QVector <int> SelectedNodes;
