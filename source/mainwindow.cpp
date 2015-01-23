@@ -294,6 +294,13 @@ MainWindow::MainWindow(QWidget *parent) :
     //Set font to script log
     ui->textBrowser->setFont(QFont("Courier"));
 
+    //Add splitter between the leftside tab view, and right
+    //tab view where the OpenGL views are
+    QSplitter *splitter3 = new QSplitter;
+    splitter3->addWidget(ui->frame);
+    splitter3->addWidget(ui->frame_11);
+    ui->horizontalLayout_2->addWidget(splitter3);
+
 }
 
 MainWindow::~MainWindow()
