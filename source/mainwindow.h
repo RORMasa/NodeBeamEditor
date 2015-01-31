@@ -74,12 +74,14 @@ public slots:
     void ShowContextMenu_Beams(const QPoint &position);
     void JBEAM_AddNode();
     void JBEAM_AddBeam();
+    void JBEAM_AddArrayItem(int ListType_id);
     int JBEAM_AddComment(int CursorPos, QString Comment);
     void JBEAM_UpdateSelectedNodes();
     void JBEAM_UpdateAllNodes();
     void JBEAM_Update();
     void AdjustBlueprint(int WidgetID);
     void LUA_message(QString msg);
+    void PrintNodePicked(int node_id);
 
 signals:
     void ZoomChanged();
@@ -277,6 +279,14 @@ private slots:
 
     void on_actionSave_triggered();
 
+    void on_listWidget_2_itemActivated(QListWidgetItem *item);
+
+    void on_toolButton_30_clicked();
+
+    void on_listWidget_2_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
+
+    void on_toolButton_31_clicked();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
@@ -336,6 +346,9 @@ private:
 
     //Path to active working JBEAM file
     QString JBEAM_Filepath;
+
+    //Toolbox current index
+    int ListType_id;
 };
 
 

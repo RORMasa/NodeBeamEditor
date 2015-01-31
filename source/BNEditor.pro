@@ -33,7 +33,7 @@ SOURCES += main.cpp\
     settings.cpp \
     NodeBeam_LUA.cpp \
     blueprints.cpp \
-    colladadae.cpp
+    NodeBeam_JBEAM.cpp
 
 HEADERS  += mainwindow.h \
     glwidget.h \
@@ -48,7 +48,6 @@ HEADERS  += mainwindow.h \
     beamdefaultsdialog.h \
     settings.h \
     blueprints.h \
-    colladadae.h
 
 
 FORMS    += mainwindow.ui \

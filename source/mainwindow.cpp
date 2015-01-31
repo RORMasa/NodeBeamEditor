@@ -148,6 +148,8 @@ MainWindow::MainWindow(QWidget *parent) :
         QObject::connect(glWidgetViews[i], SIGNAL(NodeBeamUpdated()), this, SLOT(MainNodeBeamUpdated()));
         QObject::connect(this, SIGNAL(ZoomChanged()), glWidgetViews[i], SLOT(setZoom()));
         QObject::connect(glWidgetViews[i], SIGNAL(JBEAM_AddBeamO()), this, SLOT(JBEAM_AddBeam()));
+        QObject::connect(glWidgetViews[i], SIGNAL(JBEAM_AddArrayItem(int)), this, SLOT(JBEAM_AddArrayItem(int)));
+        QObject::connect(glWidgetViews[i], SIGNAL(PrintNodePicked(int)), this, SLOT(PrintNodePicked(int)));
     }
     for(int i=0; i<4; i++)
     {
@@ -180,11 +182,11 @@ MainWindow::MainWindow(QWidget *parent) :
     //Create JBEAM textbox with linenumbers
     JBEAMtextbox = new JBEAM_TextBox;
     ui->verticalLayout_9->addWidget(JBEAMtextbox);
-    ui->verticalLayout_9->addWidget(ui->widget);
-    JBEAMtextbox->setLineWrapMode(QPlainTextEdit::NoWrap);
-    //Set smaller TAB width
-    JBEAMtextbox->setTabStopWidth(15);
+    ui->verticalLayout_9->addWidget(ui->widget); //Add widget containing buttons N, B and refresh
+    JBEAMtextbox->setLineWrapMode(QPlainTextEdit::NoWrap); //No automatic line change
+    JBEAMtextbox->setTabStopWidth(15); //Set smaller TAB width
 
+    //Default empty file template
     EmptyJbeamTextTemplate = "{\n"
                    "    \"Vehicle\":{\n"
                    "        \"information\":{\n"
@@ -198,6 +200,12 @@ MainWindow::MainWindow(QWidget *parent) :
                    "        \"beams\":[\n"
                    "            [\"id1:\", \"id2:\"],\n\n"
                    "            //BNEbeams\n"
+                   "   \n"
+                   "   \n"
+                   "        ],\n"
+                   "        \"triangles\":[\n"
+                   "            [\"id1:\", \"id2:\", \"id3:\"],\n\n"
+                   "            //BNEtriangles\n"
                    "   \n"
                    "   \n"
                    "        ],\n"
@@ -300,6 +308,13 @@ MainWindow::MainWindow(QWidget *parent) :
     splitter3->addWidget(ui->frame);
     splitter3->addWidget(ui->frame_11);
     ui->horizontalLayout_2->addWidget(splitter3);
+
+    //Load user defined tools on Editor tab's toolbox
+    for(int i=0; i<CurrentNodeBeam->ListTypes.size();i++)
+    {
+        ui->listWidget_2->addItem(CurrentNodeBeam->ListTypes.at(i).keyword);
+    }
+    ListType_id = -1;
 
 }
 
@@ -2474,29 +2489,6 @@ void MainWindow::on_checkBox_2_clicked()
     }
 }
 
-//load blueprint
-void MainWindow::on_toolButton_17_clicked()
-{
-    /*
-    if(OpenGLViews->currentIndex()!=1) OpenGLViews->setCurrentIndex(1);
-    QString fileName = QFileDialog::getOpenFileName(this);
-    if (!fileName.isEmpty())
-    {
-        glWidgetO->LoadBlueprint(fileName);
-        for(int i = fileName.length(); i>0;i--)
-        {
-            if(fileName[i] == '/')
-            {
-                fileName = fileName.remove(0,i+1);
-                break;
-            }
-        }
-        ui->label_10_bluepname->setText(fileName);
-    }
-    */
-
-}
-
 //change blueprint scaling
 void MainWindow::on_lineEdit_bluep_scale_textEdited(const QString &arg1)
 {
@@ -2874,6 +2866,37 @@ void MainWindow::JBEAM_AddBeam()
     }
 
     textcursor.insertText(beamline);
+    JBEAMtextbox->setTextCursor(textcursor);
+}
+
+/* Add other part, in JBEAM edit widget at text cursor position */
+void MainWindow::JBEAM_AddArrayItem(int ListType_id)
+{
+    QVector <int> pickednodes = CurrentNodeBeam->ListTypes.at(ListType_id).contaier.last();
+    QString line = "           [";
+    line+= CurrentNodeBeam->ListTypes.at(ListType_id).JBEAM_template;
+    line+=("],\n");
+
+    for(int i=0; i<CurrentNodeBeam->ListTypes.at(ListType_id).nodeamount;i++)
+    {
+        line = line.arg(CurrentNodeBeam->Nodes.at(pickednodes.at(i)).NodeName);
+    }
+
+    QTextCursor textcursor = JBEAMtextbox->textCursor();
+
+    textcursor.insertText(line);
+    JBEAMtextbox->setTextCursor(textcursor);
+}
+
+//Write picked node in JBEAM widget
+void MainWindow::PrintNodePicked(int node_id)
+{
+    QString line = "\"%1\", ";
+    line = line.arg(CurrentNodeBeam->Nodes.at(node_id).NodeName);
+
+    QTextCursor textcursor = JBEAMtextbox->textCursor();
+
+    textcursor.insertText(line);
     JBEAMtextbox->setTextCursor(textcursor);
 }
 
@@ -3408,7 +3431,7 @@ void MainWindow::JBEAM_AddFromTemp()
 /* Open files dragged and dropped on the window */
 void MainWindow::dropEvent(QDropEvent * dropevent)
 {
-    qDebug() << "tiedostoa pukkaa " << dropevent->mimeData()->urls();
+    qDebug() << "File dropped on window " << dropevent->mimeData()->urls();
     QList <QUrl> urls = dropevent->mimeData()->urls();
     if(urls.size()>0)
     {
@@ -3549,5 +3572,68 @@ void JBEAM_TextBox::resizeEvent(QResizeEvent *event)
     LineNumbersA->setGeometry(QRect(cr.left(), cr.top(), 26, cr.height()));
 }
 
+
+//Add collision triangles
+void MainWindow::on_toolButton_17_clicked()
+{
+    if(ui->toolButton_17->isChecked())
+    {
+        if(glWidgetViews[0]->AddingJbeam_Enable("triangles"));
+        else ui->toolButton_17->setChecked(0);
+    }
+    else glWidgetViews[0]->AddingJbeam_Disable();
+}
+
+//User has selected tool from custom toolbox
+void MainWindow::on_listWidget_2_itemActivated(QListWidgetItem *item)
+{
+
+}
+
+void MainWindow::on_toolButton_30_clicked()
+{
+    if(ui->toolButton_30->isChecked())
+    {
+        if((ListType_id>-1) && (ListType_id<CurrentNodeBeam->ListTypes.size()))
+        {
+            if(glWidgetViews[0]->AddingJbeam_Enable(CurrentNodeBeam->ListTypes.at(ListType_id).keyword));
+            else ui->toolButton_17->setChecked(0);
+        }
+    }
+    else glWidgetViews[0]->AddingJbeam_Disable();
+}
+
+void MainWindow::on_listWidget_2_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
+{
+    ListType_id = -1;
+    for(int i=0; i< CurrentNodeBeam->ListTypes.size();i++)
+    {
+        if(CurrentNodeBeam->ListTypes.at(i).keyword == current->text())
+        {
+            ListType_id = i;
+        }
+    }
+    if((ui->toolButton_30->isChecked()) && (ListType_id>-1))
+    {
+        if(glWidgetViews[0]->AddingJbeam_id != ListType_id)
+        {
+            glWidgetViews[0]->AddingJbeam_Disable();
+            if(glWidgetViews[0]->AddingJbeam_Enable(current->text()))
+            {
+                ui->label_21->setText(current->text());
+            }
+            else ui->toolButton_17->setChecked(0);
+        }
+    }
+}
+
+void MainWindow::on_toolButton_31_clicked()
+{
+    if(ui->toolButton_31->isChecked())
+    {
+        glWidgetViews[0]->EnableNodePicker();
+    }
+    else glWidgetViews[0]->DisableNodePicker();
+}
 
 

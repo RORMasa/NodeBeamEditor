@@ -55,6 +55,19 @@ NodeBeam::NodeBeam(QObject *parent): QObject(parent)
     TempNode.clear();
     TempBeam.clear();
 
+    /*
+    //Add hydros in list types
+    JBEAM_ListType ListType;
+    ListType.drawtype = ListType.BEAM;
+    ListType.keyword = "hydros";
+    ListType.nodeamount = 2;
+    ListType.nodenames.append(tr("Choose 1st hydro node"));
+    ListType.nodenames.append(tr("Choose 2nd hydro node"));
+    ListType.JBEAM_template = "\"%1\", \"%2\", 0.5";
+    ListType.JBEAM_tableheader = "[\"id1:\",\"id2:\"],";
+    ListTypes.append(ListType);*/
+
+    Load_ListTypes();
 }
 
 NodeBeam::~NodeBeam(void)
@@ -2829,6 +2842,8 @@ void NodeBeam::clear()
     TempNode.clear();
     TempBeam.clear();
 
+    for(int i=0; i< ListTypes.size();i++) ListTypes[i].contaier.clear();
+
 }
 
 /* Parse contents of the JBEAM text edit box */
@@ -2898,6 +2913,20 @@ QJsonParseError NodeBeam::ParseJBEAM_TextEdit(QByteArray JbeamInputText)
                 qDebug() << "beams found " << Jbeam_beams.count();
                 JBEAM_ParseBeamsArray(Jbeam_beams);
 
+            }
+            //Get other parts from slot
+            for(int i2=0;i2<ListTypes.size();i2++)
+            {
+                QString keyword = ListTypes.at(i2).keyword;
+                slot_iterator = Jbeam_slots[i].find(keyword);
+
+                if (slot_iterator != Jbeam_slots.at(i).end())
+                {
+                    qDebug() << "Found " << keyword;
+                    QJsonArray Jbeam_other;
+                    Jbeam_other = Jbeam_slots.at(i).value(keyword).toArray();
+                    JBEAM_ParseOtherArray(Jbeam_other, i2);
+                }
             }
         }
 
@@ -2973,6 +3002,47 @@ bool NodeBeam::JBEAM_ParseBeamsArray(QJsonArray JbeamBeamsArray)
             {
                 JBEAM_ParseComment(JbeamBeamsArray.at(i).toObject().value("BNE").toString());
                 BeamGroupID = NewBeamGroup("");
+            }
+        }
+    }
+}
+
+bool NodeBeam::JBEAM_ParseOtherArray(QJsonArray JbeamArray, int ListType_id)
+{
+    int TotalNodeAmount = Nodes.size();
+    for(int i=0; i<JbeamArray.count();i++)
+    {
+        //If it's an array, it's a part
+        if(JbeamArray.at(i).isArray())
+        {
+            QVector <int> node_ids;
+
+            QJsonArray Jbeam;
+            Jbeam = JbeamArray.at(i).toArray();
+
+            bool ok=1;
+
+            for(int i2=0; i2<ListTypes.at(ListType_id).nodeamount; i2++)
+            {
+                if(Jbeam.at(ListTypes.at(ListType_id).node_positions.at(i2)).isString())
+                {
+                    node_ids.append(FindBeamNodeByName(Jbeam.at(ListTypes.at(ListType_id).node_positions.at(i2)).toString()));
+                    if(node_ids.at(i2)>=TotalNodeAmount) ok = 0;
+                }
+            }
+            if(ok)
+            {
+                qDebug() << "Adding " << node_ids;
+                ListTypes[ListType_id].Add(node_ids);
+            }
+
+        }
+        else if(JbeamArray.at(i).isObject())
+        {
+            if(JbeamArray.at(i).toObject().contains("BNE"))
+            {
+                //JBEAM_ParseComment(JbeamBeamsArray.at(i).toObject().value("BNE").toString());
+
             }
         }
     }

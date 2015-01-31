@@ -65,11 +65,14 @@ GLWidget::GLWidget(QWidget *parent)
     PickedNode1=9999;
     AddingBeamsSingle=0;
     AddingBeamsCont=0;
+    AddingJbeam = -1;
     AddingWheels=0;
     CurrentBeamGroup=0;
     ZoomFactor = 1.0;
     ShowNodeNumbers = 0;
     ShowNodeNumbers1 = 0;
+    BeamSuggestion = 0;
+    PrintPickedNodeName = 0;
 
     qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
     qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
@@ -242,6 +245,7 @@ void GLWidget::draw()
             if(NBPointer->NodeGroups.at(i2).draw)
             {
                 if(NBPointer->Nodes.at(i3).GlobalID == NBPointer->ActiveNode) glColor4f(1.0f,0.0f,0.0f,1.0f);
+                else if(NBPointer->Nodes.at(i3).GlobalID == HighlightNode) glColor4f(1.0f,1.0f,0.0f,1.0f);
                 else glColor4f(0.4f,0.4f,0.4f,1.0f);
 
                 glVertex3f(NBPointer->Nodes.at(i3).locX, NBPointer->Nodes.at(i3).locY, NBPointer->Nodes.at(i3).locZ);
@@ -260,6 +264,48 @@ void GLWidget::draw()
     }
     glColor4f(0.4f,0.4f,0.4f,1.0f);
     glEnd();
+
+    for(int i2=0; i2<NBPointer->ListTypes.size();i2++)
+    {
+        //Draw triangles
+        if(NBPointer->ListTypes.at(i2).drawtype == 3)
+        {
+            glEnable(GL_DEPTH_TEST);
+            glBegin(GL_TRIANGLES);
+            glColor3f(1.0, 0.0, 0.0);
+
+            for(int i=0; i<NBPointer->ListTypes.at(i2).contaier.size();i++)
+            {
+                int nodeid = NBPointer->ListTypes.at(i2).contaier.at(i).at(NBPointer->ListTypes.at(i2).draworder.at(0));
+                int nodeid1 = NBPointer->ListTypes.at(i2).contaier.at(i).at(NBPointer->ListTypes.at(i2).draworder.at(1));
+                int nodeid2 = NBPointer->ListTypes.at(i2).contaier.at(i).at(NBPointer->ListTypes.at(i2).draworder.at(2));
+                glVertex3f(NBPointer->Nodes.at(nodeid).locX,NBPointer->Nodes.at(nodeid).locY,NBPointer->Nodes.at(nodeid).locZ);
+                glVertex3f(NBPointer->Nodes.at(nodeid1).locX,NBPointer->Nodes.at(nodeid1).locY,NBPointer->Nodes.at(nodeid1).locZ);
+                glVertex3f(NBPointer->Nodes.at(nodeid2).locX,NBPointer->Nodes.at(nodeid2).locY,NBPointer->Nodes.at(nodeid2).locZ);
+            }
+
+            glEnd();
+        }
+        else if(NBPointer->ListTypes.at(i2).drawtype == 1)
+        {
+            glLineWidth(2);
+            glBegin(GL_LINES);
+            glColor3f(1.0, 0.0, 0.0);
+
+            for(int i=0; i<NBPointer->ListTypes.at(i2).contaier.size();i++)
+            {
+                int nodeid = NBPointer->ListTypes.at(i2).contaier.at(i).at(NBPointer->ListTypes.at(i2).draworder.at(0));
+                int nodeid1 = NBPointer->ListTypes.at(i2).contaier.at(i).at(NBPointer->ListTypes.at(i2).draworder.at(1));
+                glVertex3f(NBPointer->Nodes.at(nodeid).locX,NBPointer->Nodes.at(nodeid).locY,NBPointer->Nodes.at(nodeid).locZ);
+                glVertex3f(NBPointer->Nodes.at(nodeid1).locX,NBPointer->Nodes.at(nodeid1).locY,NBPointer->Nodes.at(nodeid1).locZ);
+            }
+
+            glEnd();
+        }
+
+
+    }
+
 
     /* Drawing beams */
     glColor4f(0.0f,0.4f,0.6f,1.0f);
@@ -339,7 +385,7 @@ void GLWidget::draw()
     glLineWidth(5);
     glBegin(GL_LINES);
     //Suggesting beam to be placed, when node detected
-    if((AddingBeamsSingle==2) || (AddingBeamsCont==2))
+    if((AddingBeamsSingle==2) || (AddingBeamsCont==2) || (BeamSuggestion))
     {
         if((BeamNode1 != PickedNode1) && (PickedNode1!=9999))
         {
@@ -427,6 +473,7 @@ void GLWidget::drawpicking()
             {
                 PickedNode1 = NBPointer->Nodes[i].GlobalID;
                 qDebug() << "Found node number: " << PickedNode1;
+                HighlightNode = PickedNode1;
                 break;
             }
         }
@@ -766,6 +813,8 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 
         if(PickedNode1!=9999)
         {
+            qDebug() << "JBEAM_Adding: " << AddingJbeam;
+            qDebug() << "JBEAM_count: " << NBPointer->ListTypes.at(AddingJbeam_id).nodeamount;
             if(AddingBeamsSingle==1)
             {
                 BeamNode1=PickedNode1;
@@ -864,6 +913,60 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
                 emit NodeBeamUpdated();
                 qDebug() << "wheel node 4";
 
+            }
+            else if(AddingJbeam>=0)
+            {
+                if(AddingJbeam == 0)
+                {
+                    AddingJbeam_pickednoes.clear();
+                    AddingJbeam_pickednoes.append(PickedNode1);
+                    BeamNode1=PickedNode1;
+
+                    if(NBPointer->ListTypes.at(AddingJbeam_id).drawtype == NBPointer->ListTypes.at(AddingJbeam_id).BEAM)
+                    {
+                        BeamSuggestion = 1;
+                    }
+
+                    PickedNode1=9999;
+                    TextOverlay = NBPointer->ListTypes.at(AddingJbeam_id).nodenames.at(1);
+                    AddingJbeam++;
+                }
+                else if(AddingJbeam < (NBPointer->ListTypes.at(AddingJbeam_id).nodeamount-1))
+                {
+                    AddingJbeam_pickednoes.append(PickedNode1);
+                    TextOverlay = NBPointer->ListTypes.at(AddingJbeam_id).nodenames.at(AddingJbeam+1);
+                    PickedNode1=9999;
+                    BeamSuggestion = 0;
+                    AddingJbeam++;
+                }
+                else if(AddingJbeam == (NBPointer->ListTypes.at(AddingJbeam_id).nodeamount-1))
+                {
+                    AddingJbeam_pickednoes.append(PickedNode1);
+                    QString test = "[";
+                    test+= NBPointer->ListTypes.at(AddingJbeam_id).JBEAM_template;
+                    for(int i4=0; i4<NBPointer->ListTypes.at(AddingJbeam_id).nodeamount;i4++)
+                    {
+                        test = test.arg(NBPointer->Nodes.at(AddingJbeam_pickednoes.at(i4)).NodeName);
+                    }
+                    test+="]";
+                    qDebug() << test;
+
+                    NBPointer->ListTypes[AddingJbeam_id].Add(AddingJbeam_pickednoes);
+                    emit JBEAM_AddArrayItem(AddingJbeam_id);
+
+                    AddingJbeam = 0;
+                    PickedNode1=9999;
+                    TextOverlay = NBPointer->ListTypes.at(AddingJbeam_id).nodenames.at(0);
+                    AddingJbeam_pickednoes.clear();
+                    BeamSuggestion = 0;
+                    //emit JBEAM_AddItem;
+
+                }
+            }
+            else if(PrintPickedNodeName)
+            {
+                emit PrintNodePicked(PickedNode1);
+                PickedNode1=9999;
             }
         }
         /* Check if user has dragged the move arrows */
@@ -1079,6 +1182,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     //Set keyboard focus to this widget, if mouse moves on the widget
     this->setFocus();
     //qDebug() << "hiiri " << event->x() << ", " << event->y();
+    HighlightNode = 99999;
     if(AddingBeamsSingle==2)
     {
         updateGL();
@@ -1087,6 +1191,8 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     {
         updateGL();
     }
+    else if(AddingJbeam>-1) updateGL();
+    else if(PrintPickedNodeName>0) updateGL();
     else if(AddingWheels==1)
     {
         TextOverlay = "Choose 1st wheel node";
@@ -2074,8 +2180,6 @@ void GLWidget::DrawSphere(int segments, int diameter)
 
     }
 
-    qDebug() << "That's it";
-
     glColor3f(0.0f,0.0f,1.0f); //blue color
 //    glBegin(GL_QUAD_STRIP);
 
@@ -2334,4 +2438,50 @@ void GLWidget::GetViewMatrices(QMatrix4x4 * ModelviewMatrix, QMatrix4x4 * Projec
 void GLWidget::LoadDae()
 {
 
+}
+
+bool GLWidget::AddingJbeam_Enable(QString keyword)
+{
+    bool ok=0;
+    for(int i=0;i<NBPointer->ListTypes.size();i++)
+    {
+        if(NBPointer->ListTypes.at(i).keyword == keyword)
+        {
+            if(NBPointer->ListTypes.at(i).nodeamount>0)
+            {
+                AddingJbeam_id = i;
+                AddingJbeam = 0;
+                NodePicking = 1;
+                TextOverlay = NBPointer->ListTypes.at(i).nodenames.at(0);
+                ok=1;
+            }
+        }
+    }
+    if(!ok)
+    {
+        AddingJbeam = 0;
+
+        return false;
+    }
+    else return true;
+}
+
+void GLWidget::AddingJbeam_Disable()
+{
+    AddingJbeam = -1;
+    NodePicking = 0;
+    BeamSuggestion = 0;
+    TextOverlay.clear();
+}
+
+void GLWidget::EnableNodePicker()
+{
+    NodePicking = 1;
+    PrintPickedNodeName = 1;
+}
+
+void GLWidget::DisableNodePicker()
+{
+    NodePicking = 0;
+    PrintPickedNodeName = 0;
 }

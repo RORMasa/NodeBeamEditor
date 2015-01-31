@@ -65,6 +65,7 @@ public:
 
     bool NodePicking;
     bool ShowArrows;
+    bool BeamSuggestion;
 
     float ZoomFactor;
     int PickedNode1;
@@ -80,6 +81,8 @@ public:
     int MovingNodes;
     int ScalingNodes;
     int RotatingNodes;
+
+    bool PrintPickedNodeName;
 
     double pii;
 
@@ -121,6 +124,22 @@ public:
     bool Select_AddToSelection;
     bool ManipulateByStep;
 
+    //Dae loading
+    void LoadDae();
+
+    //New system to add any JBEAM content type that depends of nodes
+    int AddingJbeam;
+    int AddingJbeam_id;
+    QVector <int> AddingJbeam_pickednoes;
+
+    bool AddingJbeam_Enable(QString keyword);
+    void AddingJbeam_Disable();
+    void DisableNodePicker();
+    void EnableNodePicker();
+
+
+    int HighlightNode;
+
 public slots:
     void setXRotation(int angle);
     void setYRotation(int angle);
@@ -137,6 +156,8 @@ signals:
     void zRotationChanged(int angle);
     void NodeBeamUpdated();
     void JBEAM_AddBeamO();
+    void JBEAM_AddArrayItem(int ListType_id);
+    void PrintNodePicked(int node_id);
 
 protected:
     void draw();
@@ -185,6 +206,7 @@ private:
     void Draw3DCursor_Picking(int Mode); //Mode 0 = move, 1 = scale, 2 = rotate
     void DrawRectSelect();
     void GetViewMatrices(QMatrix4x4 * ModelviewMatrix, QMatrix4x4 * ProjectionMatrix);
+
 };
 
 

@@ -616,6 +616,37 @@ QTabWidget::tab-bar {
               <string>Grid size</string>
              </property>
             </widget>
+            <widget class="QToolButton" name="toolButton_31">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>60</y>
+               <width>88</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="toolTip">
+              <string>Print node name in JBEAM textedit at cursor position.</string>
+             </property>
+             <property name="whatsThis">
+              <string/>
+             </property>
+             <property name="text">
+              <string>Node picker</string>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>60</width>
+               <height>60</height>
+              </size>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="toolButtonStyle">
+              <enum>Qt::ToolButtonTextUnderIcon</enum>
+             </property>
+            </widget>
            </widget>
            <widget class="QWidget" name="page">
             <widget class="QComboBox" name="comboBox_2">
@@ -1396,11 +1427,47 @@ QTabWidget::tab-bar {
            </property>
           </widget>
          </widget>
+         <widget class="QWidget" name="tab_5">
+          <attribute name="title">
+           <string>Triangles</string>
+          </attribute>
+          <attribute name="toolTip">
+           <string>Collision triangles</string>
+          </attribute>
+          <widget class="QToolButton" name="toolButton_17">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>71</width>
+             <height>101</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Add</string>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>60</width>
+             <height>60</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
+         </widget>
          <widget class="QWidget" name="tab_4">
           <attribute name="title">
            <string>Wheels</string>
           </attribute>
           <widget class="QToolButton" name="toolButton_19">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="geometry">
             <rect>
              <x>0</x>
@@ -1440,7 +1507,7 @@ QTabWidget::tab-bar {
             <rect>
              <x>9</x>
              <y>-1</y>
-             <width>531</width>
+             <width>881</width>
              <height>101</height>
             </rect>
            </property>
@@ -1453,7 +1520,7 @@ QTabWidget::tab-bar {
            <widget class="QToolButton" name="toolButton_18">
             <property name="geometry">
              <rect>
-              <x>0</x>
+              <x>600</x>
               <y>0</y>
               <width>101</width>
               <height>101</height>
@@ -1466,7 +1533,7 @@ QTabWidget::tab-bar {
            <widget class="QToolButton" name="toolButton_27">
             <property name="geometry">
              <rect>
-              <x>101</x>
+              <x>710</x>
               <y>0</y>
               <width>101</width>
               <height>101</height>
@@ -1476,25 +1543,86 @@ QTabWidget::tab-bar {
              <string>Test in RoR</string>
             </property>
            </widget>
-          </widget>
-          <widget class="QToolButton" name="toolButton_20">
-           <property name="geometry">
-            <rect>
-             <x>202</x>
-             <y>0</y>
-             <width>101</width>
-             <height>101</height>
-            </rect>
-           </property>
-           <property name="toolTip">
-            <string>Set scale of the blueprint by showing known distance</string>
-           </property>
-           <property name="text">
-            <string>Set scale</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
+           <widget class="QToolButton" name="toolButton_20">
+            <property name="geometry">
+             <rect>
+              <x>820</x>
+              <y>0</y>
+              <width>61</width>
+              <height>101</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>Set scale of the blueprint by showing known distance</string>
+            </property>
+            <property name="text">
+             <string>Set scale</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QToolButton" name="toolButton_30">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>81</width>
+              <height>101</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Add other</string>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>60</width>
+              <height>60</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonTextUnderIcon</enum>
+            </property>
+           </widget>
+           <widget class="QListWidget" name="listWidget_2">
+            <property name="geometry">
+             <rect>
+              <x>90</x>
+              <y>10</y>
+              <width>161</width>
+              <height>81</height>
+             </rect>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_10">
+            <property name="geometry">
+             <rect>
+              <x>260</x>
+              <y>0</y>
+              <width>81</width>
+              <height>31</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Active tool:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_21">
+            <property name="geometry">
+             <rect>
+              <x>330</x>
+              <y>0</y>
+              <width>161</width>
+              <height>31</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
           </widget>
          </widget>
         </widget>

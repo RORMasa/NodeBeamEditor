@@ -1,0 +1,13 @@
+{
+	"keyword" : "triangles",
+	"drawtype" : "triangle",
+	"draworder" : [0,1,2],
+	"nodeamount" : 3,
+	"nodenames" : [
+		"Choose 1st node",
+		"Choose 2nd node",
+		"Choose 3rd node"
+		],
+    "tableheader" : "\"id1\", \"id2:\", \"id3:\"",
+	"template" : "\"%1\", \"%2\", \"%3\""	
+}

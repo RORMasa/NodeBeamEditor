@@ -179,6 +179,40 @@ public:
     void DeleteBeam(Beam beam);
 };
 
+/* Any JBEAM content type based on a list, that depends of nodes
+ * for example; hubwheels, wheels, coltris, hydros, thrusters
+ */
+class JBEAM_ListType
+{
+public:
+
+    JBEAM_ListType();
+    ~JBEAM_ListType();
+    QString keyword; //Keyword in JBEAM
+    int nodeamount; //Amount of nodes in one instance
+    QStringList nodenames; //Option name for each node, for example wheelnode 1, wheelnode 2
+    enum drawtypes {NONE, BEAM, WHEEL, TRIANGLE};
+    int drawtype;
+    QString JBEAM_template; //template where node numbers are added
+    QString JBEAM_tableheader;
+    QVector <int> node_positions; //Position of each node in the template
+    QVector <int> draworder; //Which nodes are drawn and in which order
+
+    //Fucntions
+    bool Add(QVector <int> item);
+    //bool Remove();
+    //void Clear();
+    //int Count();
+    //void NodeRemoved(int nodeid);
+
+    //Container
+    QVector < QVector < int > > contaier;
+
+private:
+
+
+};
+
 class NodeBeam : public QObject
 {
    Q_OBJECT
@@ -188,6 +222,7 @@ public:
 
     QVector<Node> Nodes;
     QVector<Beam> Beams;
+    QVector<JBEAM_ListType> ListTypes;
     QVector<Hubwheel> Hubwheels;
     QVector<NodeGroup> NodeGroups;
     QVector<BeamGroup> BeamGroups;
@@ -216,13 +251,12 @@ public:
     /*File export to BeamNG */
     void ExportBeamNG(const QString &fileName);
 
-    /*File import from BeamNG*/
+    /*File import from BeamNG
+     * old and outdated     */
     void ImportBeamNG(const QString &fileName);
     void ImportBeamNG_NumberValue(QString TempStr, int ParsingMode);
-    /*New JBeam tree importer exporter*/
     void ReadJBeamTree(QString fileName);
     void WriteInJBeamTree(QString slotname);
-
     void ImportJSON(const QString &fileName);
 
     /* File import Wavefront OBJ, places new nodes and beams in temp containers */
@@ -261,6 +295,8 @@ public:
     //JBEAM temp containers, for new nodes
     //and beams going to JBEAM
     JBEAM_Temp JBEAM_temp;
+
+    //The line where JBEAM parse error occured
     int JbeamErrorLine;
 
     //Currently selected nodes, by GlobalID
@@ -348,19 +384,16 @@ public:
     luabridge::LuaRef LuaGetAllNodes();
     int LuaGetNodeCount();
 
-
+    //Comments that are added to JBEAM from Lua script.
     Comments LuaComments;
     bool LuaComment;
 
     /* 3D Editing */
+    //Calculate the middle point of selected nodes
     bool Editing3D_CalculateSelectionCenter();
 
     //Center point of nodes in Selected nodes
     QVector3D SelectionCenterPos;
-
-
-
-
 
     /* JBEAM TextEdit parsing functions */
     QJsonParseError ParseJBEAM_TextEdit(QByteArray JbeamInputText);
@@ -369,6 +402,7 @@ public:
     bool JBEAM_SaveAs(const QString &fileName, QString JBEAM_Text);
 
 signals:
+    //Write a message to scipts tab's logging textbox from LUA script.
     void LUA_log(QString msg);
 
 private:
@@ -383,8 +417,12 @@ private:
     QByteArray JBEAM_FixCommas(QByteArray JbeamText);
     bool JBEAM_ParseNodesArray(QJsonArray JbeamNodesArray);
     bool JBEAM_ParseBeamsArray(QJsonArray JbeamBeamsArray);
+    bool JBEAM_ParseOtherArray(QJsonArray JbeamArray, int ListType_id);
     QByteArray JBEAM_RemoveComments(QByteArray JbeamText);
     void JBEAM_ParseComment(QString comment);
+
+    //Load jbeam content types from json files
+    void Load_ListTypes();
 
 };
 
