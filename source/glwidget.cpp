@@ -272,7 +272,7 @@ void GLWidget::draw()
         {
             glEnable(GL_DEPTH_TEST);
             glBegin(GL_TRIANGLES);
-            glColor3f(1.0, 0.0, 0.0);
+            glColor3f(0.0, 1.0, 0.0);
 
             for(int i=0; i<NBPointer->ListTypes.at(i2).contaier.size();i++)
             {
@@ -282,6 +282,18 @@ void GLWidget::draw()
                 glVertex3f(NBPointer->Nodes.at(nodeid).locX,NBPointer->Nodes.at(nodeid).locY,NBPointer->Nodes.at(nodeid).locZ);
                 glVertex3f(NBPointer->Nodes.at(nodeid1).locX,NBPointer->Nodes.at(nodeid1).locY,NBPointer->Nodes.at(nodeid1).locZ);
                 glVertex3f(NBPointer->Nodes.at(nodeid2).locX,NBPointer->Nodes.at(nodeid2).locY,NBPointer->Nodes.at(nodeid2).locZ);
+            }
+
+            glColor3f(1.0, 0.0, 0.0);
+
+            for(int i=0; i<NBPointer->ListTypes.at(i2).contaier.size();i++)
+            {
+                int nodeid = NBPointer->ListTypes.at(i2).contaier.at(i).at(NBPointer->ListTypes.at(i2).draworder.at(0));
+                int nodeid1 = NBPointer->ListTypes.at(i2).contaier.at(i).at(NBPointer->ListTypes.at(i2).draworder.at(1));
+                int nodeid2 = NBPointer->ListTypes.at(i2).contaier.at(i).at(NBPointer->ListTypes.at(i2).draworder.at(2));
+                glVertex3f(NBPointer->Nodes.at(nodeid).locX,NBPointer->Nodes.at(nodeid).locY,NBPointer->Nodes.at(nodeid).locZ);
+                glVertex3f(NBPointer->Nodes.at(nodeid2).locX,NBPointer->Nodes.at(nodeid2).locY,NBPointer->Nodes.at(nodeid2).locZ);
+                glVertex3f(NBPointer->Nodes.at(nodeid1).locX,NBPointer->Nodes.at(nodeid1).locY,NBPointer->Nodes.at(nodeid1).locZ);
             }
 
             glEnd();
@@ -813,8 +825,8 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 
         if(PickedNode1!=9999)
         {
-            qDebug() << "JBEAM_Adding: " << AddingJbeam;
-            qDebug() << "JBEAM_count: " << NBPointer->ListTypes.at(AddingJbeam_id).nodeamount;
+            //qDebug() << "JBEAM_Adding: " << AddingJbeam;
+            //qDebug() << "JBEAM_count: " << NBPointer->ListTypes.at(AddingJbeam_id).nodeamount;
             if(AddingBeamsSingle==1)
             {
                 BeamNode1=PickedNode1;

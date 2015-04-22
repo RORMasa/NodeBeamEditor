@@ -339,6 +339,9 @@ public:
                        QVector4D RectSel_3V, QVector4D RectSel_4V,
                        QVector4D CameraLocation, bool AddToSelection);
 
+    /* Mirror selected nodes */
+    void MirrorNodes(int axis);
+
     /* Make new set of Beam arguments */
     void NewBeamArguments();
     void AddBeamArgument(QString key, QString value);

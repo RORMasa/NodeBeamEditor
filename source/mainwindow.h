@@ -143,10 +143,6 @@ private slots:
 
     void on_actionImport_BeamNG_triggered();
 
-    void on_actionChassis_Generator_triggered();
-
-    void on_actionTracks_triggered();
-
     void on_actionImport_OBJ_triggered();
 
     void on_actionImport_Rigs_of_Rods_triggered();
@@ -287,6 +283,10 @@ private slots:
 
     void on_toolButton_31_clicked();
 
+    void on_toolButton_32_clicked();
+
+    void on_toolButton_15_clicked();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
@@ -307,6 +307,9 @@ private:
     void loadFile(const QString &fileName);
     int CurrentBeamGroupi;
     int CurrentNodeGroupi;
+
+    //Refresh OpenGL views
+    void RefreshGLViews();
 
     //Don't refresh GUI
     bool RefreshLock;

@@ -12,6 +12,7 @@
         <file>icons/ScaleNode.png</file>
         <file>icons/WheelAdd.png</file>
         <file>icons/windowicon.png</file>
+        <file>icons/bne.ico</file>
     </qresource>
     <qresource prefix="/images">
         <file>images/logo.png</file>

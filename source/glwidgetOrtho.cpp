@@ -71,7 +71,7 @@ GLWidgetOrtho::GLWidgetOrtho(QWidget *parent)
     MeasuringDistance=0;
     ViewOffsetX = 0;
     ViewOffsetY = 0;
-    ViewOffsetZ = 0;
+    ViewOffsetZ =-10000;
 
     /*For scaling tool*/
     StartDistanceFromOrigin.resize(2);
@@ -564,7 +564,7 @@ void GLWidgetOrtho::paintGL()
     glClearColor(backgroundcolor[0], backgroundcolor[1], backgroundcolor[2], backgroundcolor[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    glTranslatef(ViewOffsetX, ViewOffsetY, -10.0);
+    glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ);
     glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
     glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
     glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
@@ -601,7 +601,7 @@ void GLWidgetOrtho::resizeGL(int width, int height)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     GLfloat x = (GLfloat(width) / height)*ViewHeight;
-    glOrtho(-x, x, -ViewHeight, +ViewHeight, 4.0, 35.0);
+    glOrtho(-x, x, -ViewHeight, +ViewHeight, 4.0, 20000.0);
 
     glMatrixMode(GL_MODELVIEW);
 

@@ -5,7 +5,7 @@
 length = 6.0
 width = 1.4
 height = 0.4 
-segments = 3
+segments = 6
 
 nameprefix = "cha"
 

@@ -14,47 +14,41 @@ TEMPLATE = app
 
 #CONFIG += RELEASE
 #CONFIG += build_all
+#CONFIG += console
 
 INCLUDEPATH += . \
     Generators \
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    glwidget.cpp \
-    NodeBeam.cpp \
-    glwidgetOrtho.cpp \
-    newprojectdialog.cpp \
-    Generators/ChassisGenerator.cpp \
-    inputdialog.cpp \
-    Generators/tracksgenerator.cpp \
-    jbeam.cpp \
-    jbeam_object.cpp \
-    beamdefaultsdialog.cpp \
-    settings.cpp \
-    NodeBeam_LUA.cpp \
-    blueprints.cpp \
-    NodeBeam_JBEAM.cpp
+        glwidget.cpp \
+        glwidgetOrtho.cpp \
+        newprojectdialog.cpp \
+        inputdialog.cpp \
+        beamdefaultsdialog.cpp \
+        settings.cpp \
+        NodeBeam.cpp \
+        NodeBeam_LUA.cpp \
+        NodeBeam_JBEAM.cpp \
+        blueprints.cpp \
+        colladadae.cpp
+
 
 HEADERS  += mainwindow.h \
     glwidget.h \
-    NodeBeam.h \
     glwidgetOrtho.h \
     newprojectdialog.h \
-    Generators/ChassisGenerator.h \
     inputdialog.h \
-    Generators/tracksgenerator.h \
-    jbeam.h \
-    jbeam_object.h \
     beamdefaultsdialog.h \
     settings.h \
+    NodeBeam.h \
     blueprints.h \
+    colladadae.h
 
 
 FORMS    += mainwindow.ui \
     newprojectdialog.ui \
-    Generators/ChassisGenerator.ui \
     inputdialog.ui \
-    Generators/tracksgenerator.ui \
     beamdefaultsdialog.ui \
     settings.ui \
     blueprints.ui

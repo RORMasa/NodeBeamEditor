@@ -44,6 +44,7 @@
 #include "NodeBeam.h"
 #include <QString>
 #include <QVector4D>
+#include <QGLBuffer>
 
 class GLWidgetOrtho;
 
@@ -126,6 +127,9 @@ public:
 
     //Dae loading
     void LoadDae();
+
+    //Buffer object for model
+    QGLBuffer mesh;
 
     //New system to add any JBEAM content type that depends of nodes
     int AddingJbeam;

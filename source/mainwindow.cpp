@@ -1,27 +1,26 @@
+#include <QtWidgets>
+#include <QtOpenGL>
+#include <QTimerEvent>
+#include <QPixmap>
+#include <QJsonDocument>
+#include <QLabel>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "glwidget.h"
 #include "glwidgetOrtho.h"
-#include <QtWidgets>
-#include <QtOpenGL>
 #include "NodeBeam.h"
-#include <newprojectdialog.h>
-#include "Generators/ChassisGenerator.h"
-#include "Generators/tracksgenerator.h"
+#include "newprojectdialog.h"
 #include "inputdialog.h"
 #include "settings.h"
-#include <QTimerEvent>
-#include <QPixmap>
-#include <QJsonDocument>
 #include "blueprints.h"
-#include <QLabel>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     /* About box : Version and compliation time , link to GitHub */
-    AboutBox = "<br><br><br><b>Version: 0.34</b><br><br>Built on ";
+    AboutBox = "<br><br><br><b>Version: 0.35</b><br><br>Built on ";
     AboutBox.append(__DATE__);
     AboutBox.append(", ");
     AboutBox.append(__TIME__);
@@ -1213,16 +1212,6 @@ void MainWindow::on_actionImport_OBJ_triggered()
     }
 }
 
-/* Chassis generator menu button triggered */
-void MainWindow::on_actionChassis_Generator_triggered()
-{
-    ChassisGenerator ChGen;
-    ChGen.NBPointer = CurrentNodeBeam;
-    ChGen.exec();
-    MainNodeBeamUpdated();
-
-}
-
 /* Move selected nodes to group */
 void MainWindow::on_pushButton_14_clicked()
 {
@@ -1261,13 +1250,6 @@ void MainWindow::on_pushButton_14_clicked()
 
     }
     MainNodeBeamUpdated();
-}
-
-/* Generate tracks for tracked vehicles */
-void MainWindow::on_actionTracks_triggered()
-{
-    TracksGenerator trackgen;
-    trackgen.exec();
 }
 
 /* Parse JBEAM widget */
@@ -2085,6 +2067,7 @@ void MainWindow::on_toolButton_7_clicked()
         CurrentNodeBeam->DeleteNodeGroup(ui->treeWidget->currentItem()->text(3).toInt());
     }*/
     MainNodeBeamUpdated();
+    this->RefreshGLViews();
 }
 
 /* Rectangle select */
@@ -3258,6 +3241,13 @@ bool MainWindow::FindBeamContainer(QString JBEAM_box, QString beam, int &Begin, 
     else return false;
 }
 
+/*
+bool MainWindow::FindListTypeContainer(QString JBEAM_box, QString beam, int &Begin, int &End, bool FindComma,int &RealEnd)
+{
+
+}
+*/
+
 void MainWindow::JBEAM_DeleteNodes()
 {
     int pos1; //Position containers for parsing the textbox
@@ -3397,7 +3387,7 @@ void MainWindow::JBEAM_Update()
 /* Open blueprint adjustment widget for ortographic view */
 void MainWindow::AdjustBlueprint(int WidgetID)
 {
-    blueprints bps;
+    blueprints bps(this);
     bps.glwidgetortho = glWidgetOViews[WidgetID];
     QObject::connect(&bps,SIGNAL(updateGL()),glWidgetOViews[0],SLOT(updateGL()));
     bps.exec();
@@ -3636,4 +3626,51 @@ void MainWindow::on_toolButton_31_clicked()
     else glWidgetViews[0]->DisableNodePicker();
 }
 
+/* Enable Mirror tool */
+void MainWindow::on_toolButton_15_clicked()
+{
+    if(ui->toolButton_15->isChecked())
+    {
+        ui->stackedWidget->setCurrentIndex(6);
+        ui->checkBox_mirrorx->setChecked(0);
+        ui->checkBox_mirrory->setChecked(0);
+        ui->checkBox_mirrorz->setChecked(0);
 
+    }
+    else
+    {
+        ui->stackedWidget->setCurrentIndex(0);
+    }
+
+}
+
+/* Mirror selected nodes */
+void MainWindow::on_toolButton_32_clicked()
+{
+    if(ui->checkBox_mirrorx->isChecked())
+    {
+        CurrentNodeBeam->MirrorNodes(0);
+    }
+    if(ui->checkBox_mirrory->isChecked())
+    {
+        CurrentNodeBeam->MirrorNodes(1);
+    }
+    if(ui->checkBox_mirrorz->isChecked())
+    {
+        CurrentNodeBeam->MirrorNodes(2);
+    }
+    this->RefreshGLViews();
+}
+
+/* Refresh all open gl views */
+void MainWindow::RefreshGLViews()
+{
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->updateGL();
+    }
+    for(int i=0; i<4; i++)
+    {
+        glWidgetOViews[i]->updateGL();
+    }
+}

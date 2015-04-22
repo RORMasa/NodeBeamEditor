@@ -41,7 +41,10 @@
   <widget class="QWidget" name="centralWidget">
    <property name="styleSheet">
     <string notr="true">QWidget#centralWidget {
-	background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgba(121, 121, 121, 255), stop:1 rgba(207, 207, 207, 255));
+/*	background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgba(121, 121, 121, 255), stop:1 rgba(207, 207, 207, 255));
+*/
+background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0  rgba(83, 93, 108, 255), stop:1 rgba(207, 207, 207, 255));
+
 
 }
 QToolButton {
@@ -82,13 +85,12 @@ QToolButton:disabled {
 }
 QPushButton {
 	background-color: rgb(68, 68, 68);
-     border-style: outset;
-     border-width: 2px;
-     border-radius: 10px;
-     border-color: orange;
+     border-style: solid;
+     border-width: 3px;
+     border-radius: 0px;
+     border-color: #B3B3B3;
      font:  12px;
-	
-	color: rgb(255, 255, 255);
+	 color: rgb(255, 255, 255);
      padding: 6px;
 }
  QPushButton:checked {
@@ -103,7 +105,7 @@ QPushButton:Disabled {
 	background-color: rgb(68, 68, 68);
      border-style: outset;
      border-width: 2px;
-     border-radius: 10px;
+     border-radius: 0px;
      border-color: grey;
      font:  12px;
 	
@@ -535,7 +537,7 @@ QTabWidget::tab-bar {
           </widget>
           <widget class="QToolButton" name="toolButton_15">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="geometry">
             <rect>
@@ -547,6 +549,9 @@ QTabWidget::tab-bar {
            </property>
            <property name="text">
             <string>Mirror</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
           </widget>
           <widget class="QToolButton" name="toolButton_16">
@@ -1278,6 +1283,73 @@ QTabWidget::tab-bar {
              </property>
             </widget>
            </widget>
+           <widget class="QWidget" name="page_7">
+            <widget class="QLabel" name="label_22">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>0</y>
+               <width>101</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Mirror axis</string>
+             </property>
+            </widget>
+            <widget class="QToolButton" name="toolButton_32">
+             <property name="geometry">
+              <rect>
+               <x>100</x>
+               <y>60</y>
+               <width>101</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Mirror selected</string>
+             </property>
+            </widget>
+            <widget class="QCheckBox" name="checkBox_mirrorx">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>81</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>X</string>
+             </property>
+            </widget>
+            <widget class="QCheckBox" name="checkBox_mirrory">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>50</y>
+               <width>81</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Y</string>
+             </property>
+            </widget>
+            <widget class="QCheckBox" name="checkBox_mirrorz">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>70</y>
+               <width>81</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Z</string>
+             </property>
+            </widget>
+           </widget>
           </widget>
          </widget>
          <widget class="QWidget" name="tab_2">
@@ -1382,6 +1454,9 @@ QTabWidget::tab-bar {
            </property>
           </widget>
           <widget class="QToolButton" name="toolButton_11">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="geometry">
             <rect>
              <x>210</x>
@@ -1699,17 +1774,31 @@ QTabWidget::tab-bar {
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>30</height>
+                 <height>37</height>
                 </size>
+               </property>
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
                </property>
                <widget class="QPushButton" name="pushButton_3">
                 <property name="geometry">
                  <rect>
-                  <x>60</x>
+                  <x>90</x>
                   <y>0</y>
                   <width>131</width>
-                  <height>28</height>
+                  <height>35</height>
                  </rect>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>-1</pointsize>
+                  <weight>50</weight>
+                  <italic>false</italic>
+                  <bold>false</bold>
+                 </font>
                 </property>
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Refresh the editor and jbeam widget, after moving, scaling or rotating or after editing the contents inside the box.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1723,8 +1812,8 @@ QTabWidget::tab-bar {
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>31</width>
-                  <height>28</height>
+                  <width>40</width>
+                  <height>35</height>
                  </rect>
                 </property>
                 <property name="toolTip">
@@ -1737,10 +1826,10 @@ QTabWidget::tab-bar {
                <widget class="QPushButton" name="pushButton_SetBeamCursor">
                 <property name="geometry">
                  <rect>
-                  <x>30</x>
+                  <x>40</x>
                   <y>0</y>
-                  <width>31</width>
-                  <height>28</height>
+                  <width>40</width>
+                  <height>35</height>
                  </rect>
                 </property>
                 <property name="toolTip">

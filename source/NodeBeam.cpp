@@ -11,7 +11,6 @@
 #include <QXmlStreamWriter>
 #include <QLinkedList>
 
-#include <jbeam.h>
 #include "NodeBeam.h"
 
 #include <QJsonValue>
@@ -1309,7 +1308,6 @@ void NodeBeam::DeleteNode(int NodeGlobalID)
     //Delete all beams connected to this node
     for(int i=0; i<Beams.size(); i++)
     {
-        qDebug()<<"Should I delete beam " << Beams[i].Node1GlobalID << ", " << Beams[i].Node2GlobalID << ", BeamID: " << i;
         if(Beams[i].Node1GlobalID == NodeGlobalID)
         {
             qDebug()<<"Deleting beam connceted to node" << Beams[i].Node1GlobalID;
@@ -1350,7 +1348,7 @@ void NodeBeam::DeleteNode(int NodeGlobalID)
     for(int i=NodeGlobalID; i<Nodes.size(); i++)
     {
         Nodes[i].GlobalID--;
-        qDebug() << "Node global ID lowered from " << (Nodes[i].GlobalID+1) << " to " <<  Nodes[i].GlobalID  ;
+        //qDebug() << "Node global ID lowered from " << (Nodes[i].GlobalID+1) << " to " <<  Nodes[i].GlobalID  ;
     }
 }
 
@@ -2207,6 +2205,7 @@ void NodeBeam::SelectNodes3D(QVector4D RectSel_1V, QVector4D RectSel_2V,
     }
 }
 
+/*
 void NodeBeam::ReadJBeamTree(QString fileName)
 {
     //JBeam jbeamtree("test3.jbeam");
@@ -2220,7 +2219,7 @@ void NodeBeam::ReadJBeamTree(QString fileName)
     {
         ok = jbeamtree.GoToNextSlot();
 
-        /* Finding content from the slot */
+        // Finding content from the slot
         qDebug()<< "  ";
         qDebug() << "Slot is"<< jbeamtree.CurrentPos->key;
 
@@ -2308,8 +2307,10 @@ void NodeBeam::ReadJBeamTree(QString fileName)
     }
 
 }
+*/
 
 /* Write in specified SLOT in JBeamTree */
+/*
 void NodeBeam::WriteInJBeamTree(QString slotname)
 {
     //First loading the editable jbeam
@@ -2323,7 +2324,7 @@ void NodeBeam::WriteInJBeamTree(QString slotname)
     {
         ok = jbeamtree.GoToNextSlot();
 
-        /* Finding content from the slot */
+        // Finding content from the slot
         qDebug()<< "  ";
         qDebug() << "Slot is"<< jbeamtree.CurrentPos->key;
 
@@ -2343,7 +2344,7 @@ void NodeBeam::WriteInJBeamTree(QString slotname)
 
     }
     jbeamtree.WriteFile("testi.jbeam");
-}
+}*/
 
 /* When node name is known, but node global id is not known, this function finds it */
 int NodeBeam::FindNodeByName(QString nodename)
@@ -2634,6 +2635,32 @@ void NodeBeam::DeleteNodeGroup(int NodeGroupID)
         for(int i=0; i<NodeGroups.size();i++)
         {
             if(NodeGroups[i].NodeGroupID > NodeGroupID) NodeGroups[i].NodeGroupID--;
+        }
+    }
+}
+
+/* Mirror selected nodes, 0 = X, 1 = Y, 2 = Z */
+void NodeBeam::MirrorNodes(int axis)
+{
+    if(axis == 0)
+    {
+        for(int i=0; i<SelectedNodes.size();i++)
+        {
+            Nodes[SelectedNodes.at(i)].locX = -Nodes[SelectedNodes.at(i)].locX;
+        }
+    }
+    else if(axis == 1)
+    {
+        for(int i=0; i<SelectedNodes.size();i++)
+        {
+            Nodes[SelectedNodes.at(i)].locY = -Nodes[SelectedNodes.at(i)].locY;
+        }
+    }
+    else if(axis == 2)
+    {
+        for(int i=0; i<SelectedNodes.size();i++)
+        {
+            Nodes[SelectedNodes.at(i)].locZ = -Nodes[SelectedNodes.at(i)].locZ;
         }
     }
 }
