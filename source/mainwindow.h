@@ -67,6 +67,8 @@ public:
     QLabel * StatusBar_mode;
     QLabel * StatusBar_nodecount;
 
+    bool *TexboxOutdated;
+
 public slots:
     void MainNodeBeamUpdated();
     void SettingsUpdated();

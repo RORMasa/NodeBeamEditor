@@ -219,6 +219,7 @@ class NodeBeam : public QObject
 
 public:
     bool EditorMode; //BeamNG <==> ROR axises
+    bool TextBoxoutdated;
 
     QVector<Node> Nodes;
     QVector<Beam> Beams;

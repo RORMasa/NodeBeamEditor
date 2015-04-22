@@ -48,6 +48,7 @@ NodeBeam::NodeBeam(QObject *parent): QObject(parent)
     blue=0;
     ActiveNodeGroup=-1;
     ActiveBeamGroup=-1;
+    TextBoxoutdated = 0;
 
     DefaultPrefixCalculator=0;
     LuaComment=0;

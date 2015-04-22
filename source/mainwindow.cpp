@@ -315,6 +315,8 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     ListType_id = -1;
 
+    this->TexboxOutdated = &CurrentNodeBeam->TextBoxoutdated;
+
 }
 
 MainWindow::~MainWindow()
@@ -1411,14 +1413,8 @@ void MainWindow::on_toolButton_21_clicked()
 
         }
     }
-    for(int i=0; i<2; i++)
-    {
-        glWidgetViews[i]->updateGL();
-    }
-    for(int i=0; i<4; i++)
-    {
-        glWidgetOViews[i]->updateGL();
-    }
+    this->RefreshGLViews();
+    *TexboxOutdated = 1;
 }
 
 /* Move - reset values in text boxes */
@@ -1464,14 +1460,8 @@ void MainWindow::on_toolButton_28_clicked()
 
         }
     }
-    for(int i=0; i<2; i++)
-    {
-        glWidgetViews[i]->updateGL();
-    }
-    for(int i=0; i<4; i++)
-    {
-        glWidgetOViews[i]->updateGL();
-    }
+    this->RefreshGLViews();
+    *TexboxOutdated = 1;
 }
 
 
@@ -1656,14 +1646,9 @@ void MainWindow::on_toolButton_26_clicked()
             }
         }
     }
-    for(int i=0; i<2; i++)
-    {
-        glWidgetViews[i]->updateGL();
-    }
-    for(int i=0; i<4 ;i++)
-    {
-        glWidgetOViews[i]->updateGL();
-    }
+    this->RefreshGLViews();
+    *TexboxOutdated = 1;
+
 }
 //Rotate - clear text boxes
 void MainWindow::on_toolButton_25_clicked()
@@ -2767,8 +2752,13 @@ void MainWindow::on_actionRun_again_triggered()
 /* Parse JBEAM widget refresh button clicked */
 void MainWindow::on_pushButton_3_clicked()
 {
-    JBEAM_UpdateAllNodes();
+    if(*TexboxOutdated)
+    {
+        JBEAM_UpdateAllNodes();
+    }
     JBEAM_ParseTextEdit();
+    this->RefreshGLViews();
+    *TexboxOutdated = 0;
 }
 
 /* Parse JBEAM widget */
@@ -3660,6 +3650,7 @@ void MainWindow::on_toolButton_32_clicked()
         CurrentNodeBeam->MirrorNodes(2);
     }
     this->RefreshGLViews();
+    *TexboxOutdated = 1;
 }
 
 /* Refresh all open gl views */

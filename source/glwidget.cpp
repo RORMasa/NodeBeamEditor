@@ -1224,6 +1224,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
         }
         else if(MovingNodes==3)
         {
@@ -1246,6 +1247,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
         }
         else if(MovingNodes>0)
         {
@@ -1286,6 +1288,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
                 NBPointer->Editing3D_CalculateSelectionCenter();
                 updateGL();
             }
+            NBPointer->TextBoxoutdated=1;
         }
         else if(ScalingNodes>0)
         {
@@ -1330,6 +1333,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
                 }
                 updateGL();
             }
+            NBPointer->TextBoxoutdated=1;
         }
         else if(RotatingNodes>0)
         {
@@ -1453,6 +1457,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
         }
         else if(RectSelect > 0)
         {

@@ -141,7 +141,6 @@ public:
     void DisableNodePicker();
     void EnableNodePicker();
 
-
     int HighlightNode;
 
 public slots:

@@ -1045,6 +1045,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                 NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ += -viewscalefactor*(**ZPointer2);
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
             emit NodeBeamUpdated();
         }
         else if(MovingNodes==2)
@@ -1066,6 +1067,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                     NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locX += -viewscalefactor*(**XPointer2);
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
             emit NodeBeamUpdated();
         }
         else if(MovingNodes==3)
@@ -1087,6 +1089,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                     NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locY += -viewscalefactor*(**YPointer2);
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
             emit NodeBeamUpdated();
         }
         else if(MovingNodes==4)
@@ -1108,6 +1111,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                     NBPointer->Nodes[NBPointer->SelectedNodes[i5]].locZ += -viewscalefactor*(**ZPointer2);
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
             emit NodeBeamUpdated();
         }
         else if(ScalingNodes==1)
@@ -1127,6 +1131,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
 
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
             emit NodeBeamUpdated();
         }
         else if(ScalingNodes==2)
@@ -1144,6 +1149,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
 
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
             emit NodeBeamUpdated();
         }
         else if(ScalingNodes==3)
@@ -1161,6 +1167,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
 
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
             emit NodeBeamUpdated();
         }
         else if(ScalingNodes==4)
@@ -1178,6 +1185,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
 
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
             emit NodeBeamUpdated();
         }
         else if(RotatingNodes==1)
@@ -1224,6 +1232,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                 NBPointer->Nodes[NBPointer->SelectedNodes[i2]].locZ = a2*XCoordinate + b2*YCoordinate;
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
             emit NodeBeamUpdated();
             QString Message = "Rotating X: ";
             Message.append(QString::number((angle*360.0f/(2*pii))));
@@ -1274,6 +1283,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                 NBPointer->Nodes[NBPointer->SelectedNodes[i2]].locZ = a2*XCoordinate + b2*YCoordinate;
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
             emit NodeBeamUpdated();
             QString Message = "Rotating Y: ";
             Message.append(QString::number((angle*360.0f/(2*pii))));
@@ -1327,6 +1337,7 @@ void GLWidgetOrtho::mouseMoveEvent(QMouseEvent *event)
                 NBPointer->Nodes[NBPointer->SelectedNodes[i2]].locY = a2*XCoordinate + b2*YCoordinate;
             }
             updateGL();
+            NBPointer->TextBoxoutdated=1;
             emit NodeBeamUpdated();
             QString Message = "Rotating Z: ";
             Message.append(QString::number((angle*360.0f/(2*pii))));
