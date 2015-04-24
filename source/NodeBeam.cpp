@@ -1342,6 +1342,12 @@ void NodeBeam::DeleteNode(int NodeGlobalID)
         }
     }
 
+    //Fix listypes
+    for(int i=0;i<ListTypes.size();i++)
+    {
+        ListTypes[i].NodeRemoved(NodeGlobalID);
+    }
+
     //Delete node
     NodeGroups[Nodes[NodeGlobalID].GroupID].NodeAmount--;
     Nodes.remove(NodeGlobalID);
@@ -2898,7 +2904,7 @@ QJsonParseError NodeBeam::ParseJBEAM_TextEdit(QByteArray JbeamInputText)
     //Convert Json document to json object
     QJsonObject JbeamObject = Jbeam.object();
 
-    qDebug() << "Object is empty:" << Jbeam.object().isEmpty();
+    //qDebug() << "Object is empty:" << Jbeam.object().isEmpty();
 
     //Parse JSON object, find nodes and beams.
     if(!JbeamObject.isEmpty())
@@ -2907,7 +2913,7 @@ QJsonParseError NodeBeam::ParseJBEAM_TextEdit(QByteArray JbeamInputText)
 
         for(int i=0; i<JbeamObject.keys().length(); i++)
         {
-            qDebug() << "Parsing slot " << JbeamObject.keys()[i];
+            //qDebug() << "Parsing slot " << JbeamObject.keys()[i];
             QJsonObject JbeamObject_slot;
             QJsonValue slot = JbeamObject.value(JbeamObject.keys()[i]);
 
@@ -2915,7 +2921,7 @@ QJsonParseError NodeBeam::ParseJBEAM_TextEdit(QByteArray JbeamInputText)
             {
                 JbeamObject_slot = slot.toObject();
                 Jbeam_slots.append(JbeamObject_slot); // Add in list to parse beams later
-                qDebug() << "Keys in slot: " << JbeamObject_slot.keys();
+                //qDebug() << "Keys in slot: " << JbeamObject_slot.keys();
 
                 //Get nodes from slot
                 QJsonObject::iterator slot_iterator = JbeamObject_slot.find("nodes");
@@ -3172,7 +3178,7 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
             QChar prevchar = 'ö';
             int prevchar_i=0;
             if (i>0) prevchar_i = i-1;
-            qDebug() << "aloituspiste " << JbeamTextSTR[i-1]<<JbeamTextSTR[prevchar_i]<<JbeamTextSTR[i+1];
+            //qDebug() << "aloituspiste " << JbeamTextSTR[i-1]<<JbeamTextSTR[prevchar_i]<<JbeamTextSTR[i+1];
             JBEAM_FixCommas_PrevChar(JbeamTextSTR, prevchar, prevchar_i);
             if(prevchar == ',')
             {
@@ -3262,7 +3268,7 @@ QByteArray NodeBeam::JBEAM_FixCommas2(QByteArray JbeamText)
 
 QByteArray NodeBeam::JBEAM_RemoveComments(QByteArray JbeamText)
 {
-    qDebug() << "Removing comments";
+    //qDebug() << "Removing comments";
     QString JbeamTextSTR = JbeamText.constData();
 
     bool commentfound=0;

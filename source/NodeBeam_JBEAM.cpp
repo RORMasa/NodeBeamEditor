@@ -34,12 +34,16 @@ void NodeBeam::Load_ListTypes()
             {
                 //Read file
                 QTextStream in(&file);
+                #ifndef TESTING
                 #ifndef QT_NO_CURSOR
                     QApplication::setOverrideCursor(Qt::WaitCursor);
                 #endif
+                #endif
                 QString FileContents = in.readAll();
+                #ifndef TESTING
                 #ifndef QT_NO_CURSOR
                     QApplication::restoreOverrideCursor();
+                #endif
                 #endif
                 file.close();
 
@@ -204,4 +208,35 @@ bool JBEAM_ListType::Add(QVector <int> item)
         return true;
     }
     else return false;
+}
+
+//Node is removed, remove all instances that connect to removed node.
+void JBEAM_ListType::NodeRemoved(int nodeid)
+{
+    for(int i=0; i<this->contaier.size();i++)
+    {
+        for(int i2=0; i2<contaier.at(i).size(); i2++)
+        {
+            if(contaier.at(i).at(i2) == nodeid)
+            {
+                contaier.removeAt(i);
+                i--;
+                qDebug() << "List type container removed " << i;
+                break;
+            }
+        }
+    }
+
+    //Lower global ID's
+    for(int i=0; i<this->contaier.size();i++)
+    {
+        for(int i2=0; i2<contaier.at(i).size(); i2++)
+        {
+            if(contaier.at(i).at(i2) >= nodeid)
+            {
+                contaier[i][i2] = contaier[i][i2]-1;
+            }
+        }
+    }
+
 }

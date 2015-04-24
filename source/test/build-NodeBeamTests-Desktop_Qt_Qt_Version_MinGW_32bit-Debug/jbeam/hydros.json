@@ -1,0 +1,12 @@
+{
+	"keyword" : "hydros",
+	"drawtype" : "beam",
+	"draworder" : [0,1],
+	"nodeamount" : 2,
+	"nodenames" : [
+		"Choose 1st node",
+		"Choose 2nd node"
+		],
+    "tableheader" : "\"id1\", \"id2:\"",
+	"template" : "\"%1\", \"%2\""	
+}

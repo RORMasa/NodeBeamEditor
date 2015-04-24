@@ -1,0 +1,16 @@
+{
+	"keyword" : "camerasInternal",
+	"drawtype" : "none",
+	"draworder" : [],
+	"nodeamount" : 6,
+	"nodenames" : [
+		"Choose 1st camera beam node",
+		"Choose 2nd camera beam node",
+		"Choose 3rd camera beam node",
+		"Choose 4th camera beam node",
+		"Choose 5th camera beam node",
+		"Choose 6th camera beam node"
+		],
+    "tableheader" : "\"x\", \"y\", \"z\", \"fov\", \"id1:\", \"id2:\", \"id3:\", \"id4:\", \"id5:\", \"id6:\"",
+	"template" : "\"x\", \"y\", \"z\", \"fov\", \"%1\", \"%2\", \"%3\", \"%4\", \"%5\", \"%6\""	
+}

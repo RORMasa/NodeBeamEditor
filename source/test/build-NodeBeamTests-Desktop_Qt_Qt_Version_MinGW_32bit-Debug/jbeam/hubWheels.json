@@ -1,0 +1,15 @@
+{
+	"keyword" : "hubWheels",
+	"drawtype" : "wheel",
+	"draworder" : [0,1],
+	"nodeamount" : 4,
+	"nodenames" : [
+		"Choose 1st wheel node",
+		"Choose 2nd wheelnode",
+		"Choose S node",
+		"Choose arm node"
+		],
+    "tableheader" : "\"name\",\"group\",\"node1:\",\"node2:\",\"nodeS\",\"nodeArm:\",\"wheelDir\"",
+	"template" : "\"name\",\"group\",\"%1\",\"%2\",\"%3\",\"%4\",\"wheelDir\""	
+	
+}

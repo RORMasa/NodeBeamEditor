@@ -1,0 +1,12 @@
+{
+	"keyword" : "thrusters",
+	"drawtype" : "none",
+	"draworder" : [],
+	"nodeamount" : 2,
+	"nodenames" : [
+		"Choose 1st thurster node",
+		"Choose 2nd thruster node"
+		],
+    "tableheader" : "\"id1\", \"id2:\"",
+	"template" : "\"%1\", \"%2\""	
+}

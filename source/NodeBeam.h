@@ -203,7 +203,7 @@ public:
     //bool Remove();
     //void Clear();
     //int Count();
-    //void NodeRemoved(int nodeid);
+    void NodeRemoved(int nodeid);
 
     //Container
     QVector < QVector < int > > contaier;
