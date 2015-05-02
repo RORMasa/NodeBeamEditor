@@ -437,42 +437,51 @@ bool NodeBeam::ImportWavefrontOBJ(const QString &fileName)
 
     for(int i=0; i< OBJfile_lines.length();i++)
     {
-        if(OBJfile_lines[i][0]=='v') OBJnodes.append(OBJfile_lines[i]);
-        else if(OBJfile_lines[i][0]=='f') OBJbeams.append(OBJfile_lines[i]);
+        QRegExp separator(" +");
+        QStringList line = OBJfile_lines.at(i).split(separator);
+        if((line.at(0) == "v") && (line.length() >= 4))
+        {
+            TempNode.NodeName = NewNodeName(CurrentNamePrefix);
+            TempNode.locX = line.at(1).toFloat();
+            TempNode.locY = line.at(2).toFloat();
+            TempNode.locZ = line.at(3).toFloat();
+            TempNodes.append(TempNode);
+        }
+        else if((line.at(0) == "f") && (line.length() >= 3))
+        {
+            for(int i2=1; i2<line.length(); i2++)
+            {
+                int textcoord = line.at(i2).indexOf("/");
+                if(textcoord >= 0)
+                {
+                    QString temp;
+                    for(int i3=0; i3<line.at(i2).length();i3++)
+                    {
+                        if(line.at(i2).at(i3) == '/') break;
+                        else temp.append(line.at(i2).at(i3));
+                    }
+                    line[i2] = temp;
+                }
+            }
+            for(int i2=1; i2< line.length()-1 ;i2++)
+            {
+                int node1 = line.at(i2).toInt()-1;
+                int node2 = line.at(i2+1).toInt()-1;
+                int nodecount = TempNodes.size();
+                if((node1 < nodecount) && (node1 >= 0))
+                {
+                    if((node2 < nodecount) && (node2 >= 0))
+                    {
+                        TempBeam.Node1Name = TempNodes.at(node1).NodeName;
+                        TempBeam.Node2Name = TempNodes.at(node2).NodeName;
+                        TempBeam.draw = 1;
+                        TempBeams.append(TempBeam);
+                    }
+                }
+            }
+        }
     }
 
-    for(int i=0; i< OBJnodes.length();i++)
-    {
-        OBJnodes[i].replace("v","");
-        OBJnodes[i].replace("V","");
-        QStringList coordinates = OBJnodes[i].split(' ');
-        for(int i2=0; i2< coordinates.length() ;i2++)
-        {
-            if(coordinates[i2].length()==0) coordinates.removeAt(i2);
-        }
-        TempNode.NodeName = NewNodeName(CurrentNamePrefix);
-        TempNode.locX = coordinates[0].toFloat();
-        TempNode.locY = coordinates[1].toFloat();
-        TempNode.locZ = coordinates[2].toFloat();
-        TempNodes.append(TempNode);
-    }
-
-    for(int i=0; i< OBJbeams.length();i++)
-    {
-        OBJbeams[i].replace("f","");
-        OBJbeams[i].replace("F","");
-        QStringList beamnodes = OBJbeams[i].split(' ');
-        for(int i2=0; i2< beamnodes.length() ;i2++)
-        {
-            if(beamnodes[i2].length()==0) beamnodes.removeAt(i2);
-        }
-        for(int i2=0; i2< beamnodes.length()-1 ;i2++)
-        {
-            TempBeam.Node1Name = TempNodes[beamnodes[i2].toInt()-1].NodeName;
-            TempBeam.Node2Name = TempNodes[beamnodes[i2+1].toInt()-1].NodeName;
-            TempBeams.append(TempBeam);
-        }
-    }
     #ifndef QT_NO_CURSOR
         QApplication::restoreOverrideCursor();
     #endif
