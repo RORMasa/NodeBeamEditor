@@ -31,11 +31,12 @@ MainWindow::MainWindow(QWidget *parent) :
     HubWheelProperties = new BeamDefaultsDialog;
 
     /* Create perspective views */
-    for(int i=0; i<2; i++)
-    {
-        GLWidget * widget1 = new GLWidget;
-        glWidgetViews[i] = widget1;
-    }
+    QGLContext * context = new QGLContext(QGLFormat(QGL::DoubleBuffer));
+    GLWidget * widget1 = new GLWidget(context, this);
+    glWidgetViews[0] = widget1;
+    GLWidget * widget2 = new GLWidget(context, widget1);
+    glWidgetViews[1] = widget2;
+
     /* Create orthographic views */
     for(int i=0; i<4; i++)
     {
@@ -236,7 +237,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboBox_3_views->addItem("Right");
     ui->comboBox_3_views->addItem("Left");
 
-    //Show axis arrows
+    //Draw triangles by default
     ui->checkBox_2->setChecked(1);
 
     //Change glwidget cursors to crosscursor
@@ -724,15 +725,6 @@ void MainWindow::MainNodeBeamUpdated()
     }
     ui->comboBox->setCurrentIndex(CurrentBeamGroupi);
 
-    /* Hubwheels list update */
-    QListWidgetItem * item;
-    ui->listWidget->clear();
-    for(int i=0; i<CurrentNodeBeam->Hubwheels.size(); i++)
-    {
-        item = new QListWidgetItem;
-        item->setText(CurrentNodeBeam->Hubwheels[i].name);
-        ui->listWidget->addItem(item);
-    }
     /*
      * Auto save disabled
     if(autosave.elapsed()>60000)
@@ -2437,7 +2429,7 @@ void MainWindow::on_checkBox_2_clicked()
     {
         for(int i=0; i<2; i++)
         {
-            glWidgetViews[i]->ShowArrows = 1;
+            glWidgetViews[i]->DrawTris = 1;
         }
         for(int i=0; i<4 ;i++)
         {
@@ -2448,7 +2440,7 @@ void MainWindow::on_checkBox_2_clicked()
     {
         for(int i=0; i<2; i++)
         {
-            glWidgetViews[i]->ShowArrows = 0;
+            glWidgetViews[i]->DrawTris = 0;
         }
         for(int i=0; i<4 ;i++)
         {
@@ -2524,9 +2516,11 @@ void MainWindow::on_toolButton_19_clicked()
     }
 }
 
+
 /* Update hubwheel to boxes below */
 void MainWindow::on_listWidget_activated(const QModelIndex &index)
 {
+    /*
     for(int i=0; i<CurrentNodeBeam->Hubwheels.size(); i++)
     {
         if(CurrentNodeBeam->Hubwheels[i].name == ui->listWidget->currentItem()->text())
@@ -2539,11 +2533,13 @@ void MainWindow::on_listWidget_activated(const QModelIndex &index)
             ui->lineEdit_hubwheel_6->setText(QString::number(CurrentNodeBeam->Hubwheels[i].wheelDir));
         }
     }
+    */
 
 }
 
 void MainWindow::on_pushButton_clicked()
 {
+    /*
     for(int i=0; i<CurrentNodeBeam->Hubwheels.size(); i++)
     {
         if(CurrentNodeBeam->Hubwheels[i].name == ui->listWidget->currentItem()->text())
@@ -2561,11 +2557,13 @@ void MainWindow::on_pushButton_clicked()
 
         }
     }
+    */
  }
 
 //Set hubwheel properties
 void MainWindow::on_pushButton_2_clicked()
 {
+    /*
     HubWheelProperties->setWindowTitle("Hubwheel Arguments");
     if(HubWheelProperties->firstload == 0)
     {
@@ -2586,20 +2584,21 @@ void MainWindow::on_pushButton_2_clicked()
 
     HubWheelProperties->selecting = 0;
     HubWheelProperties->selected = -1;
+    */
 }
 
 void MainWindow::SettingsUpdated()
 {
     QVector <float> backgroundcolor;
     backgroundcolor.append((AppSettings->readsetting("bg_color_r").toInt())/255.0f);
-    backgroundcolor.append((AppSettings->readsetting("bg_color_b").toInt())/255.0f);
     backgroundcolor.append((AppSettings->readsetting("bg_color_g").toInt())/255.0f);
+    backgroundcolor.append((AppSettings->readsetting("bg_color_b").toInt())/255.0f);
     backgroundcolor.append(1.0f);
 
     QVector <float> gridcolor;
     gridcolor.append((AppSettings->readsetting("grid_color_r").toInt())/255.0f);
-    gridcolor.append((AppSettings->readsetting("grid_color_b").toInt())/255.0f);
     gridcolor.append((AppSettings->readsetting("grid_color_g").toInt())/255.0f);
+    gridcolor.append((AppSettings->readsetting("grid_color_b").toInt())/255.0f);
     gridcolor.append(1.0f);
 
     for(int i=0; i<2; i++)
@@ -2615,13 +2614,14 @@ void MainWindow::SettingsUpdated()
     CurrentNodeBeam->VehicleAuthors[0] = AppSettings->readsetting("author");
 }
 
-/* Blueprints opacity adjust */
+/* Reference mesh opacity adjust */
 void MainWindow::on_horizontalSlider_sliderMoved(int position)
 {
-    /*
-    glWidgetO->blueprint_opa[glWidgetO->textureid] = ui->horizontalSlider->value()/100.0f;
-    glWidgetO->updateGL();
-    */
+    for(int i=0; i<2; i++)
+    {
+        glWidgetViews[i]->MeshOpacity = (float)position/100;
+        glWidgetViews[i]->updateGL();
+    }
 }
 
 //Set scale by measuring distance
@@ -3663,5 +3663,19 @@ void MainWindow::RefreshGLViews()
     for(int i=0; i<4; i++)
     {
         glWidgetOViews[i]->updateGL();
+    }
+}
+
+void MainWindow::on_toolButton_33_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this);
+    if (!fileName.isEmpty())
+    {
+        qDebug() << fileName;
+        for(int i=0; i<1; i++)
+        {
+            glWidgetViews[i]->LoadRefMesh(fileName);
+            glWidgetViews[i]->updateGL();
+        }
     }
 }

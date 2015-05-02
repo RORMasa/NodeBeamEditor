@@ -1,44 +1,3 @@
-
-/****************************************************************************
-**
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
-** Contact: http://www.qt-project.org/legal
-**
-** This file is part of the examples of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:BSD$
-** You may use this file under the terms of the BSD license as follows:
-**
-** "Redistribution and use in source and binary forms, with or without
-** modification, are permitted provided that the following conditions are
-** met:
-**   * Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer.
-**   * Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**   * Neither the name of Digia Plc and its Subsidiary(-ies) nor the names
-**     of its contributors may be used to endorse or promote products derived
-**     from this software without specific prior written permission.
-**
-**
-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
-
 #include <QtWidgets>
 #include <QtOpenGL>
 #include <QMatrix4x4>
@@ -53,9 +12,38 @@
 #define GL_MULTISAMPLE  0x809D
 #endif
 
+/* SHADERS */
+//For 3D mesh
+static const char *vertexShaderSource =
+        "attribute vec4 vertex;\n"
+        "attribute vec3 normal;\n"
+        "varying vec3 vert;\n"
+        "varying vec3 vertNormal;\n"
+        "uniform mat4 projMatrix;\n"
+        "uniform mat4 mvMatrix;\n"
+        "uniform mat3 normalMatrix;\n"
+        "void main() {\n"
+        "   vert = vertex.xyz;\n"
+        "   vertNormal = normalMatrix * normal;\n"
+        "   gl_Position = projMatrix * mvMatrix * vertex;\n"
+        "}\n";
 
-GLWidget::GLWidget(QWidget *parent)
-    : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
+static const char *fragmentShaderSource =
+    "varying highp vec3 vert;\n"
+    "varying highp vec3 vertNormal;\n"
+    "uniform highp vec3 lightPos;\n"
+    "uniform float opacity;\n"
+    "void main() {\n"
+    "   highp vec3 L = normalize(lightPos - vert);\n"
+    "   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
+    "   highp vec3 color = vec3(0.4, 0.4, 0.4);\n"
+    "   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.0, 1.0);\n"
+    "   gl_FragColor = vec4(col, opacity);\n"
+    "}\n";
+
+GLWidget::GLWidget(QGLContext *context, QWidget *parent,
+     const QGLWidget * shareWidget, Qt::WindowFlags f)
+    : QGLWidget(QGLFormat(QGL::DoubleBuffer), parent)
 {
     dRot = 4510;
     zRot = 3600;
@@ -85,6 +73,7 @@ GLWidget::GLWidget(QWidget *parent)
     setMouseTracking(true);
 
     ShowArrows = 1;
+    DrawTris = 1;
 
     pii = 2*qAsin(1);
 
@@ -95,6 +84,7 @@ GLWidget::GLWidget(QWidget *parent)
     backgroundcolor[3] = 0.15;
     gridcolor.resize(4);
     gridcolor[3] = 1.0;
+    MeshOpacity = 0.8;
 
     //View offset in begin
     ViewOffsetX = 0;
@@ -115,11 +105,14 @@ GLWidget::GLWidget(QWidget *parent)
     MovingNodes=0;
     ScalingNodes=0;
     RotatingNodes=0;
+
+
 }
 
 GLWidget::~GLWidget()
 {
-
+    VAO.release();
+    VAO.destroy();
 }
 
 QSize GLWidget::minimumSizeHint() const
@@ -240,17 +233,19 @@ void GLWidget::draw()
     int i3 = 0;
     for(int i2=0; i2<NBPointer->NodeGroups.size();i2++)
     {
-        for(int i=0; i<NBPointer->NodeGroups.at(i2).NodeAmount; i++)
+        if(NBPointer->NodeGroups.at(i2).draw)
         {
-            if(NBPointer->NodeGroups.at(i2).draw)
+            for(int i=0; i<NBPointer->NodeGroups.at(i2).NodeAmount; i++)
             {
-                if(NBPointer->Nodes.at(i3).GlobalID == NBPointer->ActiveNode) glColor4f(1.0f,0.0f,0.0f,1.0f);
-                else if(NBPointer->Nodes.at(i3).GlobalID == HighlightNode) glColor4f(1.0f,1.0f,0.0f,1.0f);
-                else glColor4f(0.4f,0.4f,0.4f,1.0f);
 
-                glVertex3f(NBPointer->Nodes.at(i3).locX, NBPointer->Nodes.at(i3).locY, NBPointer->Nodes.at(i3).locZ);
+                    if(NBPointer->Nodes.at(i3).GlobalID == NBPointer->ActiveNode) glColor4f(1.0f,0.0f,0.0f,1.0f);
+                    else if(NBPointer->Nodes.at(i3).GlobalID == HighlightNode) glColor4f(1.0f,1.0f,0.0f,1.0f);
+                    else glColor4f(0.4f,0.4f,0.4f,1.0f);
+
+                    glVertex3f(NBPointer->Nodes.at(i3).locX, NBPointer->Nodes.at(i3).locY, NBPointer->Nodes.at(i3).locZ);
+
+                i3++;
             }
-            i3++;
         }
     }
     glColor4f(1.0f,1.0f,0.0f,1.0f);
@@ -268,7 +263,7 @@ void GLWidget::draw()
     for(int i2=0; i2<NBPointer->ListTypes.size();i2++)
     {
         //Draw triangles
-        if(NBPointer->ListTypes.at(i2).drawtype == 3)
+        if((NBPointer->ListTypes.at(i2).drawtype == 3) && DrawTris)
         {
             glEnable(GL_DEPTH_TEST);
             glBegin(GL_TRIANGLES);
@@ -303,7 +298,6 @@ void GLWidget::draw()
             glLineWidth(2);
             glBegin(GL_LINES);
             glColor3f(1.0, 0.0, 0.0);
-
             for(int i=0; i<NBPointer->ListTypes.at(i2).contaier.size();i++)
             {
                 int nodeid = NBPointer->ListTypes.at(i2).contaier.at(i).at(NBPointer->ListTypes.at(i2).draworder.at(0));
@@ -311,11 +305,8 @@ void GLWidget::draw()
                 glVertex3f(NBPointer->Nodes.at(nodeid).locX,NBPointer->Nodes.at(nodeid).locY,NBPointer->Nodes.at(nodeid).locZ);
                 glVertex3f(NBPointer->Nodes.at(nodeid1).locX,NBPointer->Nodes.at(nodeid1).locY,NBPointer->Nodes.at(nodeid1).locZ);
             }
-
             glEnd();
         }
-
-
     }
 
 
@@ -517,7 +508,7 @@ void GLWidget::RenderTextInScene(bool names)
                 if(NBPointer->NodeGroups[i2].draw)
                 {
                     QPainter painter(this);
-                    painter.setRenderHint(QPainter::Antialiasing);
+                    //painter.setRenderHint(QPainter::Antialiasing);
                     if(NBPointer->Nodes[i3].GlobalID == NBPointer->ActiveNode);
                     else;
 
@@ -539,7 +530,7 @@ void GLWidget::RenderTextInScene(bool names)
                 if(NBPointer->NodeGroups[i2].draw)
                 {
                     QPainter painter(this);
-                    painter.setRenderHint(QPainter::Antialiasing);
+                    //painter.setRenderHint(QPainter::Antialiasing);
                     if(NBPointer->Nodes[i3].GlobalID == NBPointer->ActiveNode);
                     else;
 
@@ -730,6 +721,29 @@ void GLWidget::DrawAxisArrows()
 
 void GLWidget::initializeGL()
 {
+    initializeOpenGLFunctions();
+
+    ShaderProgram = new QOpenGLShaderProgram;
+    ShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
+    ShaderProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
+    ShaderProgram->bindAttributeLocation("vertex",0);
+    ShaderProgram->bindAttributeLocation("normal",1);
+    ShaderProgram->link();
+
+    ShaderProgram->bind();
+    m_projectionmatrixloc = ShaderProgram->uniformLocation("projMatrix");
+    m_normalMatrixLoc = ShaderProgram->uniformLocation("normalMatrix");
+    m_lightPosLoc = ShaderProgram->uniformLocation("lightPos");
+    m_mvmatrixloc = ShaderProgram->uniformLocation("mvMatrix");
+    m_opacityloc = ShaderProgram->uniformLocation("opacity"); //For opacity adjustment of the model
+
+    // Light position is fixed.
+    ShaderProgram->setUniformValue(m_lightPosLoc, QVector3D(0, 0, 50));
+
+    ShaderProgram->release();
+
+    verts_size = 0;
+
     glClearColor(backgroundcolor[0], backgroundcolor[1], backgroundcolor[2], backgroundcolor[3]);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -746,7 +760,7 @@ void GLWidget::initializeGL()
 void GLWidget::paintGL()
 {  
     /* Set background color */
-    glClearColor(backgroundcolor[0], backgroundcolor[1], backgroundcolor[2], backgroundcolor[3]);
+    glClearColor(backgroundcolor.at(0), backgroundcolor.at(1), backgroundcolor.at(2), backgroundcolor.at(3));
 
     /* Render picking colors in buffer and check what should be picked */
     if(NodePicking || (MovingNodes > 0) || (ScalingNodes > 0) || (RotatingNodes > 0))
@@ -767,6 +781,7 @@ void GLWidget::paintGL()
 
     /* Render the actual scene itself */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
     glLoadIdentity();
     glTranslatef(0.0, 0.0, -10.0);
     glRotatef(xRot / 16.0, 1.0, 0.0, 0.0); //Rotate 3D view
@@ -775,33 +790,47 @@ void GLWidget::paintGL()
     glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
     glEnable(GL_MULTISAMPLE);
     draw(); //draw nodes, beams, wheels, lines
+
+    //Adjust the world matrix for 3D reference mesh
+    m_worldmatrix.setToIdentity();
+    m_worldmatrix.translate(0,0,-10);
+    m_worldmatrix.rotate(xRot / 16.0f, 1, 0, 0);
+    m_worldmatrix.rotate(zRot / 16.0f, 0, 0, 1);
+    m_worldmatrix.translate(ViewOffsetX, ViewOffsetY, ViewOffsetZ);
+
+    //Bind shaderprogram and vertexarray object, draw the model
+    ShaderProgram->bind();
+    ShaderProgram->setUniformValue(m_projectionmatrixloc, m_projectionmatrix);
+    ShaderProgram->setUniformValue(m_mvmatrixloc, m_camera * m_worldmatrix);
+    ShaderProgram->setUniformValue(m_opacityloc, MeshOpacity);
+    QMatrix3x3 normalMatrix = m_worldmatrix.normalMatrix();
+    ShaderProgram->setUniformValue(m_normalMatrixLoc, normalMatrix);
+
+    VAO.bind();
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDrawArrays(GL_TRIANGLES, 0, verts_size); //draw reference mesh
+    VAO.release();
+
+    ShaderProgram->release();
+
+    glDisable(GL_DEPTH_TEST);
+
+    //Draw node names, numbers, cursors
     if(MovingNodes > 0) Draw3DCursor();
     else if(ScalingNodes > 0) Draw3DCursor_Scale();
     else if(RotatingNodes > 0) Draw3DCursor_Rotate();
     else if(ShowArrows); //DrawAxisArrows();
     glColor3f(0.6, 0.6, 0.6);  //Set text color
     renderText(10, yHeight-20, TextOverlay, QFont( "Arial", 14, QFont::Bold, 0 ) );
+
     if(ShowNodeNumbers) RenderTextInScene(1);
     else if(ShowNodeNumbers1) RenderTextInScene(0);
     if(RectSelect > 1) DrawRectSelect();
 
     QGLWidget::swapBuffers();
+
 }
-
-//void GLWidget::resizeGL(int width, int height)
-//{
-//    int side = qMin(width, height);
-//    glViewport((width - side) / 2, (height - side) / 2, side, side);
-
-//    glMatrixMode(GL_PROJECTION);
-//    glLoadIdentity();
-//#ifdef QT_OPENGL_ES_1
-//    glOrthof(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
-//#else
-//    glOrtho(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
-//#endif
-//    glMatrixMode(GL_MODELVIEW);
-//}
 
 void GLWidget::resizeGL(int width, int height)
 {
@@ -811,9 +840,11 @@ void GLWidget::resizeGL(int width, int height)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     GLfloat x = (GLfloat(width) / height)*ZoomFactor;
-    glFrustum(-x, x, -ZoomFactor, ZoomFactor, 4.0, 55.0);
+    glFrustum(-x, x, -ZoomFactor, ZoomFactor, 4.0, 1000.0);
     glMatrixMode(GL_MODELVIEW);
 
+    m_projectionmatrix.setToIdentity();
+    m_projectionmatrix.frustum(-x, x, -ZoomFactor, ZoomFactor, 4.0, 1000.0);
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
@@ -2501,4 +2532,121 @@ void GLWidget::DisableNodePicker()
 {
     NodePicking = 0;
     PrintPickedNodeName = 0;
+}
+
+/* Reference model loading, create buffer object and vertex array object */
+bool GLWidget::LoadRefMesh(QString filename)
+{
+    QVector <float> verts;
+
+    //Load OBJ file
+    if(this->LoadObj(filename, verts))
+    {
+        verts_size = verts.size();
+
+        //Create buffer object
+        if(buffer.size()>0) buffer.destroy();
+        buffer.create();
+        buffer.bind();
+        buffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+        buffer.allocate(verts.constData(), verts.size()*sizeof(GLfloat));
+
+        //Create vertex array object
+        if(VAO.isCreated()) VAO.destroy();
+        VAO.create();
+        VAO.bind();
+
+        QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+        buffer.bind();
+        f->glEnableVertexAttribArray(0);
+        f->glEnableVertexAttribArray(1);
+        f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+        f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+        buffer.release();
+        VAO.release();
+    }
+}
+
+/* Load vertices, normals and faces from OBJ file and store in QVector */
+bool GLWidget::LoadObj(QString filename, QVector<float> &vertices)
+{
+    QVector <QVector <float> > tempvertices;
+    QVector <QVector <float> > tempnormals;
+
+    QFileInfo fileinfo(filename);
+    if(fileinfo.exists())
+    {
+        QFile file(filename);
+        if(file.open(QIODevice::ReadOnly))
+        {
+            QString contents = file.readAll();
+            file.close();
+
+            QStringList rows = contents.split("\n");
+            for(int i=0; i<rows.size(); i++)
+            {
+                QRegExp separator(" +");
+                QStringList row = rows.at(i).split(separator);
+                if((row.at(0) == "v") && (row.length()>=4))
+                {
+                    QVector <float> vertex;
+                    vertex.append(row.at(1).toFloat());
+                    vertex.append(row.at(3).toFloat());
+                    vertex.append(row.at(2).toFloat());
+                    tempvertices.append(vertex);
+                }
+                else if((row.at(0) == "vn") && (row.length()==4))
+                {
+                    QVector <float> normal;
+                    normal.append(row.at(1).toFloat());
+                    normal.append(row.at(3).toFloat());
+                    normal.append(row.at(2).toFloat());
+                    tempnormals.append(normal);
+                }
+                else if((row.at(0) == "f") && (row.length()>=4))
+                {
+                    QStringList tempface;
+                    for(int i2=1; i2<4;i2++)
+                    {
+                        int textcoord = row.at(i2).indexOf("/");
+                        if(textcoord >= 0)
+                        {
+                            QString temp;
+                            for(int i3=0; i3<row.at(i2).length();i3++)
+                            {
+                                if(row.at(i2).at(i3) == '/') break;
+                                else temp.append(row.at(i2).at(i3));
+                            }
+                            tempface.append(temp);
+                        }
+                    }
+                    if(tempface.size() == 3)
+                    {
+
+                        QString temp = tempface.at(0);
+                        tempface[0]=tempface.at(1);
+                        tempface[1]=temp;
+
+                        for(int i2=0; i2<tempface.size(); i2++)
+                        {
+                            int vertexloc = tempface.at(i2).toInt()-1;
+                            if((vertexloc<tempvertices.size()) && (vertexloc>-1))
+                            {
+                                vertices.append(tempvertices.at(vertexloc).at(0));
+                                vertices.append(tempvertices.at(vertexloc).at(1));
+                                vertices.append(tempvertices.at(vertexloc).at(2));
+                                vertices.append(1);
+                                vertices.append(0);
+                                vertices.append(0);
+                            }
+                        }
+                    }
+
+                }
+            }
+            return true;
+        }
+        else return false;
+    }
+    else return false;
 }

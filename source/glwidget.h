@@ -46,14 +46,20 @@
 #include <QVector4D>
 #include <QGLBuffer>
 
+#include <QOpenGLShaderProgram>
+#include <QOpenGLFunctions>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLBuffer>
+
 class GLWidgetOrtho;
 
-class GLWidget : public QGLWidget
+class GLWidget : public QGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
 
 public:
-    GLWidget(QWidget *parent = 0);
+    GLWidget(QGLContext *context, QWidget *parent = 0,
+       const QGLWidget *shareWidget = 0, Qt::WindowFlags f = 0);
     ~GLWidget();
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
@@ -78,6 +84,8 @@ public:
 
     bool ShowNodeNumbers;
     bool ShowNodeNumbers1; //Shows actual ID's, for RoR
+
+    bool DrawTris;
 
     int MovingNodes;
     int ScalingNodes;
@@ -125,12 +133,6 @@ public:
     bool Select_AddToSelection;
     bool ManipulateByStep;
 
-    //Dae loading
-    void LoadDae();
-
-    //Buffer object for model
-    QGLBuffer mesh;
-
     //New system to add any JBEAM content type that depends of nodes
     int AddingJbeam;
     int AddingJbeam_id;
@@ -142,6 +144,9 @@ public:
     void EnableNodePicker();
 
     int HighlightNode;
+
+    float MeshOpacity;
+    bool LoadRefMesh(QString filename);
 
 public slots:
     void setXRotation(int angle);
@@ -209,6 +214,22 @@ private:
     void Draw3DCursor_Picking(int Mode); //Mode 0 = move, 1 = scale, 2 = rotate
     void DrawRectSelect();
     void GetViewMatrices(QMatrix4x4 * ModelviewMatrix, QMatrix4x4 * ProjectionMatrix);
+
+    //Mesh loading
+    void LoadDae();
+    bool LoadObj(QString filename, QVector <float> &vertices);
+
+    //Buffer object for model
+    QGLBuffer mesh;
+
+    //Reference mesh
+    QOpenGLShaderProgram * ShaderProgram;
+    QMatrix4x4 m_projectionmatrix, m_worldmatrix, m_viewmatrix, m_camera;
+    int m_projectionmatrixloc, m_normalMatrixLoc, m_lightPosLoc, m_mvmatrixloc, m_opacityloc;
+
+    QOpenGLVertexArrayObject VAO;
+    QOpenGLBuffer buffer;
+    int verts_size;
 
 };
 
