@@ -3292,6 +3292,15 @@ QByteArray NodeBeam::JBEAM_RemoveComments(QByteArray JbeamText)
     for(int i=0; i<JbeamTextSTR.length(); i++)
     {
         if(JbeamTextSTR[i] == '/') commentcheck++;
+        else if((JbeamTextSTR.at(i) == '*') && (commentcheck == 1))
+        {
+            int i2;
+            for(i2=i; i2<JbeamTextSTR.length()-1;i2++)
+            {
+                if(( JbeamTextSTR.at(i2)=='*' ) && ( JbeamTextSTR.at(i2+1)=='/' )) break;
+            }
+            JbeamTextSTR.replace(i-1,i2-i+1,' ');
+        }
         else commentcheck = 0;
         if(commentcheck==2)
         {

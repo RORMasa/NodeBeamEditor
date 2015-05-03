@@ -15,12 +15,16 @@
 #include "settings.h"
 #include "blueprints.h"
 
+#define VERSION "0.35"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     /* About box : Version and compliation time , link to GitHub */
-    AboutBox = "<br><br><br><b>Version: 0.35</b><br><br>Built on ";
+    AboutBox = "<br><br><br><b>Version: ";
+    AboutBox.append(VERSION);
+    AboutBox.append("</b><br><br>Built on ");
     AboutBox.append(__DATE__);
     AboutBox.append(", ");
     AboutBox.append(__TIME__);
