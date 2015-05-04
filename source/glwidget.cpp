@@ -2438,9 +2438,18 @@ void GLWidget::keyPressEvent(QKeyEvent * event)
     {
         ManipulateByStep=1;
     }
+    else if(event->key() == Qt::Key_Shift)
+    {
+        this->Select_AddToSelection = 1;
+    }
+}
 
-
-
+void GLWidget::keyReleaseEvent(QKeyEvent * event)
+{
+    if(event->key() == Qt::Key_Shift)
+    {
+            this->Select_AddToSelection = 0;
+    }
 }
 
 /* Get projection and model view matrix as transposed */
