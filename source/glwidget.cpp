@@ -2279,7 +2279,7 @@ QVector4D GLWidget::RayTraceVector(int MouseX, int MouseY)
     /* Calculate mouse position in actual scene 3D coordinates
         with the inverse matrixes */
     MousePos = inverse_projection*MousePos;
-    MousePos = inverse_modelview*MousePos*7.465;
+    MousePos = inverse_modelview*MousePos*7.965;
 
     /* Calculate the ray trace vector */
     QVector4D RayTraceVector = MousePos - CameraPos;

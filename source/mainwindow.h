@@ -69,6 +69,8 @@ public:
 
     bool *TexboxOutdated;
 
+    void OpenJBEAM_cmdargument(QString fileName);
+
 public slots:
     void MainNodeBeamUpdated();
     void SettingsUpdated();
@@ -345,14 +347,14 @@ private:
 
     QString EditorTitle;
 
+    //Path to active working JBEAM file
+    QString JBEAM_Filepath;
+
     //File name of previously ran script
     QString LastScript;
 
     //Empty JBEAM text template
     QString EmptyJbeamTextTemplate;
-
-    //Path to active working JBEAM file
-    QString JBEAM_Filepath;
 
     //Toolbox current index
     int ListType_id;

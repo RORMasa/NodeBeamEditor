@@ -1185,6 +1185,50 @@ void MainWindow::on_actionReload_triggered()
     MainNodeBeamUpdated();
 }
 
+/* Open file that was passed as command line argument */
+void MainWindow::OpenJBEAM_cmdargument(QString fileName)
+{
+    if (!fileName.isEmpty())
+    {
+        QFile file(fileName);
+        if (!file.open(QFile::ReadOnly | QFile::Text)) {
+            QMessageBox msgBox;
+            msgBox.setText("Error opening file.");
+            msgBox.exec();
+        }
+        else
+        {
+            QTextStream in(&file);
+
+            #ifndef QT_NO_CURSOR
+                QApplication::setOverrideCursor(Qt::WaitCursor);
+            #endif
+
+            QString FileContents = in.readAll();
+
+
+            #ifndef QT_NO_CURSOR
+                QApplication::restoreOverrideCursor();
+            #endif
+            file.close();
+
+            //Put file contents in JBEAM TextBox
+            JBEAMtextbox->setPlainText(FileContents);
+            JBEAM_ParseTextEdit();
+
+            QStringList filepath = fileName.split('\\');
+            QString title = filepath.last() + " - " + EditorTitle;
+            setWindowTitle(title);
+
+            JBEAM_Filepath = fileName;
+            ui->actionReload->setEnabled(true);
+
+        }
+    }
+
+    MainNodeBeamUpdated();
+}
+
 /* Import nodes and beams from Wavefront OBJ file */
 void MainWindow::on_actionImport_OBJ_triggered()
 {

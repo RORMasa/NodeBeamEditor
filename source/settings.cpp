@@ -13,7 +13,8 @@ settings::settings(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    appsett = new QSettings ("editor.ini", QSettings::IniFormat);
+    QString path = qApp->applicationDirPath() + "/editor.ini";
+    appsett = new QSettings (path, QSettings::IniFormat);
     ui->lineEdit->setText(appsett->value("author").toString());
     ui->lineEdit_2->setText(appsett->value("beamnglocation").toString());
     ui->lineEdit_3->setText(appsett->value("currentvehicle").toString());

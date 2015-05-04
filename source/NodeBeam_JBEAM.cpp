@@ -11,7 +11,8 @@ void NodeBeam::Load_ListTypes()
     qDebug() << "Loading JBEAM List types";
 
     QDir jbeamfolder;
-    jbeamfolder.current();
+    QString path = qApp->applicationDirPath();
+    jbeamfolder.cd(path);
     jbeamfolder.cd(tr("jbeam"));
 
     QStringList filters;
