@@ -1537,6 +1537,31 @@ QTabWidget::tab-bar {
             <enum>Qt::ToolButtonTextUnderIcon</enum>
            </property>
           </widget>
+          <widget class="QToolButton" name="toolButton_35">
+           <property name="geometry">
+            <rect>
+             <x>60</x>
+             <y>0</y>
+             <width>71</width>
+             <height>101</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Flip</string>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>60</width>
+             <height>60</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
          </widget>
          <widget class="QWidget" name="tab_4">
           <attribute name="title">
@@ -2625,6 +2650,7 @@ QTabWidget::tab-bar {
     <addaction name="separator"/>
     <addaction name="actionImport_Rigs_of_Rods"/>
     <addaction name="actionImport_OBJ"/>
+    <addaction name="actionImport_reference_model_from_OBJ"/>
     <addaction name="separator"/>
     <addaction name="actionExport_to_Rigs_of_Rods"/>
     <addaction name="separator"/>
@@ -2739,7 +2765,7 @@ QTabWidget::tab-bar {
   </action>
   <action name="actionImport_OBJ">
    <property name="text">
-    <string>Import Wavefront OBJ ...</string>
+    <string>Import nodes and beams from OBJ ...</string>
    </property>
   </action>
   <action name="actionSettings">
@@ -2781,6 +2807,11 @@ QTabWidget::tab-bar {
    </property>
    <property name="text">
     <string>Reload JBEAM</string>
+   </property>
+  </action>
+  <action name="actionImport_reference_model_from_OBJ">
+   <property name="text">
+    <string>Import reference mesh from OBJ ...</string>
    </property>
   </action>
  </widget>

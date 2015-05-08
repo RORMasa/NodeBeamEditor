@@ -2200,7 +2200,16 @@ void NodeBeam::SelectNodes3D(QVector4D RectSel_1V, QVector4D RectSel_2V,
                 {
                     if(DotProduct4 < 0)
                     {
-                        SelectedNodes.append(Nodes.at(i).GlobalID);
+                        bool selected = 0;
+                        for(int i2=0; i2<SelectedNodes.size(); i2++)
+                        {
+                            if(SelectedNodes.at(i2) == Nodes.at(i).GlobalID)
+                            {
+                                selected = 1;
+                                break;
+                            }
+                        }
+                        if(!selected) SelectedNodes.append(Nodes.at(i).GlobalID);
                     }
                 }
             }
@@ -2213,7 +2222,16 @@ void NodeBeam::SelectNodes3D(QVector4D RectSel_1V, QVector4D RectSel_2V,
                 {
                     if(DotProduct4 > 0)
                     {
-                        SelectedNodes.append(Nodes.at(i).GlobalID);
+                        bool selected = 0;
+                        for(int i2=0; i2<SelectedNodes.size(); i2++)
+                        {
+                            if(SelectedNodes.at(i2) == Nodes.at(i).GlobalID)
+                            {
+                                selected = 1;
+                                break;
+                            }
+                        }
+                        if(!selected) SelectedNodes.append(Nodes.at(i).GlobalID);
                     }
                 }
             }

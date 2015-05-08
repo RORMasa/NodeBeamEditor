@@ -106,6 +106,8 @@ GLWidget::GLWidget(QGLContext *context, QWidget *parent,
     ScalingNodes=0;
     RotatingNodes=0;
 
+    TrianglePicking=0;
+
 
 }
 
@@ -493,6 +495,76 @@ void GLWidget::drawpicking()
 
 }
 
+void GLWidget::drawpicking_triangle()
+{
+    glDisable(GL_LIGHTING);
+    glDisable (GL_BLEND);
+    glDisable(GL_MULTISAMPLE);
+    glDisable(GL_TEXTURE_2D);
+
+    for(int i2=0; i2<NBPointer->ListTypes.size();i2++)
+    {
+        //Draw triangles
+        if((NBPointer->ListTypes.at(i2).drawtype == 3) && DrawTris)
+        {
+            glEnable(GL_DEPTH_TEST);
+            glBegin(GL_TRIANGLES);
+
+            float conv = 1.0f/255.0f;
+
+            for(int i=0; i<NBPointer->ListTypes.at(i2).contaier.size();i++)
+            {
+                //Draw each triangle with unique color
+                int red = (i & 0x0000ff);
+                int green = (i & 0x00ff00) >> 8;
+                //qDebug() << "varit ovat " << red << ", " << green;
+                glColor3f(conv*red, conv*green, conv*i2);
+
+                int nodeid = NBPointer->ListTypes.at(i2).contaier.at(i).at(NBPointer->ListTypes.at(i2).draworder.at(0));
+                int nodeid1 = NBPointer->ListTypes.at(i2).contaier.at(i).at(NBPointer->ListTypes.at(i2).draworder.at(1));
+                int nodeid2 = NBPointer->ListTypes.at(i2).contaier.at(i).at(NBPointer->ListTypes.at(i2).draworder.at(2));
+
+                glVertex3f(NBPointer->Nodes.at(nodeid).locX,NBPointer->Nodes.at(nodeid).locY,NBPointer->Nodes.at(nodeid).locZ);
+                glVertex3f(NBPointer->Nodes.at(nodeid1).locX,NBPointer->Nodes.at(nodeid1).locY,NBPointer->Nodes.at(nodeid1).locZ);
+                glVertex3f(NBPointer->Nodes.at(nodeid2).locX,NBPointer->Nodes.at(nodeid2).locY,NBPointer->Nodes.at(nodeid2).locZ);
+
+                glVertex3f(NBPointer->Nodes.at(nodeid).locX,NBPointer->Nodes.at(nodeid).locY,NBPointer->Nodes.at(nodeid).locZ);
+                glVertex3f(NBPointer->Nodes.at(nodeid2).locX,NBPointer->Nodes.at(nodeid2).locY,NBPointer->Nodes.at(nodeid2).locZ);
+                glVertex3f(NBPointer->Nodes.at(nodeid1).locX,NBPointer->Nodes.at(nodeid1).locY,NBPointer->Nodes.at(nodeid1).locZ);
+            }
+            glEnd();
+        }
+    }
+
+
+    GLubyte pixel[3];
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT,viewport);
+
+    //glReadPixels(cursorX,viewport[3]-cursorY,1,1,GL_RGB,GL_UNSIGNED_BYTE,(void *)pixel);
+    glReadPixels(lastPos.x(), viewport[3]-lastPos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, (void *) pixel);
+    //qDebug() << pixel[0] << ", " << pixel[1] << "," << pixel[2];
+
+    if(pixel[2]<NBPointer->ListTypes.size())
+    {
+        int green = pixel[1];
+        green = green << 8;
+        int color = green + pixel[0];
+
+        if(color<NBPointer->ListTypes.at(pixel[2]).contaier.size())
+        {
+            qDebug() << "Selection is " << color;
+        }
+
+    }
+
+    glEnable(GL_LIGHTING);
+    glEnable (GL_BLEND);
+    glEnable(GL_MULTISAMPLE);
+    glEnable(GL_TEXTURE_2D);
+
+}
+
 /* Rendering node names next of nodes */
 void GLWidget::RenderTextInScene(bool names)
 {
@@ -763,7 +835,7 @@ void GLWidget::paintGL()
     glClearColor(backgroundcolor.at(0), backgroundcolor.at(1), backgroundcolor.at(2), backgroundcolor.at(3));
 
     /* Render picking colors in buffer and check what should be picked */
-    if(NodePicking || (MovingNodes > 0) || (ScalingNodes > 0) || (RotatingNodes > 0))
+    if(NodePicking || TrianglePicking || (MovingNodes > 0) || (ScalingNodes > 0) || (RotatingNodes > 0))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glLoadIdentity();
@@ -773,6 +845,7 @@ void GLWidget::paintGL()
         //glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
         glTranslatef(ViewOffsetX, ViewOffsetY, ViewOffsetZ); //Move 3D view around
         if(NodePicking) drawpicking(); //Draw nodes in buffer, each with individual color
+        else if(TrianglePicking) drawpicking_triangle();
         else if(MovingNodes >0) Draw3DCursor_Picking(0); //Draw move 3D cursor in buffer and check
         else if(ScalingNodes >0) Draw3DCursor_Picking(1); //Draw scale 3D cursor in buffer and check
         else if(RotatingNodes > 0) Draw3DCursor_Picking(2); //Draw rotate 3D cursor in buffer and check
@@ -2450,6 +2523,10 @@ void GLWidget::keyReleaseEvent(QKeyEvent * event)
     {
             this->Select_AddToSelection = 0;
     }
+    else if(event->key() == Qt::Key_Control)
+    {
+        ManipulateByStep=0;
+    }
 }
 
 /* Get projection and model view matrix as transposed */
@@ -2594,6 +2671,7 @@ bool GLWidget::LoadObj(QString filename, QVector<float> &vertices)
             QStringList rows = contents.split("\n");
             for(int i=0; i<rows.size(); i++)
             {
+                rows[i] = rows.at(i).simplified();
                 QRegExp separator(" +");
                 QStringList row = rows.at(i).split(separator);
                 if((row.at(0) == "v") && (row.length()>=4))
@@ -2602,6 +2680,7 @@ bool GLWidget::LoadObj(QString filename, QVector<float> &vertices)
                     vertex.append(row.at(1).toFloat());
                     vertex.append(row.at(3).toFloat());
                     vertex.append(row.at(2).toFloat());
+                    vertex[1] = -vertex.at(1);
                     tempvertices.append(vertex);
                 }
                 else if((row.at(0) == "vn") && (row.length()==4))
@@ -2612,10 +2691,16 @@ bool GLWidget::LoadObj(QString filename, QVector<float> &vertices)
                     normal.append(row.at(2).toFloat());
                     tempnormals.append(normal);
                 }
-                else if((row.at(0) == "f") && (row.length()>=4))
+            }
+
+            for(int i=0; i<rows.size(); i++)
+            {
+                QRegExp separator(" +");
+                QStringList row = rows.at(i).split(separator);
+                if((row.at(0) == "f") && (row.length()>=4))
                 {
                     QStringList tempface;
-                    for(int i2=1; i2<4;i2++)
+                    for(int i2=1; i2<row.length();i2++)
                     {
                         int textcoord = row.at(i2).indexOf("/");
                         if(textcoord >= 0)
@@ -2628,14 +2713,11 @@ bool GLWidget::LoadObj(QString filename, QVector<float> &vertices)
                             }
                             tempface.append(temp);
                         }
+                        else tempface.append(row.at(i2));
                     }
                     if(tempface.size() == 3)
                     {
-
-                        QString temp = tempface.at(0);
-                        tempface[0]=tempface.at(1);
-                        tempface[1]=temp;
-
+                        //it is a triangle
                         for(int i2=0; i2<tempface.size(); i2++)
                         {
                             int vertexloc = tempface.at(i2).toInt()-1;
@@ -2650,7 +2732,45 @@ bool GLWidget::LoadObj(QString filename, QVector<float> &vertices)
                             }
                         }
                     }
+                    else if(tempface.size() >= 4)
+                    {
+                        //Turn quad to two triangles
+                        QStringList face1, face2;
+                        face1.append(tempface.at(0));
+                        face1.append(tempface.at(1));
+                        face1.append(tempface.at(2));
+                        face2.append(tempface.at(0));
+                        face2.append(tempface.at(2));
+                        face2.append(tempface.at(3));
 
+                        for(int i2=0; i2<face1.size(); i2++)
+                        {
+                            int vertexloc = face1.at(i2).toInt()-1;
+                            if((vertexloc<tempvertices.size()) && (vertexloc>-1))
+                            {
+                                vertices.append(tempvertices.at(vertexloc).at(0));
+                                vertices.append(tempvertices.at(vertexloc).at(1));
+                                vertices.append(tempvertices.at(vertexloc).at(2));
+                                vertices.append(1);
+                                vertices.append(0);
+                                vertices.append(0);
+                            }
+                        }
+
+                        for(int i2=0; i2<face2.size(); i2++)
+                        {
+                            int vertexloc = face2.at(i2).toInt()-1;
+                            if((vertexloc<tempvertices.size()) && (vertexloc>-1))
+                            {
+                                vertices.append(tempvertices.at(vertexloc).at(0));
+                                vertices.append(tempvertices.at(vertexloc).at(1));
+                                vertices.append(tempvertices.at(vertexloc).at(2));
+                                vertices.append(1);
+                                vertices.append(0);
+                                vertices.append(0);
+                            }
+                        }
+                    }
                 }
             }
             return true;

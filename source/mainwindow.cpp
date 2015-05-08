@@ -3279,6 +3279,37 @@ bool MainWindow::FindBeamContainer(QString JBEAM_box, QString beam, int &Begin, 
     else return false;
 }
 
+bool MainWindow::JBEAM_FindOtherContainer(QString JBEAM_box, QString listtype, int &Begin, int &End)
+{
+    QString pattern = "\"" + listtype + "\"\\s*:\\s*\\[";
+    QRegExp re_container;
+    re_container.setPattern(pattern);
+
+    Begin = JBEAM_box.indexOf(re_container);
+    int i=Begin;
+    for(i; i<JBEAM_box.length(); i++)
+    {
+        if(JBEAM_box.at(i) == '[') break;
+    }
+    Begin = i;
+    int level = 1;
+    i++;
+    qDebug() << JBEAM_box.at(i);
+    for(i; i<JBEAM_box.length(); i++)
+    {
+        if(JBEAM_box.at(i) == '[') level++;
+        else if(JBEAM_box.at(i) == ']') level--;
+        if(level < 1)
+        {
+            qDebug() << "stop" << i;
+            break;
+        }
+    }
+    End = i;
+
+    return true;
+}
+
 /*
 bool MainWindow::FindListTypeContainer(QString JBEAM_box, QString beam, int &Begin, int &End, bool FindComma,int &RealEnd)
 {
@@ -3408,6 +3439,19 @@ void MainWindow::JBEAM_UpdateCursors(QString JBEAM_box)
 void MainWindow::on_JBEAM_textChanged()
 {
     JBEAM_UpdateCursors(JBEAMtextbox->toPlainText());
+
+
+    /* testing
+    int begin, end, length = 0;
+    QString text = JBEAMtextbox->toPlainText();
+    length = text.length();
+    JBEAM_FindOtherContainer(text,tr("triangles"),begin, end);
+    text = text.left(length-(length-end));
+    text = text.right(text.length()-begin);
+    qDebug() << text;
+    */
+
+
 }
 
 
@@ -3611,6 +3655,18 @@ void MainWindow::on_toolButton_17_clicked()
     }
     else glWidgetViews[0]->AddingJbeam_Disable();
 }
+//Flip collision triangles
+void MainWindow::on_toolButton_35_clicked()
+{
+    if(ui->toolButton_35->isChecked())
+    {
+
+    }
+    else
+    {
+
+    }
+}
 
 //User has selected tool from custom toolbox
 void MainWindow::on_listWidget_2_itemActivated(QListWidgetItem *item)
@@ -3714,12 +3770,25 @@ void MainWindow::RefreshGLViews()
     }
 }
 
+/* Load reference mesh from OBJ file */
 void MainWindow::on_toolButton_33_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this);
     if (!fileName.isEmpty())
     {
         qDebug() << fileName;
+        for(int i=0; i<1; i++)
+        {
+            glWidgetViews[i]->LoadRefMesh(fileName);
+            glWidgetViews[i]->updateGL();
+        }
+    }
+}
+void MainWindow::on_actionImport_reference_model_from_OBJ_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this);
+    if (!fileName.isEmpty())
+    {
         for(int i=0; i<1; i++)
         {
             glWidgetViews[i]->LoadRefMesh(fileName);

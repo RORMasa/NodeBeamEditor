@@ -293,6 +293,10 @@ private slots:
 
     void on_toolButton_33_clicked();
 
+    void on_toolButton_35_clicked();
+
+    void on_actionImport_reference_model_from_OBJ_triggered();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
@@ -333,6 +337,7 @@ private:
     //Find JBEAM node or beam from string
     bool FindNodeContainer(QString JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd, bool FindComma, int &RealNodeEnd);
     bool FindBeamContainer(QString JBEAM_box, QString beam, int &Begin, int &End, bool FindComma,int &RealEnd);
+    bool JBEAM_FindOtherContainer(QString JBEAM_box, QString listtype, int &Begin, int &End);
 
     void JBEAM_UpdateCursors(QString JBEAM_box);
     //Node JBEAM cursor; if is set, add new nodes at cursor position. Value is -1 if not set

@@ -71,6 +71,7 @@ public:
     int AddingWheels;
 
     bool NodePicking;
+    bool TrianglePicking;
     bool ShowArrows;
     bool BeamSuggestion;
 
@@ -170,6 +171,7 @@ signals:
 protected:
     void draw();
     void drawpicking();
+    void drawpicking_triangle();
     void RenderTextInScene(bool names);
     void initializeGL();
     void paintGL();
