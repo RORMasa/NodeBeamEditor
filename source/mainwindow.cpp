@@ -436,6 +436,7 @@ void MainWindow::on_actionExport_to_BeamNG_triggered()
     QString fileName = QFileDialog::getSaveFileName(this, "Export to JBeam",QDir::currentPath(),"BeamNG file (*.jbeam);;All files (*.*)",0,QFileDialog::DontUseNativeDialog);
     if (!fileName.isEmpty())
     {
+        JBEAM_UpdateAllNodes();
         Timer.start();
         //CurrentNodeBeam->ExportBeamNG(fileName);
 
@@ -452,7 +453,7 @@ void MainWindow::on_actionExport_to_BeamNG_triggered()
         int result = Timer.elapsed();
         QString resultt = "File exporting finished in ";
         resultt.append(QString::number(result));
-        resultt.append(" ms !");
+        resultt.append(" ms.");
         ui->statusBar->showMessage(resultt,10000);
     }
 }
@@ -463,12 +464,14 @@ void MainWindow::on_actionSave_triggered()
     QString fileName = JBEAM_Filepath;
     if ((!fileName.isEmpty() && (ui->actionReload->isEnabled())))
     {
+        JBEAM_UpdateAllNodes();
         if(CurrentNodeBeam->JBEAM_SaveAs(fileName,JBEAMtextbox->toPlainText()))
         {
             QString resultt = "JBEAM saved ";
             ui->statusBar->showMessage(resultt,10000);
         }
     }
+    else on_actionExport_to_BeamNG_triggered();
 }
 
 /* File menu / Export to RoR triggered */
