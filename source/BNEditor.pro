@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui webkitwidgets
 QT       += opengl
 #QT       += testlib
 
@@ -32,7 +32,8 @@ SOURCES += main.cpp\
         NodeBeam_LUA.cpp \
         NodeBeam_JBEAM.cpp \
         blueprints.cpp \
-        colladadae.cpp
+        colladadae.cpp \
+        htmlinputdialog.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -44,7 +45,8 @@ HEADERS  += mainwindow.h \
     settings.h \
     NodeBeam.h \
     blueprints.h \
-    colladadae.h
+    colladadae.h \
+    htmlinputdialog.h
 
 
 FORMS    += mainwindow.ui \
@@ -52,7 +54,8 @@ FORMS    += mainwindow.ui \
     inputdialog.ui \
     beamdefaultsdialog.ui \
     settings.ui \
-    blueprints.ui
+    blueprints.ui \
+    htmlinputdialog.ui
 
 RESOURCES += \
     icons.qrc

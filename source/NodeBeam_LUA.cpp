@@ -29,6 +29,9 @@ void NodeBeam::RunLUAScript(QString filename)
             .addFunction("GetNodei", &NodeBeam::LuaGetNodei)
             .addFunction("GetNodeCount", &NodeBeam::LuaGetNodeCount)
             .addFunction("GetNodes", &NodeBeam::LuaGetAllNodes)
+            .addFunction("GetJbeamText", &NodeBeam::LuaGetJbeamtext)
+            .addFunction("SetJbeamText", &NodeBeam::LuaSetJbeamtext)
+            .addFunction("InputValue", &NodeBeam::LuaInputValue)
             .endClass();
 
     //Link this nodebeam object to Lua
@@ -173,19 +176,37 @@ int NodeBeam::LuaGetNodeCount()
     return Nodes.size();
 }
 
-/*
 //Get contents of JBEAM textbox in Lua.
 LuaRef NodeBeam::LuaGetJbeamtext()
 {
-
+    LuaRef text = newTable(L);
+    emit LUA_getJbeamText();
+    text["jbeam"] = this->Lua_Jbeamtext.toStdString();
+    return text;
 }
 
-//Set contents in JBEAM textbox from Lua
-LuaRef NodeBeam::LiaSetJbeamtext(std::strng text)
+//Set contents of JBEAM textbox in Lua.
+void NodeBeam::LuaSetJbeamtext(const std::string text)
 {
-
+    emit LUA_setJbeamText(QString::fromStdString(text));
 }
-*/
+
+//Get input value from user
+LuaRef NodeBeam::LuaInputValue(const std::string htmlfile)
+{
+    emit LUA_HtmlInputDialog(QString::fromStdString(htmlfile));
+
+    LuaRef value = newTable(L);
+    if(this->Lua_InputDialogResult.size()>0)
+    {
+        for(int i=0; i<Lua_InputDialogResult.size();i++)
+        {
+            value[Lua_InputDialogResult.at(i).at(0).toStdString()] = Lua_InputDialogResult.at(i).at(1).toStdString();
+        }
+    }
+    return value;
+}
+
 
 /* == Comments class == */
 Comments::Comments()

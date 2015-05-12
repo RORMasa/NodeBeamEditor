@@ -387,10 +387,18 @@ public:
     luabridge::LuaRef LuaGetNodei(int i);
     luabridge::LuaRef LuaGetAllNodes();
     int LuaGetNodeCount();
+    luabridge::LuaRef LuaGetJbeamtext();
+    void LuaSetJbeamtext(const std::string text);
+    luabridge::LuaRef LuaInputValue(const std::string htmlfile);
+
+    //Result of html input dialog will be returned here for lua
+    QList <QStringList> Lua_InputDialogResult;
 
     //Comments that are added to JBEAM from Lua script.
     Comments LuaComments;
     bool LuaComment;
+
+    QString Lua_Jbeamtext;
 
     /* 3D Editing */
     //Calculate the middle point of selected nodes
@@ -408,6 +416,9 @@ public:
 signals:
     //Write a message to scipts tab's logging textbox from LUA script.
     void LUA_log(QString msg);
+    void LUA_getJbeamText();
+    void LUA_setJbeamText(QString text);
+    void LUA_HtmlInputDialog(QString htmlfile);
 
 private:
 

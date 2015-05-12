@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Generate chassis</title>
+	
+	<!-- Bootstrap -->
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<script src="js/bootstrap.min.js"></script>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+</head>
+<body>
+<form method="GET" action="chassis.html">
+	<div class="container luaform">  
+	<h2>Generate chassis</h2>
+	<div class="row">
+		<div class="col-xs-6">
+			<div class="form-group">
+				<label>Segments</label>
+				<input type="text" name="segments" class="form-control">
+			</div>
+		</div>
+		<div class="col-xs-6">
+			<div class="form-group">
+				<label>Length (m)</label>
+				<input type="text" name="length" class="form-control">
+			</div>	
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-6">
+			<div class="form-group">
+				<label>Width (m)</label>
+				<input type="text" name="width" class="form-control">
+			</div>
+		</div>
+		<div class="col-xs-6">
+			<div class="form-group">
+				<label>Height (m)</label>
+				<input type="text" name="height" class="form-control">
+			</div>
+		</div>
+	</div>	
+	
+	<div class="row">
+		<div class="col-xs-12">
+			<div class="form-group">
+				<label>Node name prefix</label>
+				<input type="text" name="prefix" class="form-control">
+			</div>
+		</div>
+	</div>	
+	<input type="submit" value="Generate chassis" class="btn btn-primary">
+</div>
+</form>
+</body>
+</html>

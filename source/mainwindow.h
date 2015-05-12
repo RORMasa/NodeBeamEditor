@@ -3,13 +3,15 @@
 #include <QMainWindow>
 #include <QWidget>
 #include <QListWidgetItem>
-#include "NodeBeam.h"
 #include <QTreeWidget>
-#include "beamdefaultsdialog.h"
-#include "settings.h"
 #include <QTime>
 #include <QLabel>
 #include <QPlainTextEdit>
+
+#include "NodeBeam.h"
+#include "beamdefaultsdialog.h"
+#include "settings.h"
+#include "htmlinputdialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -86,6 +88,9 @@ public slots:
     void AdjustBlueprint(int WidgetID);
     void LUA_message(QString msg);
     void PrintNodePicked(int node_id);
+    void LUA_JBEAM_Get(); //Returns jbeam textbox contents
+    void LUA_JBEAM_Set(QString text);
+    void htmlinputdialog(QString html);
 
 signals:
     void ZoomChanged();

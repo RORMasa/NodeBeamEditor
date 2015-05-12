@@ -97,6 +97,9 @@ MainWindow::MainWindow(QWidget *parent) :
     //Active working file
     CurrentNodeBeam = new NodeBeam;
     QObject::connect(CurrentNodeBeam,SIGNAL(LUA_log(QString)),this,SLOT(LUA_message(QString)));
+    QObject::connect(CurrentNodeBeam,SIGNAL(LUA_getJbeamText()),this,SLOT(LUA_JBEAM_Get()));
+    QObject::connect(CurrentNodeBeam,SIGNAL(LUA_setJbeamText(QString)),this,SLOT(LUA_JBEAM_Set(QString)));
+    QObject::connect(CurrentNodeBeam,SIGNAL(LUA_HtmlInputDialog(QString)),this,SLOT(htmlinputdialog(QString)));
 
     //Link nodebeam to glwidgets
     for(int i=0; i<2; i++)
@@ -3798,4 +3801,25 @@ void MainWindow::on_actionImport_reference_model_from_OBJ_triggered()
             glWidgetViews[i]->updateGL();
         }
     }
+}
+
+//Send jbeamtextbox contents to lua
+void MainWindow::LUA_JBEAM_Get()
+{
+    QString jbeamtext = this->JBEAMtextbox->toPlainText();
+    CurrentNodeBeam->Lua_Jbeamtext = jbeamtext;
+}
+
+//Set jbeamtextbox contents from lua
+void MainWindow::LUA_JBEAM_Set(QString text)
+{
+    this->JBEAMtextbox->setPlainText(text);
+}
+
+/* Get values from WebView inputdialog */
+void MainWindow::htmlinputdialog(QString html)
+{
+    HtmlInputDialog dialog(this,html);
+    dialog.exec();
+    CurrentNodeBeam->Lua_InputDialogResult = dialog.result;
 }
