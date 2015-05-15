@@ -2640,6 +2640,8 @@ QTabWidget::tab-bar {
      <string>File</string>
     </property>
     <addaction name="actionNew"/>
+    <addaction name="actionNew_JBEAM"/>
+    <addaction name="actionClose"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSave_As"/>
     <addaction name="separator"/>
@@ -2678,8 +2680,18 @@ QTabWidget::tab-bar {
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionJBEAM"/>
+    <addaction name="actionNode"/>
+    <addaction name="actionBeams"/>
+    <addaction name="actionScript"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
    <addaction name="menuGenerate"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -2812,6 +2824,36 @@ QTabWidget::tab-bar {
   <action name="actionImport_reference_model_from_OBJ">
    <property name="text">
     <string>Import reference mesh from OBJ ...</string>
+   </property>
+  </action>
+  <action name="actionJBEAM">
+   <property name="text">
+    <string>JBEAM</string>
+   </property>
+  </action>
+  <action name="actionNode">
+   <property name="text">
+    <string>Nodes</string>
+   </property>
+  </action>
+  <action name="actionBeams">
+   <property name="text">
+    <string>Beams</string>
+   </property>
+  </action>
+  <action name="actionScript">
+   <property name="text">
+    <string>Script</string>
+   </property>
+  </action>
+  <action name="actionNew_JBEAM">
+   <property name="text">
+    <string>New JBEAM</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="text">
+    <string>Close</string>
    </property>
   </action>
  </widget>

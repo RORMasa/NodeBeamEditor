@@ -2908,10 +2908,10 @@ void NodeBeam::clear()
 }
 
 /* Parse contents of the JBEAM text edit box */
-QJsonParseError NodeBeam::ParseJBEAM_TextEdit(QByteArray JbeamInputText)
+QJsonParseError NodeBeam::ParseJBEAM_TextEdit(QString JbeamTextStr)
 {
-    //Clear the active nodebeam
-    clear();
+    QByteArray JbeamInputText;
+    JbeamInputText.append(JbeamTextStr);
 
     //Remove C style comments
     JbeamInputText = JBEAM_RemoveComments(JbeamInputText);
@@ -3407,6 +3407,120 @@ bool NodeBeam::JBEAM_SaveAs(const QString &fileName, QString JBEAM_Text)
         SaveComplete = 1;
     }
     return SaveComplete;
+}
+
+/* Two phase parsing for multiple JBEAMS in same context */
+//1. Parse nodes of each jbeam
+//2. Parse everything else
+// Part 1
+QJsonParseError NodeBeam::ParseJBEAM_TextEditP1(QString JbeamTextStr)
+{
+    QByteArray JbeamInputText;
+    JbeamInputText.append(JbeamTextStr);
+
+    //Remove C style comments
+    JbeamInputText = JBEAM_RemoveComments(JbeamInputText);
+
+    //Fix commas to make valid JSON
+    JbeamInputText = JBEAM_FixCommas(JbeamInputText);
+
+    //Parse error
+    QJsonParseError JBEAM_ParseError;
+
+    //Parse textbox text to JSON
+    QJsonDocument Jbeam = QJsonDocument::fromJson(JbeamInputText, &JBEAM_ParseError);
+
+    //Error messages
+    qDebug() << "JSON parsing result: " << ", " << JBEAM_ParseError.errorString();
+
+    //Convert Json document to json object
+    QJsonObject JbeamObject = Jbeam.object();
+
+    //qDebug() << "Object is empty:" << Jbeam.object().isEmpty();
+
+    //Parse JSON object, find nodes and beams.
+    if(!JbeamObject.isEmpty())
+    {
+        QList <QJsonObject> Jbeam_slots;
+
+        for(int i=0; i<JbeamObject.keys().length(); i++)
+        {
+            //qDebug() << "Parsing slot " << JbeamObject.keys()[i];
+            QJsonObject JbeamObject_slot;
+            QJsonValue slot = JbeamObject.value(JbeamObject.keys()[i]);
+
+            if(slot.isObject())
+            {
+                JbeamObject_slot = slot.toObject();
+                Jbeam_slots.append(JbeamObject_slot); // Add in list to parse beams later
+                //qDebug() << "Keys in slot: " << JbeamObject_slot.keys();
+
+                //Get nodes from slot
+                QJsonObject::iterator slot_iterator = JbeamObject_slot.find("nodes");
+                if (slot_iterator != JbeamObject_slot.end())
+                {
+                    QJsonArray Jbeam_nodes;
+                    Jbeam_nodes = JbeamObject_slot.value("nodes").toArray();
+                    qDebug() << "nodes found " << Jbeam_nodes.count();
+                    JBEAM_ParseNodesArray(Jbeam_nodes);
+
+                }
+            }
+        }
+
+        JbeamParsingTemp.append(Jbeam_slots);
+    }
+    else qDebug() << "JBEAM object not found.";
+
+    if((JBEAM_ParseError.offset > 0) && (JBEAM_ParseError.offset < JbeamInputText.length()))
+    {
+        int linecount = 1;
+        for(int i=0; i<JBEAM_ParseError.offset;i++)
+        {
+            if(JbeamInputText.at(i) == '\n') linecount++;
+        }
+        JbeamErrorLine = linecount;
+        return JBEAM_ParseError;
+    }
+
+    return JBEAM_ParseError;
+
+}
+//Part2
+void NodeBeam::ParseJBEAM_TextEditP2()
+{
+    for(int i3=0; i3<JbeamParsingTemp.size(); i3++)
+    {
+        QList <QJsonObject> Jbeam_slots = JbeamParsingTemp.at(i3);
+
+        for(int i=0; i<Jbeam_slots.size(); i++)
+        {
+            //Get beams from slot
+            QJsonObject::iterator slot_iterator = Jbeam_slots[i].find("beams");
+            if (slot_iterator != Jbeam_slots.at(i).end())
+            {
+                QJsonArray Jbeam_beams;
+                Jbeam_beams = Jbeam_slots.at(i).value("beams").toArray();
+                qDebug() << "beams found " << Jbeam_beams.count();
+                JBEAM_ParseBeamsArray(Jbeam_beams);
+
+            }
+            //Get other parts from slot
+            for(int i2=0;i2<ListTypes.size();i2++)
+            {
+                QString keyword = ListTypes.at(i2).keyword;
+                slot_iterator = Jbeam_slots[i].find(keyword);
+
+                if (slot_iterator != Jbeam_slots.at(i).end())
+                {
+                    qDebug() << "Found " << keyword;
+                    QJsonArray Jbeam_other;
+                    Jbeam_other = Jbeam_slots.at(i).value(keyword).toArray();
+                    JBEAM_ParseOtherArray(Jbeam_other, i2);
+                }
+            }
+        }
+    }
 }
 
 /* == 3D Editing, cursor == */

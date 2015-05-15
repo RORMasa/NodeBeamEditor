@@ -33,7 +33,8 @@ SOURCES += main.cpp\
         NodeBeam_JBEAM.cpp \
         blueprints.cpp \
         colladadae.cpp \
-        htmlinputdialog.cpp
+        htmlinputdialog.cpp \
+    jbeamtextbox.cpp
 
 
 HEADERS  += mainwindow.h \

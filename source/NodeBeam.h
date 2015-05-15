@@ -31,6 +31,7 @@ public:
     int size();
     void clear();
     QStringList JBEAM_Comments;
+
 private:
 
 };
@@ -408,10 +409,15 @@ public:
     QVector3D SelectionCenterPos;
 
     /* JBEAM TextEdit parsing functions */
-    QJsonParseError ParseJBEAM_TextEdit(QByteArray JbeamInputText);
+    QJsonParseError ParseJBEAM_TextEdit(QString JbeamTextStr);
+    QJsonParseError ParseJBEAM_TextEditP1(QString JbeamTextStr);
+    void ParseJBEAM_TextEditP2();
 
     /* JBEAM Save As */
     bool JBEAM_SaveAs(const QString &fileName, QString JBEAM_Text);
+
+    //Temp container when parsing multiple files
+    QList < QList <QJsonObject> > JbeamParsingTemp;
 
 signals:
     //Write a message to scipts tab's logging textbox from LUA script.

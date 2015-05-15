@@ -7,6 +7,7 @@
 #include <QTime>
 #include <QLabel>
 #include <QPlainTextEdit>
+#include <QStackedWidget>
 
 #include "NodeBeam.h"
 #include "beamdefaultsdialog.h"
@@ -22,18 +23,65 @@ class JBEAM_TextBox : public QPlainTextEdit
 {
     Q_OBJECT
 public:
-    JBEAM_TextBox(QWidget *parent=0);
+    JBEAM_TextBox(QWidget *parent=0, NodeBeam *nb=0);
     void LineNumbersPaintEvent(QPaintEvent *event);
     int LineNumbers_Width;
+    NodeBeam *CurrentNodeBeam;
+
+    /* Text cursors */
+    //Update cursors
+    void JBEAM_UpdateCursors();
+
+    //Node JBEAM cursor; if is set, add new nodes at cursor position. Value is -1 if not set
+    int JBEAM_NodeCursor;
+
+    //Beam JBEAM cursor; if is set, add new beams at cursor position. Value is -1 if not set
+    int JBEAM_BeamCursor;
+
+    /* Find containers */
+    //Find JBEAM node or beam from string
+    bool FindNodeContainer(QString *JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd, bool FindComma, int &RealNodeEnd);
+    bool FindBeamContainer(QString *JBEAM_box, QString beam, int &Begin, int &End, bool FindComma,int &RealEnd);
+    bool JBEAM_FindOtherContainer(QString JBEAM_box, QString listtype, int &Begin, int &End);
+
+    /* Add */
+    void JBEAM_AddNode();
+    void JBEAM_AddBeam();
+    void JBEAM_AddArrayItem(int ListType_id);
+    int JBEAM_AddComment(int CursorPos, QString Comment);
+    void JBEAM_AddFromTemp();
+
+    /* Delete */
+    void JBEAM_DeleteNodes();
+    void JBEAM_DeleteBeams();
+
+    /* Filenames */
+    QString FullFilePath;
+    QString FileName;
+    void SetFilePath(QString FileName);
+
+    void ResetContents();
+    QString EmptyJbeamTextTemplate;
 
 protected:
     void resizeEvent(QResizeEvent *event);
 
+public slots:
+    void JBEAM_UpdateAllNodes();
+    void JBEAM_UpdateSelectedNodes();
+    void PlaceNodeCursor();
+    void PlaceBeamCursor();
+    void PrintNodePicked(int node_id);
+
 private slots:
     void updateLineNumbers(const QRect &rect, int dy);
 
+    void textchanged();
+
 private:
+    //Line numbers drawing
     QWidget * LineNumbersA;
+
 };
 
 class LineNumbers : public QWidget
@@ -101,110 +149,59 @@ private slots:
     //void on_pushButton_2_clicked();
 
     void on_actionOpen_triggered();
-
     void on_actionNew_triggered();
-
     void on_pushButton_6_clicked();
-
     void on_lineEdit_zcoordinate_textChanged(const QString &arg1);
-
     void on_checkBox_gridsnap_stateChanged(int arg1);
-
     void on_spinBox_grids_valueChanged(const QString &arg1);
-
     void on_treeWidget_itemSelectionChanged();
-
     void on_pushButton_5_clicked();
-
     void on_pushButton_13_clicked();
-
     void on_treeWidget_itemCollapsed(QTreeWidgetItem *item);
-
     void on_treeWidget_itemExpanded(QTreeWidgetItem *item);
-
     void on_treeWidget_2_itemCollapsed(QTreeWidgetItem *item);
-
     void on_treeWidget_2_itemExpanded(QTreeWidgetItem *item);
-
     void on_actionExport_to_BeamNG_triggered();
-
     void on_treeWidget_2_itemSelectionChanged();
-
     void on_spinBox_valueChanged(int arg1);
-
     void on_pushButton_16_clicked();
-
     void on_comboBox_currentIndexChanged(const QString &arg1);
-
     void on_comboBox_currentIndexChanged(int index);
-
     void on_comboBox_2_currentIndexChanged(const QString &arg1);
-
     void on_pushButton_19_clicked();
-
     void on_pushButton_9_clicked();
-
     void on_pushButton_20_clicked();
-
     void on_pushButton_21_hidebeams_clicked();
-
     void on_pushButton_22_shownodenumbers_clicked();
-
     void on_actionImport_BeamNG_triggered();
-
     void on_actionImport_OBJ_triggered();
-
     void on_actionImport_Rigs_of_Rods_triggered();
-
     void on_pushButton_3_clicked();
-
     void on_pushButton_DeleteNode_clicked();
-
     void on_actionExit_triggered();
 
 
     void on_pushButton_21_clicked();
-
     void on_actionExport_to_Rigs_of_Rods_triggered();
-
     void on_actionSave_As_triggered();
-
     void on_pushButton_14_clicked();
-
     void on_toolButton_clicked();
-
     void on_toolButton_2_clicked();
-
     void on_toolButton_3_clicked();
-
     void on_toolButton_4_clicked();
-
     void on_toolButton_7_clicked();
-
     void on_toolButton_6_clicked();
-
     void on_toolButton_5_clicked();
-
     void on_pushButton_17_clicked();
-
     void on_toolButton_8_clicked();
-
     void on_toolButton_9_clicked();
-
     void on_toolButton_11_clicked();
-
     void on_toolButton_12_clicked();
-
     void on_toolButton_13_clicked();
-
     void on_checkBox_clicked();
-
     void on_toolButton_10_clicked();
-
     void on_toolButton_14_clicked();
-
     void on_lineEdit_editingFinished();
-
     void on_lineEdit_textChanged(const QString &arg1);
 
     void keyPressEvent(QKeyEvent * eventti);
@@ -302,6 +299,18 @@ private slots:
 
     void on_actionImport_reference_model_from_OBJ_triggered();
 
+    void on_actionJBEAM_triggered();
+
+    void on_actionNode_triggered();
+
+    void NewJbeamTextWidget(QString filename);
+
+    void on_actionNew_JBEAM_triggered();
+
+    void JBEAMtabwidget_tabchanged(int current_tab);
+
+    void on_actionClose_triggered();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
@@ -315,6 +324,10 @@ private:
     QTreeWidgetItem *item;
     QTreeWidgetItem *item2;
     QTabWidget *OpenGLViews;
+    QStackedWidget *LeftStackWidget;
+    QTabWidget *JBEAMtabwidget;
+    QVector <JBEAM_TextBox*> JBEAMwidgets;
+
     JBEAM_TextBox *JBEAMtextbox;
 
     QTime autosave;
@@ -339,18 +352,6 @@ private:
     //Parse JBEAM TextEdit Box
     void JBEAM_ParseTextEdit();
 
-    //Find JBEAM node or beam from string
-    bool FindNodeContainer(QString JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd, bool FindComma, int &RealNodeEnd);
-    bool FindBeamContainer(QString JBEAM_box, QString beam, int &Begin, int &End, bool FindComma,int &RealEnd);
-    bool JBEAM_FindOtherContainer(QString JBEAM_box, QString listtype, int &Begin, int &End);
-
-    void JBEAM_UpdateCursors(QString JBEAM_box);
-    //Node JBEAM cursor; if is set, add new nodes at cursor position. Value is -1 if not set
-    int JBEAM_NodeCursor;
-
-    //Beam JBEAM cursor; if is set, add new beams at cursor position. Value is -1 if not set
-    int JBEAM_BeamCursor;
-
     void JBEAM_AddFromTemp();
     void JBEAM_DeleteNodes();
     void JBEAM_DeleteBeams();
@@ -368,6 +369,8 @@ private:
 
     //Toolbox current index
     int ListType_id;
+
+    void OpenJbeams(QStringList fileNames);
 };
 
 
