@@ -1863,7 +1863,7 @@ QTabWidget::tab-bar {
         </property>
         <property name="minimumSize">
          <size>
-          <width>255</width>
+          <width>350</width>
           <height>400</height>
          </size>
         </property>
@@ -1896,7 +1896,7 @@ QTabWidget::tab-bar {
 }</string>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="JBEAM">
             <attribute name="title">

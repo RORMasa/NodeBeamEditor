@@ -47,7 +47,8 @@ HEADERS  += mainwindow.h \
     NodeBeam.h \
     blueprints.h \
     colladadae.h \
-    htmlinputdialog.h
+    htmlinputdialog.h \
+    jbeamtextbox.h
 
 
 FORMS    += mainwindow.ui \

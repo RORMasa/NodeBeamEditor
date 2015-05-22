@@ -6,6 +6,7 @@
 #include <QLabel>
 
 #include "mainwindow.h"
+#include "jbeamtextbox.h"
 
 /* ==== JBEAM TEXT EDIT ==== */
 JBEAM_TextBox::JBEAM_TextBox(QWidget *parent, NodeBeam *nb) : QPlainTextEdit(parent)
@@ -16,6 +17,8 @@ JBEAM_TextBox::JBEAM_TextBox(QWidget *parent, NodeBeam *nb) : QPlainTextEdit(par
     //Connect linenumbers update request
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumbers(QRect,int)));
     connect(this, SIGNAL(textChanged()), this, SLOT(textchanged()));
+
+    synhigh = new Highlighter(this->document());
 
     JBEAM_NodeCursor = -1;
     JBEAM_BeamCursor = -1;
@@ -50,6 +53,10 @@ JBEAM_TextBox::JBEAM_TextBox(QWidget *parent, NodeBeam *nb) : QPlainTextEdit(par
                    "}\n";
 
     ResetContents();
+
+    QFont fontti;
+    fontti.setFamily(tr("Verdana"));
+    this->setFont(fontti);
 }
 
 //Paint linenumbers
@@ -727,4 +734,89 @@ void JBEAM_TextBox::SetFilePath(QString FileName)
     }
     this->FileName = FileName.right(FileName.length()-i-1);
     qDebug() << "Tiedostonimi on " << this->FileName;
+}
+
+/* === SYNTAX HIGHLIGHTER === */
+Highlighter::Highlighter(QTextDocument * document) :
+    QSyntaxHighlighter(document)
+{
+    QTextCharFormat commentformat;
+    commentformat.setForeground(QColor(0,140,0));
+    commentformat.setFontItalic(1);
+
+    //Comment highlight
+    HighlightingRule temprule;
+    temprule.pattern = QRegExp("\/\/.*");
+    temprule.format = commentformat;
+    rules.append(temprule);
+
+
+    QTextCharFormat strformat;
+    strformat.setForeground(QColor(40,40,255));
+
+    temprule.pattern = QRegExp("\".*\"");
+    temprule.format = strformat;
+    rules.append(temprule);
+
+
+    strformat.setForeground(QColor(220,40,40));
+    strformat.setFontWeight(QFont::Bold);
+
+    temprule.pattern = QRegExp("\\[");
+    temprule.format = strformat;
+    rules.append(temprule);
+    temprule.pattern = QRegExp("\\]");
+    rules.append(temprule);
+
+    QStringList keywords;
+    keywords << "\"nodes\"" << "\"beams\"" << "\"triangles\"" << "\"information\""
+             << "\"authors\"" << "\"hubWheels\"" << "\"pressureWheels\"";
+
+    strformat.setForeground(QColor(200,40,40));
+    strformat.setFontWeight(QFont::Bold);
+
+    foreach(const QString keyword, keywords)
+    {
+        temprule.pattern = QRegExp(keyword);
+        temprule.format = strformat;
+        rules.append(temprule);
+    }
+
+    QStringList BNEkeywords;
+    BNEkeywords << "//BNEnodes" << "//BNEbeams" << "//BNEtriangles";
+    strformat.setFontWeight(QFont::Bold);
+    strformat.setForeground(QColor(40,100,40));
+    strformat.setBackground(QColor(220,220,220));
+
+    foreach(const QString keyword, BNEkeywords)
+    {
+        temprule.pattern = QRegExp(keyword);
+        temprule.format = strformat;
+        rules.append(temprule);
+    }
+
+
+}
+
+Highlighter::~Highlighter()
+{
+
+
+
+}
+
+void Highlighter::highlightBlock(const QString &text)
+{
+
+    foreach(const HighlightingRule &rule, rules)
+    {
+        QRegExp regex = rule.pattern;
+        int index = regex.indexIn(text);
+        if(index >= 0)
+        {
+            setFormat(index,regex.matchedLength(),rule.format);
+        }
+    }
+
+
 }
