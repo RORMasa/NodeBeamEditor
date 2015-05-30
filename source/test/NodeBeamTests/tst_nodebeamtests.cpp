@@ -2,6 +2,7 @@
 #include <QtTest>
 #include <QDebug>
 #include "../../NodeBeam.h"
+#include <QApplication>
 
 class NodeBeamTests : public QObject
 {
@@ -18,6 +19,7 @@ private Q_SLOTS:
     void addnode();
     void deletenode();
     void parsejbeam();
+    void parsejbeam2();
     void triangletest();
 };
 
@@ -63,30 +65,51 @@ void NodeBeamTests::parsejbeam()
     bool ok = 1;
 
     if(!LoadTestMaterial(tr("triangletest.jbeam"))) ok=0;
-    if(NB->Nodes.size() != 4)
+    else
     {
-        ok = 0;
-        problem = "Node count does not match";
-    }
-    if(NB->Beams.size() != 1)
-    {
-        ok = 0;
-        problem = "Beam count does not match";
-    }
-    for(int i=0; i<NB->ListTypes.size();i++)
-    {
-        if(NB->ListTypes.at(i).keyword == "triangles")
+        if(NB->Nodes.size() != 4)
         {
-            if(NB->ListTypes.at(i).contaier.size() != 2)
+            ok = 0;
+            problem = "Node count does not match";
+        }
+        if(NB->Beams.size() != 1)
+        {
+            ok = 0;
+            problem = "Beam count does not match";
+        }
+        for(int i=0; i<NB->ListTypes.size();i++)
+        {
+            if(NB->ListTypes.at(i).keyword == "triangles")
             {
-                ok = 0;
-                problem = "triangle count does not match";
+                if(NB->ListTypes.at(i).contaier.size() != 2)
+                {
+                    ok = 0;
+                    problem = "triangle count does not match";
+                }
             }
         }
     }
 
     QVERIFY2(ok == 1, problem.toStdString().c_str());
+}
+void NodeBeamTests::parsejbeam2()
+{
+    QStringList testJbeams;
+    testJbeams << "FixCommaTest.jbeam";
 
+    bool ok = 1;
+    QString problem = "Error at ";
+
+    for(int i=0; i<testJbeams.size(); i++)
+    {
+        NB->clear();
+        NB->JbeamParsingTemp.clear();
+        if(!LoadTestMaterial(testJbeams.at(i)))
+        {
+            ok = 0;
+        }
+    }
+    QVERIFY2(ok == 1, problem.toStdString().c_str());
 }
 
 //Load file with two triangles and remove one node
@@ -98,18 +121,21 @@ void NodeBeamTests::triangletest()
     bool ok = 1;
 
     if(!LoadTestMaterial(tr("triangletest.jbeam"))) ok=0;
-    qDebug() << NB->Nodes.at(0).NodeName;
-    NB->DeleteNode(0);
-    qDebug() << NB->Nodes.size();
-
-    for(int i=0; i<NB->ListTypes.size();i++)
+    else
     {
-        if(NB->ListTypes.at(i).keyword == "triangles")
+        qDebug() << NB->Nodes.at(0).NodeName;
+        NB->DeleteNode(0);
+        qDebug() << NB->Nodes.size();
+
+        for(int i=0; i<NB->ListTypes.size();i++)
         {
-            if(NB->ListTypes.at(i).contaier.size() != 0)
+            if(NB->ListTypes.at(i).keyword == "triangles")
             {
-                ok = 0;
-                problem = "Triangle count does not match";
+                if(NB->ListTypes.at(i).contaier.size() != 0)
+                {
+                    ok = 0;
+                    problem = "Triangle count does not match";
+                }
             }
         }
     }
@@ -121,18 +147,36 @@ void NodeBeamTests::triangletest()
 //Read JBEAM file test contents
 bool NodeBeamTests::LoadTestMaterial(QString filename)
 {
-    QFile tiedosto;
-    tiedosto.setFileName(filename);
-    if(tiedosto.open(QFile::ReadOnly))
+    bool ok = 1;
+    QFile file;
+    file.setFileName(filename);
+    if(file.open(QFile::ReadOnly | QFile::Text))
     {
-        QString sisalto = tiedosto.readAll();
-        NB->ParseJBEAM_TextEdit(sisalto.toUtf8());
-        tiedosto.close();
-        return true;
+        QTextStream in(&file);
+
+        #ifndef QT_NO_CURSOR
+            QApplication::setOverrideCursor(Qt::WaitCursor);
+        #endif
+
+        QString FileContents = in.readAll();
+
+        #ifndef QT_NO_CURSOR
+            QApplication::restoreOverrideCursor();
+        #endif
+
+        QJsonParseError ParseError;
+        ParseError = NB->ParseJBEAM_TextEditP1(FileContents);
+        if(ParseError.offset>0)
+        {
+            ok = 0;
+        }
+        else NB->ParseJBEAM_TextEditP2();
+        file.close();
     }
+    if(ok) return true;
     else return false;
 }
 
-QTEST_APPLESS_MAIN(NodeBeamTests)
+QTEST_MAIN(NodeBeamTests)
 
 #include "tst_nodebeamtests.moc"

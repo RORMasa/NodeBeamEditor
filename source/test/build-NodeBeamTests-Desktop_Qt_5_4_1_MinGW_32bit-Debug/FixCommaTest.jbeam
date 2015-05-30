@@ -1,0 +1,48 @@
+{
+	"Vehicle":{
+		"information":{
+			"authors":"Your name"      
+		},
+		"CommaMissing1":false
+		"CommaMissing2":true
+		"nodes":[
+			["id", "posX", "posY", "posZ"],
+			//BNEnodes
+
+           ["a3", 1.00000, -1.00000, 0.00000{"commaMissing3":0.5}],
+           ["a2", -1.00000, -1.00000, 0.00000],
+  
+		],
+		"beams":[
+			["id1:", "id2:"],
+
+           ["a3", "a1"],
+           ["a2", "a0"],
+           ["a3", "a2"],
+           ["a1", "a0"],
+
+		],
+	}
+
+	"Vehicle1":{
+		"information":{
+			"authors":"Your name"      
+		},
+		"nodes":[
+			["id", "posX", "posY", "posZ"],
+
+
+           ["a1", 1.00000, 2.00000, 0.00000],
+           ["a0", -1.00000, 2.00000, 0.00000],
+
+		],
+		"beams":[
+			["id1:", "id2:"],
+			//BNEbeams
+
+
+
+
+		],
+	}
+}

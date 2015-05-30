@@ -51,7 +51,7 @@ QToolButton {
 	background-color: #e2e2e2;
      border-style: outset;
      border-width: 0px;
-     font:  12px;
+    
 	
 	color: rgb(0, 0, 0);
      padding: 6px;
@@ -63,7 +63,7 @@ QToolButton:checked {
      border-width: 0px;
      border-radius: 0px;
      border-color:rgb(255, 255, 0);
-     font:  12px;
+
 }
 QToolButton:hover {
   background-color:rgb(197, 208, 255);
@@ -72,13 +72,13 @@ QToolButton:hover {
      border-width: 0px;
      border-radius: 0px;
      border-color:rgb(255, 255, 0);
-     font:  12px;
+
 }
 QToolButton:disabled {
 	background-color: #e2e2e2;
      border-style: outset;
      border-width: 0px;
-     font:  12px;
+
 	
 	color: rgb(150, 150, 150);
      padding: 6px;
@@ -89,7 +89,7 @@ QPushButton {
      border-width: 3px;
      border-radius: 0px;
      border-color: #B3B3B3;
-     font:  12px;
+
 	 color: rgb(255, 255, 255);
      padding: 6px;
 }
@@ -107,7 +107,7 @@ QPushButton:Disabled {
      border-width: 2px;
      border-radius: 0px;
      border-color: grey;
-     font:  12px;
+
 	
 	color: grey;
      padding: 6px;
@@ -486,7 +486,7 @@ QTabWidget::tab-bar {
            <property name="iconSize">
             <size>
              <width>60</width>
-             <height>60</height>
+             <height>59</height>
             </size>
            </property>
            <property name="checkable">

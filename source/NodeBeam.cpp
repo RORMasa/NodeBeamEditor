@@ -3191,7 +3191,6 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
             char1 = char2;
         }
     }
-
     for(int i=0; i<CommaMissingPos.size();i++)
     {
         JbeamTextSTR.replace(CommaMissingPos.at(i), 1, ',');
@@ -3219,6 +3218,29 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
         }
 
     }
+
+    QRegExp regex("true\\s+\\\"");
+    int missingPos = regex.indexIn(JbeamTextSTR);
+    while(missingPos>-1)
+    {
+        JbeamTextSTR.replace(missingPos+4, 1, ",");
+        missingPos = regex.indexIn(JbeamTextSTR, missingPos+regex.matchedLength());
+    }
+    regex = QRegExp("false\\s+\\\"");
+    missingPos = regex.indexIn(JbeamTextSTR);
+    while(missingPos>-1)
+    {
+        JbeamTextSTR.insert(missingPos+5,",");
+        missingPos = regex.indexIn(JbeamTextSTR, missingPos+regex.matchedLength());
+    }
+    regex = QRegExp("\\d\\{");
+    missingPos = regex.indexIn(JbeamTextSTR);
+    while(missingPos>-1)
+    {
+        JbeamTextSTR.insert(missingPos+1,",");
+        missingPos = regex.indexIn(JbeamTextSTR, missingPos+regex.matchedLength());
+    }
+
 
     JbeamText.clear();
     JbeamText.append(JbeamTextSTR);
