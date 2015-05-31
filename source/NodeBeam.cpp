@@ -3159,33 +3159,35 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
     bool InsideString = 0;
     QChar char1 = 'ö';
     QChar char2 = 'ö';
+    bool space = 0;
 
     for(int i=0; i<JbeamTextSTR.length(); i++)
     {
         char2 = JbeamTextSTR.at(i);
 
-        if((char2 == ' ') || ( char2 == '\n') || (char2 == '\u0009'))
-        {
-            if(!InsideString) Checking = 1;
-        }
-        else if((char2 == ',') && Checking) CommaFound = 1;
+        if((char2 == ' ') || ( char2 == '\n') || (char2 == '\u0009')) space = 1;
+        else if((char2 == ',') && !InsideString) CommaFound = 1;
         else
         {
-            if(Checking)
+            if((char1 == '}') || (char1 == ']') || (char1 == '"') || char1.isDigit())
             {
-                if((char1 == '}') || (char1 == ']') || (char1 == '"') || char1.isDigit())
+                if((char2 == '{') || (char2 == '[') || (char2 == '"') || char2.isDigit())
                 {
-                    if((char2 == '{') || (char2 == '[') || (char2 == '"') || char2.isDigit())
+                    if(char1.isDigit() && char2.isDigit())
                     {
-                        if(!CommaFound)
+                        if(space && (!CommaFound) && (!InsideString))
                         {
                             CommaMissingPos.append(i-1);
                         }
                     }
+                    else if((!CommaFound) && (!InsideString))
+                    {
+                        CommaMissingPos.append(i);
+                    }
                 }
-                CommaFound=0;
             }
-            Checking = 0;
+            CommaFound=0;
+            space=0;
 
             if(char2 == '"') InsideString = !InsideString;
             char1 = char2;
@@ -3193,12 +3195,13 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
     }
     for(int i=0; i<CommaMissingPos.size();i++)
     {
-        JbeamTextSTR.replace(CommaMissingPos.at(i), 1, ',');
+        //JbeamTextSTR.replace(CommaMissingPos.at(i), 1, ',');
+        JbeamTextSTR.insert(CommaMissingPos.at(i)+i, ',');
     }
 
     for(int i=0; i<JbeamTextSTR.length(); i++)
     {
-        //qDebug() << "tarkisus " << JbeamTextSTR[i];
+        //qDebug() << "tarkistus " << JbeamTextSTR[i];
         if((JbeamTextSTR[i] == ']')||(JbeamTextSTR[i] == '}'))
         {
             QChar prevchar = 'ö';
@@ -3213,10 +3216,8 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
 
                 JBEAM_FixCommas_PrevChar(JbeamTextSTR, prevchar, prevchar_i);
                 JbeamTextSTR.replace(comma_i, 1, " ");
-
             }
         }
-
     }
 
     QRegExp regex("true\\s+\\\"");
@@ -3233,14 +3234,13 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
         JbeamTextSTR.insert(missingPos+5,",");
         missingPos = regex.indexIn(JbeamTextSTR, missingPos+regex.matchedLength());
     }
-    regex = QRegExp("\\d\\{");
+    regex = QRegExp("\\d(\\s*)\\{");
     missingPos = regex.indexIn(JbeamTextSTR);
     while(missingPos>-1)
     {
         JbeamTextSTR.insert(missingPos+1,",");
         missingPos = regex.indexIn(JbeamTextSTR, missingPos+regex.matchedLength());
     }
-
 
     JbeamText.clear();
     JbeamText.append(JbeamTextSTR);
