@@ -1205,6 +1205,7 @@ void MainWindow::OpenJBEAM_cmdargument(QString fileName)
             QStringList filepath = fileName.split('\\');
             QString title = filepath.last() + " - " + EditorTitle;
             setWindowTitle(title);
+            JBEAMtabwidget->setTabText(JBEAMtabwidget->currentIndex(),filepath.last());
 
             JBEAM_Filepath = fileName;
             ui->actionReload->setEnabled(true);

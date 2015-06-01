@@ -3115,12 +3115,12 @@ void NodeBeam::JBEAM_FixCommas_NextChar(QString &sample, QChar &nextchar, int &n
     //Find the next character other than comma, space, or line change
     for(int i=nextchar_i; i<sample.length();i++)
     {
-        if(sample[i] == ' ');
-        else if(sample[i] == '\n');
-        else if(sample[i] == '	');
+        if(sample.at(i) == ' ');
+        else if(sample.at(i) == '\n');
+        else if(sample.at(i) == '	');
         else
         {
-            nextchar = sample[i];
+            nextchar = sample.at(i);
             nextchar_i = i;
             break;
         }
@@ -3133,12 +3133,12 @@ void NodeBeam::JBEAM_FixCommas_PrevChar(QString &sample, QChar &prevchar, int &p
     for(int i=prevchar_i; i>0;i--)
     {
         //qDebug() << "checking p " << sample[i];
-        if(sample[i] == ' ');
-        else if(sample[i] == '\n');
-        else if(sample[i] == '	');
+        if(sample.at(i) == ' ');
+        else if(sample.at(i) == '\n');
+        else if(sample.at(i) == '	');
         else
         {
-            prevchar = sample[i];
+            prevchar = sample.at(i);
             prevchar_i = i;
             break;
         }
@@ -3165,7 +3165,8 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
     {
         char2 = JbeamTextSTR.at(i);
 
-        if((char2 == ' ') || ( char2 == '\n') || (char2 == '\u0009')) space = 1;
+        if((char2 == ' ') || ( char2 == '\n') || (char2 == '\r') || (char2 == '\u0009')) space = 1;
+        else if(CommaFound && (char2 == ',') && (!InsideString)) JbeamTextSTR.replace(i,1,' ');
         else if((char2 == ',') && !InsideString) CommaFound = 1;
         else
         {
@@ -3202,7 +3203,7 @@ QByteArray NodeBeam::JBEAM_FixCommas(QByteArray JbeamText)
     for(int i=0; i<JbeamTextSTR.length(); i++)
     {
         //qDebug() << "tarkistus " << JbeamTextSTR[i];
-        if((JbeamTextSTR[i] == ']')||(JbeamTextSTR[i] == '}'))
+        if((JbeamTextSTR.at(i) == ']')||(JbeamTextSTR.at(i) == '}'))
         {
             QChar prevchar = 'ö';
             int prevchar_i=0;

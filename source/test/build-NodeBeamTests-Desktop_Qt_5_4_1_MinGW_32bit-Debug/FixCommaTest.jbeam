@@ -15,10 +15,11 @@
 		],
 		"beams":[
 			["id1:", "id2:"],
-
+			,
            ["a2", "a0" {"CommaMissing5":505}],
            ["a3", "a2"{"CommaMissing6":505}],
            ["a1""a0"],
+		   //not valid jbeam
 		   [{"CommaMissing7":505}"a3", "a1"],
 
 		],
