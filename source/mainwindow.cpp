@@ -14,6 +14,7 @@
 #include "inputdialog.h"
 #include "settings.h"
 #include "blueprints.h"
+#include "processbar.h"
 
 #define VERSION "0.36"
 
@@ -1084,10 +1085,26 @@ void MainWindow::on_actionImport_BeamNG_triggered()
 
 void MainWindow::OpenJbeams(QStringList fileNames)
 {
+    QTime timer;
+    int time1, time2, time3;
+
+    processBar * infobar = new processBar(this);
+    infobar->show();
+
+    float step = (float)100/fileNames.size();
+
     for(int i=0; i<fileNames.size(); i++)
     {
         QString fileName = fileNames.at(i);
         NewJbeamTextWidget(fileName);
+
+        //Update processbar
+        QStringList filepath = fileName.split('/');
+        QString info = "Loading file: " + filepath.last();
+        infobar->setLabel(info);
+        infobar->setBarValue((i+1)*step);
+        qApp->processEvents();
+
         if (!fileName.isEmpty())
         {
             /*New JBEAM input system trough textbox */
@@ -1100,6 +1117,7 @@ void MainWindow::OpenJbeams(QStringList fileNames)
             }
             else
             {
+
                 QTextStream in(&file);
 
                 #ifndef QT_NO_CURSOR
@@ -1115,9 +1133,7 @@ void MainWindow::OpenJbeams(QStringList fileNames)
 
                 //Put file contents in JBEAM TextBox
                 JBEAMtextbox->setPlainText(FileContents);
-                JBEAM_ParseTextEdit();
 
-                QStringList filepath = fileName.split('/');
                 QString title = filepath.last() + " - " + EditorTitle;
                 setWindowTitle(title);
 
@@ -1126,7 +1142,11 @@ void MainWindow::OpenJbeams(QStringList fileNames)
             }
         }
     }
+    JBEAM_ParseTextEdit();
     MainNodeBeamUpdated();
+
+    infobar->close();
+    delete infobar;
 }
 
 //Reload JBEAM currently under construction
@@ -2811,13 +2831,13 @@ void MainWindow::JBEAM_ParseTextEdit()
     CurrentNodeBeam->clear();
     bool ParsingFailed=0;
     CurrentNodeBeam->JbeamParsingTemp.clear();
+    StatusBar_info->clear();
 
+    QJsonParseError ParseError;
     for(int i=0; i<JBEAMwidgets.size();i++)
     {
-        JBEAMwidgets.at(i)->JBEAM_UpdateCursors();
-
-        QJsonParseError ParseError;
         ParseError = CurrentNodeBeam->ParseJBEAM_TextEditP1(JBEAMwidgets.at(i)->toPlainText());
+
         if(ParseError.offset>0)
         {
             //Error message
@@ -2835,16 +2855,13 @@ void MainWindow::JBEAM_ParseTextEdit()
             ParsingFailed=1;
             break;
         }
-        else StatusBar_info->clear();
     }
     if(!ParsingFailed)
     {
-        for(int i=0; i<JBEAMwidgets.size();i++)
-        {
-            CurrentNodeBeam->ParseJBEAM_TextEditP2();
-        }
+        CurrentNodeBeam->ParseJBEAM_TextEditP2();
         CurrentNodeBeam->JbeamParsingTemp.clear();
     }
+
     MainNodeBeamUpdated();
 }
 

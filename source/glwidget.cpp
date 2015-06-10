@@ -945,7 +945,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
                     BeamNode2=PickedNode1;
                     PickedNode1=9999;
 
-                    NBPointer->AddBeam(BeamNode1, BeamNode2, CurrentBeamGroup);
+                    NBPointer->AddBeam(BeamNode1, BeamNode2, CurrentBeamGroup,1);
 
                     TextOverlay = "Beam added between nodes ";
                     TextOverlay.append(NBPointer->Nodes[BeamNode1].NodeName);
@@ -977,7 +977,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
                     BeamNode2=PickedNode1;
                     PickedNode1=9999;
 
-                    NBPointer->AddBeam(BeamNode1, BeamNode2, CurrentBeamGroup);
+                    NBPointer->AddBeam(BeamNode1, BeamNode2, CurrentBeamGroup,1);
 
                     TextOverlay = "Beam added between nodes ";
                     TextOverlay.append(NBPointer->Nodes[BeamNode1].NodeName);

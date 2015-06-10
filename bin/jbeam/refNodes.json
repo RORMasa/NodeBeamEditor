@@ -1,0 +1,14 @@
+{
+	"keyword" : "refNodes",
+	"drawtype" : "none",
+	"draworder" : [],
+	"nodeamount" : 4,
+	"nodenames" : [
+		"Choose ref node",
+		"Choose back node",
+		"Choose left node",
+		"Choose up node"
+		],
+    "tableheader" : "\"ref:\", \"back:\", \"left:\", \"up:\"",
+	"template" : "\"%1\", \"%2\", \"%3\", \"%4\""
+}

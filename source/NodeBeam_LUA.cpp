@@ -114,7 +114,7 @@ void NodeBeam::LuaAddBeam(const std::string node1, const std::string node2)
         LuaComment=0;
         LuaComments.clear();
     }
-    AddBeamT();
+    AddBeamT(1);
 }
 
 //Get node by name in Lua

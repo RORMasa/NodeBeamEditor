@@ -57,6 +57,11 @@ JBEAM_TextBox::JBEAM_TextBox(QWidget *parent, NodeBeam *nb) : QPlainTextEdit(par
     QFont fontti;
     fontti.setFamily(tr("Verdana"));
     this->setFont(fontti);
+
+    for(int i=0; i<CurrentNodeBeam->ListTypes.size();i++)
+    {
+        this->JBEAM_curorNames.append(CurrentNodeBeam->ListTypes.at(i).keyword);
+    }
 }
 
 //Paint linenumbers
@@ -166,6 +171,26 @@ void JBEAM_TextBox::JBEAM_UpdateCursors()
         }
     }
     //qDebug() << "Beam cursor: " << JBEAM_BeamCursor;
+
+    JBEAM_cursorLocs.clear();
+    for(int i=0; i<JBEAM_curorNames.size(); i++)
+    {
+        QString search = "//BNE" + JBEAM_curorNames.at(i);
+        int tempcursor = JBEAM_text.indexOf(search);
+        if(tempcursor>-1)
+        {
+            for(int i=tempcursor; i>0;i--)
+            {
+                if(JBEAM_text.at(i) == '\n')
+                {
+                    tempcursor = i;
+                    break;
+                }
+                else tempcursor = -1;
+            }
+        }
+        this->JBEAM_cursorLocs.append(tempcursor);
+    }
 }
 
 /* Update contents */
@@ -177,25 +202,31 @@ void JBEAM_TextBox::JBEAM_UpdateAllNodes()
     int pos2, pos3;
 
     QString TextBoxText = this->toPlainText();
+
+    bool updated[CurrentNodeBeam->Nodes.size()] = { false };
+
     for(int i=0; i<CurrentNodeBeam->Nodes.size();i++)
     {
-        QString NodeName = CurrentNodeBeam->Nodes.at(i).NodeName;
-
-        //Find node from textbox by nodename
-        if(FindNodeContainer(&TextBoxText, NodeName, pos1, pos2, 0, pos3))
+        if(!updated[i])
         {
-            QString nodeline = '"' + NodeName + '"';
-            nodeline+= ", ";
-            nodeline+= QString::number(CurrentNodeBeam->Nodes[i].locX,'f',5);
-            nodeline+= ", ";
-            nodeline+= QString::number(CurrentNodeBeam->Nodes[i].locY,'f',5);
-            nodeline+= ", ";
-            nodeline+= QString::number(CurrentNodeBeam->Nodes[i].locZ,'f',5);
+            QString NodeName = CurrentNodeBeam->Nodes.at(i).NodeName;
 
-            TextBoxText.replace(pos1,pos2-pos1+1,nodeline);
+            //Find node from textbox by nodename
+            if(FindNodeContainer(&TextBoxText, NodeName, pos1, pos2, 0, pos3))
+            {
+                QString nodeline = '"' + NodeName + '"';
+                nodeline+= ", ";
+                nodeline+= QString::number(CurrentNodeBeam->Nodes[i].locX,'f',5);
+                nodeline+= ", ";
+                nodeline+= QString::number(CurrentNodeBeam->Nodes[i].locY,'f',5);
+                nodeline+= ", ";
+                nodeline+= QString::number(CurrentNodeBeam->Nodes[i].locZ,'f',5);
+
+                TextBoxText.replace(pos1,pos2-pos1+1,nodeline);
+                updated[i] = true;
+            }
+            else qDebug() << "Node not found";
         }
-        else qDebug() << "Node not found";
-
     }
     this->setPlainText(TextBoxText);
 }
@@ -541,13 +572,48 @@ bool JBEAM_TextBox::JBEAM_FindOtherContainer(QString JBEAM_box, QString listtype
     return true;
 }
 
+// Add indentation
+void JBEAM_TextBox::str_addIndent(QString * text, int indent)
+{
+    for(int i=0; i<indent; i++)
+    {
+        text->append("    ");
+    }
+}
+// Add str value
+void JBEAM_TextBox::str_addValueStr(QString * text, QString key, QString value, int indent)
+{
+    this->str_addIndent(text, indent);
+    *text+= "\"" + key + "\":\"" + value + "\",\n";
+}
+void JBEAM_TextBox::str_beginObject(QString * text, QString key, int indent)
+{
+    this->str_addIndent(text, indent);
+    *text+= "\"" + key + "\":{\n";
+}
+void JBEAM_TextBox::str_endObject(QString * text, int indent)
+{
+    this->str_addIndent(text, indent);
+    *text+= "},\n";
+}
+void JBEAM_TextBox::str_beginList(QString * text, QString key, int indent)
+{
+    this->str_addIndent(text, indent);
+    *text+= "\"" + key + "\":[\n";
+}
+void JBEAM_TextBox::str_endList(QString * text, int indent)
+{
+    this->str_addIndent(text, indent);
+    *text+= "],\n";
+}
 
 /* Add node at text cursor position */
 void JBEAM_TextBox::JBEAM_AddNode()
 {
     int node_id = CurrentNodeBeam->TempNode.GlobalID;
-    QString nodeline = "           [";
-    nodeline+= '"' + CurrentNodeBeam->TempNode.NodeName + '"';
+    QString nodeline;
+    this->str_addIndent(&nodeline, 3);
+    nodeline+= "[\"" + CurrentNodeBeam->TempNode.NodeName + '"';
     nodeline+= ", ";
     nodeline+= QString::number(CurrentNodeBeam->TempNode.locX,'f',5);
     nodeline+= ", ";
@@ -555,12 +621,12 @@ void JBEAM_TextBox::JBEAM_AddNode()
     nodeline+= ", ";
     nodeline+= QString::number(CurrentNodeBeam->TempNode.locZ,'f',5);
     nodeline.append("],\n");
+
     QTextCursor textcursor = this->textCursor();
     if(JBEAM_NodeCursor >= 0)
     {
         textcursor.setPosition(JBEAM_NodeCursor);
     }
-
     for(int i=0; i<CurrentNodeBeam->TempNode.comments.size();i++)
     {
         JBEAM_AddComment(JBEAM_NodeCursor, CurrentNodeBeam->TempNode.comments.ReadComment(i));
@@ -572,8 +638,9 @@ void JBEAM_TextBox::JBEAM_AddNode()
 /* Add beam, in JBEAM edit widget at text cursor position */
 void JBEAM_TextBox::JBEAM_AddBeam()
 {
-    QString beamline = "           [";
-    beamline+= '"' + CurrentNodeBeam->TempBeam.Node1Name + '"';
+    QString beamline;
+    this->str_addIndent(&beamline, 3);
+    beamline+= "[\"" + CurrentNodeBeam->TempBeam.Node1Name + '"';
     beamline+= ", ";
     beamline+= '"' + CurrentNodeBeam->TempBeam.Node2Name + '"';
     beamline+=("],\n");
@@ -587,16 +654,15 @@ void JBEAM_TextBox::JBEAM_AddBeam()
     {
         JBEAM_AddComment(JBEAM_BeamCursor, CurrentNodeBeam->TempBeam.comments.ReadComment(i));
     }
-
     textcursor.insertText(beamline);
     this->setTextCursor(textcursor);
 }
 
-
 int JBEAM_TextBox::JBEAM_AddComment(int CursorPos, QString Comment)
 {
-    QString commentline = "\u0009\u0009\u0009//";
-    commentline+= Comment;
+    QString commentline;
+    this->str_addIndent(&commentline, 3);
+    commentline+= "//" + Comment;
     commentline+= "\n";
     QTextCursor textcursor = this->textCursor();
     if(CursorPos >= 0)
@@ -613,8 +679,9 @@ int JBEAM_TextBox::JBEAM_AddComment(int CursorPos, QString Comment)
 void JBEAM_TextBox::JBEAM_AddArrayItem(int ListType_id)
 {
     QVector <int> pickednodes = CurrentNodeBeam->ListTypes.at(ListType_id).contaier.last();
-    QString line = "           [";
-    line+= CurrentNodeBeam->ListTypes.at(ListType_id).JBEAM_template;
+    QString line;
+    this->str_addIndent(&line,3);
+    line+= "[" + CurrentNodeBeam->ListTypes.at(ListType_id).JBEAM_template;
     line+=("],\n");
 
     for(int i=0; i<CurrentNodeBeam->ListTypes.at(ListType_id).nodeamount;i++)
@@ -623,6 +690,8 @@ void JBEAM_TextBox::JBEAM_AddArrayItem(int ListType_id)
     }
 
     QTextCursor textcursor = this->textCursor();
+
+    if(JBEAM_cursorLocs.at(ListType_id)>-1) textcursor.setPosition(JBEAM_cursorLocs.at(ListType_id));
 
     textcursor.insertText(line);
     this->setTextCursor(textcursor);

@@ -401,7 +401,7 @@ void NodeBeam::ParseLine(QString line, int ParsingMode)
             {
                 TempBeam.draw=0;
             }
-            AddBeamT();
+            AddBeamT(1);
         }
     }
     if(ParsingMode==3)
@@ -1369,7 +1369,7 @@ void NodeBeam::DeleteNode(int NodeGlobalID)
 }
 
 /* Add beam */
-void NodeBeam::AddBeam(int Node1ID, int Node2ID, int BeamGroup)
+void NodeBeam::AddBeam(int Node1ID, int Node2ID, int BeamGroup, bool jbeamAdd)
 {
     TempBeam.Node1GlobalID = Node1ID;
     TempBeam.Node2GlobalID = Node2ID;
@@ -1379,11 +1379,11 @@ void NodeBeam::AddBeam(int Node1ID, int Node2ID, int BeamGroup)
     TempBeam.draw=1;
     qDebug() << BeamGroup;
 
-    AddBeamT();
+    AddBeamT(jbeamAdd);
 }
 
 /* Add beam from TempBeam */
-void NodeBeam::AddBeamT()
+void NodeBeam::AddBeamT(bool jbeamAdd)
 {
 
     //Adding to group
@@ -1413,7 +1413,7 @@ void NodeBeam::AddBeamT()
         Beams.insert(0,TempBeam);
     }
 
-    JBEAM_temp.AddBeam(TempBeam);
+    if(jbeamAdd) JBEAM_temp.AddBeam(TempBeam);
 }
 
 /* Add empty beam group at the end of the list  */
@@ -1496,7 +1496,7 @@ void NodeBeam::DuplicateNodes()
     for(int i=0; i<TempBeams.size(); i++)
     {
         TempBeam = TempBeams[i];
-        AddBeamT();
+        AddBeamT(1);
     }
     TempBeamsL.append(TempBeams);
 }
@@ -1515,7 +1515,7 @@ void NodeBeam::ExtrudeNodes()
         if(ActiveBeamGroup < 0) ActiveBeamGroup = NewBeamGroup("Extruded");
         for(int i=0; i<SelectedNodes.size(); i++)
         {
-            AddBeam(SelectedNodes[i], SelectedNodes2[i], ActiveBeamGroup);
+            AddBeam(SelectedNodes.at(i), SelectedNodes2.at(i), ActiveBeamGroup,1);
             TempBeams.append(TempBeam); //Add beam in tempbeams, to append later in JBEAM text window
 
         }
@@ -1563,7 +1563,7 @@ void NodeBeam::ExtrudeNodes()
         for(int i=0; i<TempBeams.size(); i++)
         {
             TempBeam = TempBeams[i];
-            AddBeamT();
+            AddBeamT(1);
         }
         TempBeamsL.append(TempBeams);
     }
@@ -2381,22 +2381,19 @@ void NodeBeam::WriteInJBeamTree(QString slotname)
 }*/
 
 /* When node name is known, but node global id is not known, this function finds it */
-int NodeBeam::FindNodeByName(QString nodename)
+int NodeBeam::FindNodeByName(QString * nodename)
 {
     int result = -1;
-    for(int i=0; i<Nodes.size(); i++)
+    for(int i=Nodes.size()-1; i>=0; i--)
     {
-        if(Nodes[i].NodeName == nodename)
-        {
-            result = i;
-        }
+        if(Nodes.at(i).NodeName == *nodename) return i;
     }
     return result;
 }
 
 int NodeBeam::FindBeamNodeByName(QString nodename)
 {
-    int nodenumber = FindNodeByName(nodename);
+    int nodenumber = FindNodeByName(&nodename);
     if(nodenumber == -1) nodenumber = 99999;
     return nodenumber;
 }
@@ -2838,13 +2835,13 @@ void NodeBeam::MergeSelectedNodes(float distance)
                             {
                                 TempBeam = Beams.at(i4);
                                 TempBeam.Node1GlobalID = SelectedNodes.at(i2);
-                                AddBeamT();
+                                AddBeamT(1);
                             }
                             else if(Beams.at(i4).Node2GlobalID == SelectedNodes.at(i))
                             {
                                 TempBeam = Beams.at(i4);
                                 TempBeam.Node2GlobalID = SelectedNodes.at(i2);
-                                AddBeamT();
+                                AddBeamT(1);
                             }
                             qDebug() << i4;
                         }
@@ -2972,7 +2969,7 @@ QJsonParseError NodeBeam::ParseJBEAM_TextEdit(QString JbeamTextStr)
                 QJsonArray Jbeam_beams;
                 Jbeam_beams = Jbeam_slots.at(i).value("beams").toArray();
                 qDebug() << "beams found " << Jbeam_beams.count();
-                JBEAM_ParseBeamsArray(Jbeam_beams);
+                JBEAM_ParseBeamsArray(&Jbeam_beams);
 
             }
             //Get other parts from slot
@@ -3032,36 +3029,36 @@ bool NodeBeam::JBEAM_ParseNodesArray(QJsonArray JbeamNodesArray)
     }
 }
 
-bool NodeBeam::JBEAM_ParseBeamsArray(QJsonArray JbeamBeamsArray)
+bool NodeBeam::JBEAM_ParseBeamsArray(QJsonArray *JbeamBeamsArray)
 {
     int BeamGroupID = NewBeamGroup("");
-    for(int i=0; i<JbeamBeamsArray.count();i++)
+    for(int i=0; i<(*JbeamBeamsArray).count();i++)
     {
         //If it's an array, it's a beam
-        if(JbeamBeamsArray.at(i).isArray())
+        if((*JbeamBeamsArray).at(i).isArray())
         {
             QJsonArray Jbeam;
-            Jbeam = JbeamBeamsArray.at(i).toArray();
+            Jbeam = (*JbeamBeamsArray).at(i).toArray();
 
             if(Jbeam.at(0).isString()) TempBeam.Node1Name = Jbeam.at(0).toString();
             if(Jbeam.at(1).isString())
             {
                 TempBeam.Node2Name = Jbeam.at(1).toString();
-                TempBeam.Node1GlobalID = FindNodeByName(TempBeam.Node1Name);
-                TempBeam.Node2GlobalID = FindNodeByName(TempBeam.Node2Name);
+                TempBeam.Node1GlobalID = FindNodeByName(&TempBeam.Node1Name);
+                TempBeam.Node2GlobalID = FindNodeByName(&TempBeam.Node2Name);
                 TempBeam.BeamGroupID = BeamGroupID;
                 if((TempBeam.Node1GlobalID<0)||(TempBeam.Node2GlobalID<0)) TempBeam.draw=0;
                 else TempBeam.draw=1;
 
-                AddBeamT();
+                AddBeamT(0);
             }
 
         }
-        else if(JbeamBeamsArray.at(i).isObject())
+        else if((*JbeamBeamsArray).at(i).isObject())
         {
-            if(JbeamBeamsArray.at(i).toObject().contains("BNE"))
+            if((*JbeamBeamsArray).at(i).toObject().contains("BNE"))
             {
-                JBEAM_ParseComment(JbeamBeamsArray.at(i).toObject().value("BNE").toString());
+                JBEAM_ParseComment((*JbeamBeamsArray).at(i).toObject().value("BNE").toString());
                 BeamGroupID = NewBeamGroup("");
             }
         }
@@ -3093,7 +3090,7 @@ bool NodeBeam::JBEAM_ParseOtherArray(QJsonArray JbeamArray, int ListType_id)
             }
             if(ok)
             {
-                qDebug() << "Adding " << node_ids;
+                //qDebug() << "Adding " << node_ids;
                 ListTypes[ListType_id].Add(node_ids);
             }
 
@@ -3454,7 +3451,7 @@ QJsonParseError NodeBeam::ParseJBEAM_TextEditP1(QString JbeamTextStr)
     QJsonDocument Jbeam = QJsonDocument::fromJson(JbeamInputText, &JBEAM_ParseError);
 
     //Error messages
-    qDebug() << "JSON parsing result: " << ", " << JBEAM_ParseError.errorString();
+    //qDebug() << "JSON parsing result: " << ", " << JBEAM_ParseError.errorString();
 
     //Convert Json document to json object
     QJsonObject JbeamObject = Jbeam.object();
@@ -3484,7 +3481,7 @@ QJsonParseError NodeBeam::ParseJBEAM_TextEditP1(QString JbeamTextStr)
                 {
                     QJsonArray Jbeam_nodes;
                     Jbeam_nodes = JbeamObject_slot.value("nodes").toArray();
-                    qDebug() << "nodes found " << Jbeam_nodes.count();
+                    //qDebug() << "nodes found " << Jbeam_nodes.count();
                     JBEAM_ParseNodesArray(Jbeam_nodes);
 
                 }
@@ -3512,33 +3509,28 @@ QJsonParseError NodeBeam::ParseJBEAM_TextEditP1(QString JbeamTextStr)
 //Part2
 void NodeBeam::ParseJBEAM_TextEditP2()
 {
-    for(int i3=0; i3<JbeamParsingTemp.size(); i3++)
+    for(int i3=0; i3<JbeamParsingTemp.size(); ++i3)
     {
-        QList <QJsonObject> Jbeam_slots = JbeamParsingTemp.at(i3);
-
-        for(int i=0; i<Jbeam_slots.size(); i++)
+        for(int i=0; i<JbeamParsingTemp.at(i3).size(); ++i)
         {
             //Get beams from slot
-            QJsonObject::iterator slot_iterator = Jbeam_slots[i].find("beams");
-            if (slot_iterator != Jbeam_slots.at(i).end())
+            QJsonObject::iterator slot_iterator = JbeamParsingTemp[i3][i].find("beams");
+            if (slot_iterator != JbeamParsingTemp.at(i3).at(i).end())
             {
                 QJsonArray Jbeam_beams;
-                Jbeam_beams = Jbeam_slots.at(i).value("beams").toArray();
-                qDebug() << "beams found " << Jbeam_beams.count();
-                JBEAM_ParseBeamsArray(Jbeam_beams);
+                Jbeam_beams = JbeamParsingTemp.at(i3).at(i).value("beams").toArray();
+                //qDebug() << "beams found " << Jbeam_beams.count();
+                JBEAM_ParseBeamsArray(&Jbeam_beams);
 
             }
             //Get other parts from slot
-            for(int i2=0;i2<ListTypes.size();i2++)
+            for(int i2=0;i2<ListTypes.size();++i2)
             {
-                QString keyword = ListTypes.at(i2).keyword;
-                slot_iterator = Jbeam_slots[i].find(keyword);
-
-                if (slot_iterator != Jbeam_slots.at(i).end())
+                slot_iterator = JbeamParsingTemp[i3][i].find(ListTypes.at(i2).keyword);
+                if (slot_iterator != JbeamParsingTemp.at(i3).at(i).end())
                 {
-                    qDebug() << "Found " << keyword;
                     QJsonArray Jbeam_other;
-                    Jbeam_other = Jbeam_slots.at(i).value(keyword).toArray();
+                    Jbeam_other = JbeamParsingTemp.at(i3).at(i).value(ListTypes.at(i2).keyword).toArray();
                     JBEAM_ParseOtherArray(Jbeam_other, i2);
                 }
             }

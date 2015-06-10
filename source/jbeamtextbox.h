@@ -93,6 +93,18 @@ private:
     //Line numbers drawing
     QWidget * LineNumbersA;
 
+    /* JBEAM pretty printing */
+    void str_addIndent(QString * text, int indent);
+    void str_addValueStr(QString * text, QString key, QString value, int indent);
+    void str_beginObject(QString * text, QString key, int indent);
+    void str_endObject(QString * text, int indent);
+    void str_beginList(QString * text, QString key, int indent);
+    void str_endList(QString * text, int indent);
+
+    //Cursors
+    QStringList JBEAM_curorNames;
+    QList <int> JBEAM_cursorLocs;
+
 };
 
 class LineNumbers : public QWidget

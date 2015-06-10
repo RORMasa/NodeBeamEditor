@@ -34,7 +34,8 @@ SOURCES += main.cpp\
         blueprints.cpp \
         colladadae.cpp \
         htmlinputdialog.cpp \
-    jbeamtextbox.cpp
+    jbeamtextbox.cpp \
+    processbar.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -48,7 +49,8 @@ HEADERS  += mainwindow.h \
     blueprints.h \
     colladadae.h \
     htmlinputdialog.h \
-    jbeamtextbox.h
+    jbeamtextbox.h \
+    processbar.h
 
 
 FORMS    += mainwindow.ui \
@@ -57,7 +59,8 @@ FORMS    += mainwindow.ui \
     beamdefaultsdialog.ui \
     settings.ui \
     blueprints.ui \
-    htmlinputdialog.ui
+    htmlinputdialog.ui \
+    processbar.ui
 
 RESOURCES += \
     icons.qrc

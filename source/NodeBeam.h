@@ -318,8 +318,8 @@ public:
     void DeleteNode(int NodeGlobalID);
 
     /* Beam functions */
-    void AddBeam(int Node1ID, int Node2ID, int BeamGroup);
-    void AddBeamT();
+    void AddBeam(int Node1ID, int Node2ID, int BeamGroup, bool jbeamAdd);
+    void AddBeamT(bool jbeamAdd);
     void DeleteBeam(int BeamIndex);
 
     /* Group functions */
@@ -351,7 +351,7 @@ public:
     void ModifyBeamArgument(QString key, QString value, int BeamdefsSet);
 
     /* Find node by name */
-    int FindNodeByName(QString nodename);
+    int FindNodeByName(QString *nodename);
     int FindBeamNodeByName(QString nodename);
 
     /* New name system */
@@ -437,7 +437,7 @@ private:
     void JBEAM_FixCommas_PrevChar(QString &sample, QChar &prevchar, int &prevchar_i);
     QByteArray JBEAM_FixCommas(QByteArray JbeamText);
     bool JBEAM_ParseNodesArray(QJsonArray JbeamNodesArray);
-    bool JBEAM_ParseBeamsArray(QJsonArray JbeamBeamsArray);
+    bool JBEAM_ParseBeamsArray(QJsonArray *JbeamBeamsArray);
     bool JBEAM_ParseOtherArray(QJsonArray JbeamArray, int ListType_id);
     QByteArray JBEAM_RemoveComments(QByteArray JbeamText);
     void JBEAM_ParseComment(QString comment);
