@@ -16,7 +16,7 @@
 #include "blueprints.h"
 #include "processbar.h"
 
-#define VERSION "0.36"
+#define VERSION "0.37"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -2816,10 +2816,7 @@ void MainWindow::LUA_message(QString msg)
 /* Parse JBEAM widget refresh button clicked */
 void MainWindow::on_pushButton_3_clicked()
 {
-    if(*TexboxOutdated)
-    {
-        JBEAM_UpdateAllNodes();
-    }
+    if(*TexboxOutdated) JBEAM_UpdateAllNodes();
     JBEAM_ParseTextEdit();
     this->RefreshGLViews();
     *TexboxOutdated = 0;
@@ -2917,9 +2914,11 @@ void MainWindow::JBEAM_UpdateSelectedNodes()
 /* Update all nodes */
 void MainWindow::JBEAM_UpdateAllNodes()
 {
+    bool updated[CurrentNodeBeam->Nodes.size()] = { false };
+
     for(int i=0; i<JBEAMwidgets.size();i++)
     {
-        JBEAMwidgets.at(i)->JBEAM_UpdateAllNodes();
+        JBEAMwidgets.at(i)->JBEAM_UpdateAllNodes(&updated[0]);
     }
 }
 

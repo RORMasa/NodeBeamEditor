@@ -49,6 +49,8 @@ public:
     /* Find containers */
     //Find JBEAM node or beam from string
     bool FindNodeContainer(QString *JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd, bool FindComma, int &RealNodeEnd);
+    bool FindNodeContainer2(QString *JBEAM_box, QString nodename, int &nodesBegin, int &pos1, int &pos2);
+    bool FindNodesSection(QString *JBEAM_box, int offset, int &nodesBegin, int &nodesEnd);
     bool FindBeamContainer(QString *JBEAM_box, QString beam, int &Begin, int &End, bool FindComma,int &RealEnd);
     bool JBEAM_FindOtherContainer(QString JBEAM_box, QString listtype, int &Begin, int &End);
 
@@ -78,7 +80,7 @@ protected:
     void resizeEvent(QResizeEvent *event);
 
 public slots:
-    void JBEAM_UpdateAllNodes();
+    void JBEAM_UpdateAllNodes(bool *updated);
     void JBEAM_UpdateSelectedNodes();
     void PlaceNodeCursor();
     void PlaceBeamCursor();

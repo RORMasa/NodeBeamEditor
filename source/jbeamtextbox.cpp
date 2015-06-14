@@ -4,6 +4,7 @@
 #include <QPixmap>
 #include <QJsonDocument>
 #include <QLabel>
+#include <QStringBuilder>
 
 #include "mainwindow.h"
 #include "jbeamtextbox.h"
@@ -195,68 +196,77 @@ void JBEAM_TextBox::JBEAM_UpdateCursors()
 
 /* Update contents */
 //Update all nodes
-void JBEAM_TextBox::JBEAM_UpdateAllNodes()
+void JBEAM_TextBox::JBEAM_UpdateAllNodes(bool *updated)
 {
-
-    int pos1; //Position containers for parsing the textbox
-    int pos2, pos3;
+    int pos1, length; //Position containers for parsing the textbox
+    int nodesBegin, nodesEnd = 0;
 
     QString TextBoxText = this->toPlainText();
 
-    bool updated[CurrentNodeBeam->Nodes.size()] = { false };
-
-    for(int i=0; i<CurrentNodeBeam->Nodes.size();i++)
+    bool ok=1;
+    while(FindNodesSection(&TextBoxText, nodesEnd, nodesBegin, nodesEnd))
     {
-        if(!updated[i])
+        QString nodesText = TextBoxText.left(nodesEnd);
+        QString otherText = TextBoxText.right(TextBoxText.length()-nodesEnd);
+
+        for(int i=0; i<CurrentNodeBeam->Nodes.size();++i)
         {
-            QString NodeName = CurrentNodeBeam->Nodes.at(i).NodeName;
-
-            //Find node from textbox by nodename
-            if(FindNodeContainer(&TextBoxText, NodeName, pos1, pos2, 0, pos3))
+            if(!(*(updated + i)))
             {
-                QString nodeline = '"' + NodeName + '"';
-                nodeline+= ", ";
-                nodeline+= QString::number(CurrentNodeBeam->Nodes[i].locX,'f',5);
-                nodeline+= ", ";
-                nodeline+= QString::number(CurrentNodeBeam->Nodes[i].locY,'f',5);
-                nodeline+= ", ";
-                nodeline+= QString::number(CurrentNodeBeam->Nodes[i].locZ,'f',5);
+                QString NodeName = CurrentNodeBeam->Nodes.at(i).NodeName;
 
-                TextBoxText.replace(pos1,pos2-pos1+1,nodeline);
-                updated[i] = true;
+                //Find node from textbox by nodename
+                if(FindNodeContainer2(&nodesText, NodeName, nodesBegin, pos1, length))
+                {
+                    QString nodeline("\"" + NodeName + "\", ");
+                    nodeline+= QString::number(CurrentNodeBeam->Nodes.at(i).locX,'f',5);
+                    nodeline+= ", " + QString::number(CurrentNodeBeam->Nodes.at(i).locY,'f',5);
+                    nodeline+= ", " + QString::number(CurrentNodeBeam->Nodes.at(i).locZ,'f',5);
+                    nodesText.replace(pos1,length,nodeline);
+                    *(updated + i) = true;
+                }
             }
-            else qDebug() << "Node not found";
         }
+        TextBoxText = nodesText + otherText;
     }
     this->setPlainText(TextBoxText);
 }
+
+
+
+
 //Update selected nodes
 void JBEAM_TextBox::JBEAM_UpdateSelectedNodes()
 {
-    int pos1; //Position containers for parsing the textbox
-    int pos2, pos3;
+    int pos1, length; //Position containers for parsing the textbox
+    bool updated[CurrentNodeBeam->Nodes.size()] = { false };
+    int nodesBegin, nodesEnd = 0;
 
     QString TextBoxText = this->toPlainText();
-    for(int i=0; i<CurrentNodeBeam->SelectedNodes.size();i++)
+    FindNodesSection(&TextBoxText,0, nodesBegin, nodesEnd);
+    QString nodesText = TextBoxText.left(nodesEnd);
+    QString otherText = TextBoxText.right(TextBoxText.length()-nodesEnd);
+
+    for(int i=0; i<CurrentNodeBeam->SelectedNodes.size();++i)
     {
-        QString NodeName = CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].NodeName;
-
-        //Find node from textbox by nodename
-        if(FindNodeContainer(&TextBoxText, NodeName, pos1, pos2, 0, pos3))
+        if(!updated[i])
         {
-            QString nodeline = '"' + NodeName + '"';
-            nodeline+= ", ";
-            nodeline+= QString::number(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].locX,'f',5);
-            nodeline+= ", ";
-            nodeline+= QString::number(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].locY,'f',5);
-            nodeline+= ", ";
-            nodeline+= QString::number(CurrentNodeBeam->Nodes[CurrentNodeBeam->SelectedNodes[i]].locZ,'f',5);
+            QString NodeName = CurrentNodeBeam->Nodes.at(CurrentNodeBeam->SelectedNodes.at(i)).NodeName;
 
-            TextBoxText.replace(pos1,pos2-pos1+1,nodeline);
+            //Find node from textbox by nodename
+            if(FindNodeContainer2(&nodesText, NodeName, nodesBegin, pos1, length))
+            {
+                QString nodeline("\"" + NodeName + "\", ");
+                nodeline+= QString::number(CurrentNodeBeam->Nodes.at(CurrentNodeBeam->SelectedNodes.at(i)).locX,'f',5);
+                nodeline+= ", " + QString::number(CurrentNodeBeam->Nodes.at(CurrentNodeBeam->SelectedNodes.at(i)).locY,'f',5);
+                nodeline+= ", " + QString::number(CurrentNodeBeam->Nodes.at(CurrentNodeBeam->SelectedNodes.at(i)).locZ,'f',5);
+                nodesText.replace(pos1,length,nodeline);
+                updated[i] = true;
+            }
         }
-        else qDebug() << "Node not found";
-
     }
+
+    TextBoxText = nodesText + otherText;
     this->setPlainText(TextBoxText);
 }
 
@@ -264,8 +274,10 @@ void JBEAM_TextBox::JBEAM_UpdateSelectedNodes()
 /* This function will find, where the node and it's 3 coordinates are in the JBEAM string.
 Results will be returned in NodeBegin and NodeEnd integer values.
 Bool will be false, if node was not found.*/
+//old
 bool JBEAM_TextBox::FindNodeContainer(QString *JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd, bool FindComma, int &RealNodeEnd)
 {
+
     int NodeFound = 0;
     int linenumber=0;
 
@@ -426,6 +438,43 @@ bool JBEAM_TextBox::FindNodeContainer(QString *JBEAM_box, QString nodename, int 
     */
 }
 
+//Locate the nodes section
+bool JBEAM_TextBox::FindNodesSection(QString *JBEAM_box, int offset, int &nodesBegin, int &nodesEnd)
+{
+    QRegExp re_nodes("\\\"nodes\\\"\\s*:\\s*\\[");
+    int i = re_nodes.indexIn(*JBEAM_box, offset);
+    if(i <0) return false;
+
+    nodesBegin = i;
+
+    int level = -1;
+    for(;i<JBEAM_box->length();++i)
+    {
+        if(JBEAM_box->at(i) == '[') ++level;
+        else if(JBEAM_box->at(i) == ']')
+        {
+             --level;
+             if(level<0) break;
+        }
+    }
+    nodesEnd = i;
+    return true;
+}
+
+//Locate the node in nodes section
+bool JBEAM_TextBox::FindNodeContainer2(QString *JBEAM_box, QString nodename, int &nodesBegin, int &pos1, int &pos2)
+{
+    QString re = "\\[\\s*\\\"" + nodename + "\\\"\\s*,?\\s*-?\\d.\\d*\\s*,?\\s*-?\\d.\\d*\\s*,?\\s*-?\\d.\\d*";
+    QRegExp lost(re);
+    pos1 = lost.indexIn(*JBEAM_box,nodesBegin) + 1;
+    if(pos1>=1)
+    {
+        pos2 = lost.matchedLength()-1;
+        return true;
+    }
+    return false;
+}
+
 bool JBEAM_TextBox::FindBeamContainer(QString *JBEAM_box, QString beam, int &Begin, int &End, bool FindComma,int &RealEnd)
 {
     int BeamFound = 0;
@@ -544,29 +593,27 @@ bool JBEAM_TextBox::FindBeamContainer(QString *JBEAM_box, QString beam, int &Beg
 bool JBEAM_TextBox::JBEAM_FindOtherContainer(QString JBEAM_box, QString listtype, int &Begin, int &End)
 {
     QString pattern = "\"" + listtype + "\"\\s*:\\s*\\[";
-    QRegExp re_container;
-    re_container.setPattern(pattern);
+    QRegExp re_container(pattern);
 
     Begin = JBEAM_box.indexOf(re_container);
     int i=Begin;
-    for(i; i<JBEAM_box.length(); i++)
+    for(; i<JBEAM_box.length(); ++i)
     {
         if(JBEAM_box.at(i) == '[') break;
     }
     Begin = i;
     int level = 1;
-    i++;
-    qDebug() << JBEAM_box.at(i);
-    for(i; i<JBEAM_box.length(); i++)
+    ++i;
+    for(;i<JBEAM_box.length();++i)
     {
-        if(JBEAM_box.at(i) == '[') level++;
-        else if(JBEAM_box.at(i) == ']') level--;
-        if(level < 1)
+        if(JBEAM_box.at(i) == '[') ++level;
+        else if(JBEAM_box.at(i) == ']')
         {
-            qDebug() << "stop" << i;
-            break;
+             --level;
+             if(level<1) break;
         }
     }
+
     End = i;
 
     return true;
@@ -575,7 +622,7 @@ bool JBEAM_TextBox::JBEAM_FindOtherContainer(QString JBEAM_box, QString listtype
 // Add indentation
 void JBEAM_TextBox::str_addIndent(QString * text, int indent)
 {
-    for(int i=0; i<indent; i++)
+    for(int i=0; i<indent; ++i)
     {
         text->append("    ");
     }

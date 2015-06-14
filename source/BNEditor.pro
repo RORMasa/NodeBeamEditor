@@ -13,6 +13,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = BNEditor
 TEMPLATE = app
 
+DEFINES *= QT_USE_QSTRINGBUILDER
+
 #CONFIG += RELEASE
 #CONFIG += build_all
 #CONFIG += console
