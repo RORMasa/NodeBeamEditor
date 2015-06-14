@@ -203,7 +203,6 @@ void JBEAM_TextBox::JBEAM_UpdateAllNodes(bool *updated)
 
     QString TextBoxText = this->toPlainText();
 
-    bool ok=1;
     while(FindNodesSection(&TextBoxText, nodesEnd, nodesBegin, nodesEnd))
     {
         QString nodesText = TextBoxText.left(nodesEnd);
@@ -464,7 +463,7 @@ bool JBEAM_TextBox::FindNodesSection(QString *JBEAM_box, int offset, int &nodesB
 //Locate the node in nodes section
 bool JBEAM_TextBox::FindNodeContainer2(QString *JBEAM_box, QString nodename, int &nodesBegin, int &pos1, int &pos2)
 {
-    QString re = "\\[\\s*\\\"" + nodename + "\\\"\\s*,?\\s*-?\\d.\\d*\\s*,?\\s*-?\\d.\\d*\\s*,?\\s*-?\\d.\\d*";
+    QString re = "\\[\\s*\\\"" + nodename + "\\\"\\s*,?\\s*-?\\d*.\\d*\\s*,?\\s*-?\\d*.\\d*\\s*,?\\s*-?\\d*.\\d*";
     QRegExp lost(re);
     pos1 = lost.indexIn(*JBEAM_box,nodesBegin) + 1;
     if(pos1>=1)
