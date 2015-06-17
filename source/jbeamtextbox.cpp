@@ -612,9 +612,7 @@ bool JBEAM_TextBox::JBEAM_FindOtherContainer(QString JBEAM_box, QString listtype
              if(level<1) break;
         }
     }
-
     End = i;
-
     return true;
 }
 
@@ -855,21 +853,12 @@ void JBEAM_TextBox::SetFilePath(QString FileName)
 Highlighter::Highlighter(QTextDocument * document) :
     QSyntaxHighlighter(document)
 {
-    QTextCharFormat commentformat;
-    commentformat.setForeground(QColor(0,140,0));
-    commentformat.setFontItalic(1);
-
-    //Comment highlight
-    HighlightingRule temprule;
-    temprule.pattern = QRegExp("\/\/.*");
-    temprule.format = commentformat;
-    rules.append(temprule);
-
 
     QTextCharFormat strformat;
     strformat.setForeground(QColor(40,40,255));
 
-    temprule.pattern = QRegExp("\".*\"");
+    HighlightingRule temprule;
+    temprule.pattern = QRegExp("\"[^\\\"]*\"");
     temprule.format = strformat;
     rules.append(temprule);
 
@@ -884,8 +873,15 @@ Highlighter::Highlighter(QTextDocument * document) :
     rules.append(temprule);
 
     QStringList keywords;
+    /*
     keywords << "\"nodes\"" << "\"beams\"" << "\"triangles\"" << "\"information\""
-             << "\"authors\"" << "\"hubWheels\"" << "\"pressureWheels\"";
+             << "\"authors\"" << "\"hubWheels\"" << "\"pressureWheels\"" << "\"refNodes\""
+             << "\"slots\"" << "\"slotType\"" << "\"name\"" << "\"slots\"" << "\"flexbodies\""
+             << "\"scalebeamSpring\"" << "\"scalebeamDamp\"" << "\"scalebeamDeform\""
+             << "\"scalebeamStrength\"" << "\"breakGroup\"" << "\"deformGroup\"" << "\"disableMeshBreaking\""
+             << "\"beamDeform\"" << "\"beamStrength\""<< "\"beamSpring\"" << "\"beamDamp\"" << "\"beamPrecompression\"";*/
+
+    keywords << "\\\"[^\\\"]*\\\"\\s*:";
 
     strformat.setForeground(QColor(200,40,40));
     strformat.setFontWeight(QFont::Bold);
@@ -893,12 +889,22 @@ Highlighter::Highlighter(QTextDocument * document) :
     foreach(const QString keyword, keywords)
     {
         temprule.pattern = QRegExp(keyword);
+        temprule.pattern.setMinimal(true);
         temprule.format = strformat;
         rules.append(temprule);
     }
 
+    QTextCharFormat commentformat;
+    commentformat.setForeground(QColor(0,140,0));
+    commentformat.setFontItalic(1);
+
+    //Comment highlight
+    temprule.pattern = QRegExp("\/\/.*");
+    temprule.format = commentformat;
+    rules.append(temprule);
+
     QStringList BNEkeywords;
-    BNEkeywords << "//BNEnodes" << "//BNEbeams" << "//BNEtriangles";
+    BNEkeywords << "//BNE.*";
     strformat.setFontWeight(QFont::Bold);
     strformat.setForeground(QColor(40,100,40));
     strformat.setBackground(QColor(220,220,220));
@@ -927,9 +933,10 @@ void Highlighter::highlightBlock(const QString &text)
     {
         QRegExp regex = rule.pattern;
         int index = regex.indexIn(text);
-        if(index >= 0)
+        while(index >= 0)
         {
             setFormat(index,regex.matchedLength(),rule.format);
+            index = regex.indexIn(text,index+regex.matchedLength());
         }
     }
 

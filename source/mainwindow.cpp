@@ -101,6 +101,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(CurrentNodeBeam,SIGNAL(LUA_getJbeamText()),this,SLOT(LUA_JBEAM_Get()));
     QObject::connect(CurrentNodeBeam,SIGNAL(LUA_setJbeamText(QString)),this,SLOT(LUA_JBEAM_Set(QString)));
     QObject::connect(CurrentNodeBeam,SIGNAL(LUA_HtmlInputDialog(QString)),this,SLOT(htmlinputdialog(QString)));
+    QObject::connect(CurrentNodeBeam,SIGNAL(nodeCountChanged(int)),this,SLOT(nodeCountChanged(int)));
+    QObject::connect(CurrentNodeBeam,SIGNAL(beamCountChanged(int)),this,SLOT(beamCountChanged(int)));
 
     //Link nodebeam to glwidgets
     for(int i=0; i<2; i++)
@@ -239,14 +241,28 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeWidget->header()->resizeSection(0,75); //Make node ID colum narrower in nodes tree widget
 
     //init StatusBar
-    StatusBar_nodecount = new QLabel();
-    StatusBar_nodecount->setToolTip("Node counter");
+    StatusBar_nodecount = new QLabel("Nodes: 99999");
+    StatusBar_nodecount->setToolTip("Number of nodes");
+    StatusBar_nodecount->setMinimumSize(StatusBar_nodecount->sizeHint());
+    StatusBar_nodecount->setIndent(3);
+    StatusBar_nodecount->setAlignment(Qt::AlignCenter);
+
+    StatusBar_beamcount = new QLabel("Beams : 99999");
+    StatusBar_beamcount->setToolTip("Number of beams");
+    StatusBar_beamcount->setMinimumSize(StatusBar_beamcount->sizeHint());
+    StatusBar_beamcount->setIndent(3);
+    StatusBar_beamcount->setAlignment(Qt::AlignCenter);
+
+
     StatusBar_mode = new QLabel();
     StatusBar_mode->setToolTip("Coordinate system");
     StatusBar_info = new QLabel();
+    ui->statusBar->addWidget(StatusBar_mode);
     ui->statusBar->addWidget(StatusBar_nodecount);
-    ui->statusBar->addWidget(StatusBar_mode, 1);
+    ui->statusBar->addWidget(StatusBar_beamcount);
     ui->statusBar->addWidget(StatusBar_info);
+    nodeCountChanged(CurrentNodeBeam->Nodes.size());
+    beamCountChanged(CurrentNodeBeam->Beams.size());
 
     //Swap editor axises for RoR if necessary
     if(AppSettings->readsetting("editor_mode")=="2")
@@ -262,13 +278,13 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->lineEdit_rotatex->move(20,70);
         ui->lineEdit_rotatey->move(20,30);
         ui->lineEdit_rotatez->move(20,50);
-        StatusBar_mode->setText("ROR");
+        StatusBar_mode->setText(" ROR ");
     }
     else
     {
         EditorMode = 0;
         CurrentNodeBeam->EditorMode = 0;
-        StatusBar_mode->setText("BeamNG");
+        StatusBar_mode->setText(" BeamNG ");
     }
 
     //Update JBEAM textbox cursor locations
@@ -3277,4 +3293,13 @@ void MainWindow::on_actionClose_triggered()
         JBEAMwidgets.at(0)->ResetContents();
     }
     on_pushButton_3_clicked();
+}
+
+void MainWindow::nodeCountChanged(int count)
+{
+    StatusBar_nodecount->setText(tr("Nodes: ") + QString::number(count));
+}
+void MainWindow::beamCountChanged(int count)
+{
+    StatusBar_beamcount->setText(tr("Beams: ") + QString::number(count));
 }

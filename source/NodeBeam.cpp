@@ -1267,16 +1267,14 @@ int NodeBeam::AddNode(int NodeGroupID)
         }
         for(int i5=0; i5<Beams.size();i5++)
         {
-            if(Beams[i5].Node1GlobalID >= activenode) Beams[i5].Node1GlobalID++;
-
-            if(Beams[i5].Node2GlobalID >= activenode) Beams[i5].Node2GlobalID++;
+            if(Beams.at(i5).Node1GlobalID >= activenode) Beams[i5].Node1GlobalID++;
+            if(Beams.at(i5).Node2GlobalID >= activenode) Beams[i5].Node2GlobalID++;
 
         }
     }
     //else create empty group.
     else
     {
-        //qDebug()<<"Creating 1.st node group.";
         NodeGroups.resize(NodeGroups.size()+1);
         NodeGroups[NodeGroups.size()-1].NodeGroupName = "Node Group 1.";
         NodeGroups[NodeGroups.size()-1].NodeGroupID = 0;
@@ -1287,10 +1285,6 @@ int NodeBeam::AddNode(int NodeGroupID)
         TempNode.GlobalID = activenode;
         TempNode.GroupID = 0;
         Nodes.insert(activenode, TempNode);
-        //qDebug() << "Adding node " << TempNode.GlobalID << " " << TempNode.locX;
-        //qDebug() << Nodes[0].locX;
-
-
     }
 
     if(green<255) green++;
@@ -1304,6 +1298,7 @@ int NodeBeam::AddNode(int NodeGroupID)
     //To be written on JBEAM widget next time it is refreshed
     JBEAM_temp.AddNode(TempNode);
 
+    emit nodeCountChanged(Nodes.size());
     return TempNode.GlobalID;
 }
 
@@ -1366,6 +1361,8 @@ void NodeBeam::DeleteNode(int NodeGlobalID)
         Nodes[i].GlobalID--;
         //qDebug() << "Node global ID lowered from " << (Nodes[i].GlobalID+1) << " to " <<  Nodes[i].GlobalID  ;
     }
+
+    emit nodeCountChanged(Nodes.size());
 }
 
 /* Add beam */
@@ -1414,6 +1411,7 @@ void NodeBeam::AddBeamT(bool jbeamAdd)
     }
 
     if(jbeamAdd) JBEAM_temp.AddBeam(TempBeam);
+    emit beamCountChanged(Beams.size());
 }
 
 /* Add empty beam group at the end of the list  */
@@ -1441,6 +1439,7 @@ void NodeBeam::DeleteBeam(int BeamIndex)
     //Remove
     BeamGroups[Beams[BeamIndex].BeamGroupID].BeamAmount--;
     Beams.remove(BeamIndex);
+    emit beamCountChanged(Beams.size());
 }
 
 void NodeBeam::DuplicateNodes()

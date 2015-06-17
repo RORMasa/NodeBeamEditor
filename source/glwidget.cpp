@@ -512,7 +512,7 @@ void GLWidget::drawpicking_triangle()
 
             float conv = 1.0f/255.0f;
 
-            for(int i=0; i<NBPointer->ListTypes.at(i2).contaier.size();i++)
+            for(int i=0; i<NBPointer->ListTypes.at(i2).contaier.size();++i)
             {
                 //Draw each triangle with unique color
                 int red = (i & 0x0000ff);

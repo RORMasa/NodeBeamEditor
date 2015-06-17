@@ -37,6 +37,7 @@ public:
     QLabel * StatusBar_info;
     QLabel * StatusBar_mode;
     QLabel * StatusBar_nodecount;
+    QLabel * StatusBar_beamcount;
 
     bool *TexboxOutdated;
 
@@ -60,6 +61,9 @@ public slots:
     void LUA_JBEAM_Get(); //Returns jbeam textbox contents
     void LUA_JBEAM_Set(QString text);
     void htmlinputdialog(QString html);
+
+    void nodeCountChanged(int count);
+    void beamCountChanged(int count);
 
 signals:
     void ZoomChanged();

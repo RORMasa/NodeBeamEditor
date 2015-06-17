@@ -426,6 +426,9 @@ signals:
     void LUA_setJbeamText(QString text);
     void LUA_HtmlInputDialog(QString htmlfile);
 
+    void nodeCountChanged(int count);
+    void beamCountChanged(int count);
+
 private:
 
     /*When parsing a line from a file, in grid_index
