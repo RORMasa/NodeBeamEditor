@@ -3416,6 +3416,12 @@ bool NodeBeam::JBEAM_SaveAs(const QString &fileName, QString JBEAM_Text)
     QFile outputFile(FileName1);
     outputFile.open(QIODevice::WriteOnly);
 
+    /* Add windows line change character */
+    for(int i=JBEAM_Text.length()-1; i>=0; --i)
+    {
+        if(JBEAM_Text.at(i) == '\n') JBEAM_Text.insert(i,'\r');
+    }
+
     /* Check that file is open */
     if(outputFile.isOpen())
     {
