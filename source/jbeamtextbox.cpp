@@ -65,7 +65,7 @@ JBEAM_TextBox::JBEAM_TextBox(QWidget *parent, NodeBeam *nb) : QPlainTextEdit(par
     }
 }
 
-//Paint linenumbers
+/* Line numbers */
 void JBEAM_TextBox::LineNumbersPaintEvent(QPaintEvent *event)
 {
     QPainter painter(LineNumbersA);
@@ -231,10 +231,7 @@ void JBEAM_TextBox::JBEAM_UpdateAllNodes(bool *updated)
     this->setPlainText(TextBoxText);
 }
 
-
-
-
-//Update selected nodes
+/* Update currently selected node information into the text box */
 void JBEAM_TextBox::JBEAM_UpdateSelectedNodes()
 {
     int pos1, length; //Position containers for parsing the textbox
@@ -273,7 +270,7 @@ void JBEAM_TextBox::JBEAM_UpdateSelectedNodes()
 /* This function will find, where the node and it's 3 coordinates are in the JBEAM string.
 Results will be returned in NodeBegin and NodeEnd integer values.
 Bool will be false, if node was not found.*/
-//old
+//old, not in use
 bool JBEAM_TextBox::FindNodeContainer(QString *JBEAM_box, QString nodename, int &NodeBegin, int &NodeEnd, bool FindComma, int &RealNodeEnd)
 {
 
@@ -437,7 +434,7 @@ bool JBEAM_TextBox::FindNodeContainer(QString *JBEAM_box, QString nodename, int 
     */
 }
 
-//Locate the nodes section
+/* Find the nodes section */
 bool JBEAM_TextBox::FindNodesSection(QString *JBEAM_box, int offset, int &nodesBegin, int &nodesEnd)
 {
     QRegExp re_nodes("\\\"nodes\\\"\\s*:\\s*\\[");
@@ -460,7 +457,7 @@ bool JBEAM_TextBox::FindNodesSection(QString *JBEAM_box, int offset, int &nodesB
     return true;
 }
 
-//Locate the node in nodes section
+/* Find a node from the nodes section */
 bool JBEAM_TextBox::FindNodeContainer2(QString *JBEAM_box, QString nodename, int &nodesBegin, int &pos1, int &pos2)
 {
     QString re = "\\[\\s*\\\"" + nodename + "\\\"\\s*,?\\s*-?\\d*.\\d*\\s*,?\\s*-?\\d*.\\d*\\s*,?\\s*-?\\d*.\\d*";
@@ -616,41 +613,6 @@ bool JBEAM_TextBox::JBEAM_FindOtherContainer(QString JBEAM_box, QString listtype
     return true;
 }
 
-// Add indentation
-void JBEAM_TextBox::str_addIndent(QString * text, int indent)
-{
-    for(int i=0; i<indent; ++i)
-    {
-        text->append("    ");
-    }
-}
-// Add str value
-void JBEAM_TextBox::str_addValueStr(QString * text, QString key, QString value, int indent)
-{
-    this->str_addIndent(text, indent);
-    *text+= "\"" + key + "\":\"" + value + "\",\n";
-}
-void JBEAM_TextBox::str_beginObject(QString * text, QString key, int indent)
-{
-    this->str_addIndent(text, indent);
-    *text+= "\"" + key + "\":{\n";
-}
-void JBEAM_TextBox::str_endObject(QString * text, int indent)
-{
-    this->str_addIndent(text, indent);
-    *text+= "},\n";
-}
-void JBEAM_TextBox::str_beginList(QString * text, QString key, int indent)
-{
-    this->str_addIndent(text, indent);
-    *text+= "\"" + key + "\":[\n";
-}
-void JBEAM_TextBox::str_endList(QString * text, int indent)
-{
-    this->str_addIndent(text, indent);
-    *text+= "],\n";
-}
-
 /* Add node at text cursor position */
 void JBEAM_TextBox::JBEAM_AddNode()
 {
@@ -702,23 +664,6 @@ void JBEAM_TextBox::JBEAM_AddBeam()
     this->setTextCursor(textcursor);
 }
 
-int JBEAM_TextBox::JBEAM_AddComment(int CursorPos, QString Comment)
-{
-    QString commentline;
-    this->str_addIndent(&commentline, 3);
-    commentline+= "//" + Comment;
-    commentline+= "\n";
-    QTextCursor textcursor = this->textCursor();
-    if(CursorPos >= 0)
-    {
-        textcursor.setPosition(CursorPos);
-    }
-    textcursor.insertText(commentline);
-    this->setTextCursor(textcursor);
-
-    return commentline.length();
-}
-
 /* Add other part, in JBEAM edit widget at text cursor position */
 void JBEAM_TextBox::JBEAM_AddArrayItem(int ListType_id)
 {
@@ -742,7 +687,7 @@ void JBEAM_TextBox::JBEAM_AddArrayItem(int ListType_id)
 }
 
 
-//Write picked node in JBEAM widget
+/* Write the name of currently picked node at textcursor position */
 void JBEAM_TextBox::PrintNodePicked(int node_id)
 {
     QString line = "\"%1\", ";
@@ -754,7 +699,7 @@ void JBEAM_TextBox::PrintNodePicked(int node_id)
     this->setTextCursor(textcursor);
 }
 
-
+/* Delete nodes that are in temp delete queue */
 void JBEAM_TextBox::JBEAM_DeleteNodes()
 {
     int pos1; //Position containers for parsing the textbox
@@ -779,7 +724,7 @@ void JBEAM_TextBox::JBEAM_DeleteNodes()
     this->setPlainText(TextBoxText);
 }
 
-//Delete beams
+/* Delete beams that are in temp delete queue */
 void JBEAM_TextBox::JBEAM_DeleteBeams()
 {
     int pos1; //Position containers for parsing the textbox
@@ -799,13 +744,11 @@ void JBEAM_TextBox::JBEAM_DeleteBeams()
 
             TextBoxText.replace(pos1,pos3-pos1+2,beamline);
         }
-        //else qDebug() << "Beam not found";
-
     }
     this->setPlainText(TextBoxText);
 }
 
-/* Add beams and nodes from temp */
+/* Add beams and nodes from temp queue */
 void JBEAM_TextBox::JBEAM_AddFromTemp()
 {
     //Add all nodes from TEMP
@@ -830,6 +773,7 @@ void JBEAM_TextBox::JBEAM_AddFromTemp()
     CurrentNodeBeam->JBEAM_temp.clear();
 }
 
+/* Reset textbox contents */
 void JBEAM_TextBox::ResetContents()
 {
     FileName = "untitled";
@@ -837,6 +781,7 @@ void JBEAM_TextBox::ResetContents()
     this->setPlainText(EmptyJbeamTextTemplate);
 }
 
+/* Set the filepath of current text file */
 void JBEAM_TextBox::SetFilePath(QString FileName)
 {
     this->FullFilePath = FileName;
@@ -846,10 +791,119 @@ void JBEAM_TextBox::SetFilePath(QString FileName)
         if(FileName.at(i) == '/') break;
     }
     this->FileName = FileName.right(FileName.length()-i-1);
-    qDebug() << "Tiedostonimi on " << this->FileName;
+    //qDebug() << "Tiedostonimi on " << this->FileName;
 }
 
-/* === SYNTAX HIGHLIGHTER === */
+/* Cut nodelines */
+QStringList JBEAM_TextBox::JBEAM_CutNodeLines()
+{
+    QStringList nodelines;
+
+    int pos1; //Position containers for parsing the textbox
+    int pos2;
+    int pos3;
+
+    QString TextBoxText = this->toPlainText();
+    for(int i=0; i<CurrentNodeBeam->JBEAM_temp.delete_nodes.size();i++)
+    {
+        QString NodeName = CurrentNodeBeam->JBEAM_temp.delete_nodes.at(i).NodeName;
+
+        //Find node from textbox by nodename
+        if(FindNodeContainer(&TextBoxText, NodeName, pos1, pos2, true, pos3))
+        {
+            QString nodeline = "";
+            nodelines.append(TextBoxText.mid(pos1-1,pos3-pos1+2));
+            TextBoxText.replace(pos1-1,pos3-pos1+2,nodeline);
+        }
+    }
+    this->setPlainText(TextBoxText);
+
+    return nodelines;
+}
+
+/* Paste text at cursor position */
+void JBEAM_TextBox::JBEAM_PasteNodeLine(QString nodeStr)
+{
+    QString nodeline;
+    this->str_addIndent(&nodeline, 3);
+    nodeline += nodeStr + "\n";
+
+    QTextCursor textcursor = this->textCursor();
+    if(JBEAM_NodeCursor >= 0)
+    {
+        textcursor.setPosition(JBEAM_NodeCursor);
+    }
+    textcursor.insertText(nodeline);
+    this->setTextCursor(textcursor);
+}
+
+
+//===============================================
+//----- JBEAM Pretty printing
+//===============================================
+
+// Add indentation
+void JBEAM_TextBox::str_addIndent(QString * text, int indent)
+{
+    for(int i=0; i<indent; ++i)
+    {
+        text->append("    ");
+    }
+}
+// Add string value
+void JBEAM_TextBox::str_addValueStr(QString * text, QString key, QString value, int indent)
+{
+    this->str_addIndent(text, indent);
+    *text+= "\"" + key + "\":\"" + value + "\",\n";
+}
+// Begin new object
+void JBEAM_TextBox::str_beginObject(QString * text, QString key, int indent)
+{
+    this->str_addIndent(text, indent);
+    *text+= "\"" + key + "\":{\n";
+}
+// End object
+void JBEAM_TextBox::str_endObject(QString * text, int indent)
+{
+    this->str_addIndent(text, indent);
+    *text+= "},\n";
+}
+// Begin list
+void JBEAM_TextBox::str_beginList(QString * text, QString key, int indent)
+{
+    this->str_addIndent(text, indent);
+    *text+= "\"" + key + "\":[\n";
+}
+// End list
+void JBEAM_TextBox::str_endList(QString * text, int indent)
+{
+    this->str_addIndent(text, indent);
+    *text+= "],\n";
+}
+// Add comment
+int JBEAM_TextBox::JBEAM_AddComment(int CursorPos, QString Comment)
+{
+    QString commentline;
+    this->str_addIndent(&commentline, 3);
+    commentline+= "//" + Comment;
+    commentline+= "\n";
+    QTextCursor textcursor = this->textCursor();
+    if(CursorPos >= 0)
+    {
+        textcursor.setPosition(CursorPos);
+    }
+    textcursor.insertText(commentline);
+    this->setTextCursor(textcursor);
+
+    return commentline.length();
+}
+
+
+
+//===============================================
+//----- SYNTAX HIGHLIGHTER
+//===============================================
+
 Highlighter::Highlighter(QTextDocument * document) :
     QSyntaxHighlighter(document)
 {
@@ -928,7 +982,6 @@ Highlighter::~Highlighter()
 
 void Highlighter::highlightBlock(const QString &text)
 {
-
     foreach(const HighlightingRule &rule, rules)
     {
         QRegExp regex = rule.pattern;
@@ -939,6 +992,4 @@ void Highlighter::highlightBlock(const QString &text)
             index = regex.indexIn(text,index+regex.matchedLength());
         }
     }
-
-
 }

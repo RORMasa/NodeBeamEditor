@@ -65,6 +65,10 @@ public:
     void JBEAM_DeleteNodes();
     void JBEAM_DeleteBeams();
 
+    /* Cut and paste as text */
+    QStringList JBEAM_CutNodeLines();
+    void JBEAM_PasteNodeLine(QString nodeStr);
+
     /* Filenames */
     QString FullFilePath;
     QString FileName;

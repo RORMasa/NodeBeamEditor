@@ -253,7 +253,6 @@ MainWindow::MainWindow(QWidget *parent) :
     StatusBar_beamcount->setIndent(3);
     StatusBar_beamcount->setAlignment(Qt::AlignCenter);
 
-
     StatusBar_mode = new QLabel();
     StatusBar_mode->setToolTip("Coordinate system");
     StatusBar_info = new QLabel();
@@ -387,7 +386,10 @@ void MainWindow::ShowContextMenu_Beams(const QPoint& position)
     }
 }
 
-//Start new file
+//======================================
+//--- File menu
+//======================================
+/* New empty file */
 void MainWindow::on_actionNew_triggered()
 {
     CurrentNodeBeam->clear();
@@ -405,8 +407,6 @@ void MainWindow::on_actionNew_triggered()
 
     JBEAMtextbox->ResetContents();
     setWindowTitle(EditorTitle);
-    //NewProjectDialog Dialog;
-    //Dialog.exec();
 }
 
 /* File menu / Import RoR NB triggered */
@@ -1168,14 +1168,8 @@ void MainWindow::OpenJbeams(QStringList fileNames)
 //Reload JBEAM currently under construction
 void MainWindow::on_actionReload_triggered()
 {
-    //if (!JBEAM_Filepath.isEmpty())
     if (!JBEAMtextbox->FullFilePath.isEmpty())
     {
-        //CurrentNodeBeam->ReadJBeamTree(fileName);
-        //CurrentNodeBeam->ImportBeamNG(fileName);
-
-        /*New JBEAM input system trough textbox */
-
         QFile file(JBEAMtextbox->FullFilePath);
         if (!file.open(QFile::ReadOnly | QFile::Text)) {
             QMessageBox msgBox;
@@ -1203,7 +1197,6 @@ void MainWindow::on_actionReload_triggered()
             JBEAM_ParseTextEdit();
         }
     }
-
     MainNodeBeamUpdated();
 }
 
@@ -1248,7 +1241,6 @@ void MainWindow::OpenJBEAM_cmdargument(QString fileName)
 
         }
     }
-
     MainNodeBeamUpdated();
 }
 
@@ -2145,7 +2137,7 @@ void MainWindow::on_toolButton_6_clicked()
             glWidgetViews[i]->RectSelect=0;
         }
     }
-
+    ui->stackedWidget->setCurrentIndex(0);
 }
 
 /* Turn all tools off except buttoni */
@@ -3302,4 +3294,30 @@ void MainWindow::nodeCountChanged(int count)
 void MainWindow::beamCountChanged(int count)
 {
     StatusBar_beamcount->setText(tr("Beams: ") + QString::number(count));
+}
+
+//Organize nodes button clicked
+void MainWindow::on_toolButton_36_clicked()
+{
+    CurrentNodeBeam->JBEAM_temp.clear();
+    CurrentNodeBeam->cutNodes();
+
+    QStringList nodelines;
+
+    //Cut nodes
+    for(int i=0; i<JBEAMwidgets.size(); ++i)
+    {
+        QStringList temp = JBEAMwidgets.at(i)->JBEAM_CutNodeLines();
+        for(int i2=0; i2<temp.size(); ++i2)
+        {
+            nodelines.append(temp.at(i2));
+        }
+    }
+    CurrentNodeBeam->JBEAM_temp.clear();
+
+    //Paste at textcursor position
+    for(int i=0; i<nodelines.size(); ++i)
+    {
+        JBEAMtextbox->JBEAM_PasteNodeLine(nodelines.at(i));
+    }
 }

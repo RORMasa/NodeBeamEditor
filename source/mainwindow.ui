@@ -655,6 +655,37 @@ QTabWidget::tab-bar {
               <enum>Qt::ToolButtonTextUnderIcon</enum>
              </property>
             </widget>
+            <widget class="QToolButton" name="toolButton_36">
+             <property name="geometry">
+              <rect>
+               <x>110</x>
+               <y>60</y>
+               <width>111</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="toolTip">
+              <string>Print node name in JBEAM textedit at cursor position.</string>
+             </property>
+             <property name="whatsThis">
+              <string/>
+             </property>
+             <property name="text">
+              <string>Organize nodes</string>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>60</width>
+               <height>60</height>
+              </size>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+             <property name="toolButtonStyle">
+              <enum>Qt::ToolButtonTextUnderIcon</enum>
+             </property>
+            </widget>
            </widget>
            <widget class="QWidget" name="page">
             <widget class="QComboBox" name="comboBox_2">
@@ -1940,7 +1971,6 @@ QTabWidget::tab-bar {
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>-1</pointsize>
                   <weight>50</weight>
                   <italic>false</italic>
                   <bold>false</bold>

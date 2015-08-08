@@ -317,6 +317,9 @@ public:
     /* Delete node */
     void DeleteNode(int NodeGlobalID);
 
+    //Put selected nodes in delete queue, but don't delete
+    void cutNodes();
+
     /* Beam functions */
     void AddBeam(int Node1ID, int Node2ID, int BeamGroup, bool jbeamAdd);
     void AddBeamT(bool jbeamAdd);

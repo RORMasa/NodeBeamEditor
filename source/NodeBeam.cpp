@@ -3575,3 +3575,12 @@ bool NodeBeam::Editing3D_CalculateSelectionCenter()
 
     //qDebug() << "Selection center is " << SelectionCenterPos.x() << ", " << SelectionCenterPos.y() << ", " << SelectionCenterPos.z();
 }
+
+/* Put selected nodes to delete queue, but don't delete */
+void NodeBeam::cutNodes()
+{
+    for(int i=0; i<SelectedNodes.size(); ++i)
+    {
+        JBEAM_temp.DeleteNode(Nodes.at(SelectedNodes.at(i)));
+    }
+}

@@ -239,5 +239,7 @@ void JBEAM_ListType::NodeRemoved(int nodeid)
             }
         }
     }
-
 }
+
+
+

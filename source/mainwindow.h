@@ -236,6 +236,8 @@ private slots:
 
     void on_actionClose_triggered();
 
+    void on_toolButton_36_clicked();
+
 private:
     Ui::MainWindow *ui;
     GLWidget *glWidget;
