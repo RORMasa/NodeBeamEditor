@@ -22,6 +22,11 @@
      <height>41</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
    <property name="orientation">
     <enum>Qt::Horizontal</enum>
    </property>
@@ -40,6 +45,11 @@
      <width>471</width>
      <height>331</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>5</pointsize>
+    </font>
    </property>
    <property name="currentIndex">
     <number>0</number>
@@ -85,9 +95,9 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>0</y>
-       <width>451</width>
-       <height>41</height>
+       <y>-10</y>
+       <width>440</width>
+       <height>50</height>
       </rect>
      </property>
      <property name="font">
@@ -107,7 +117,7 @@
        <x>0</x>
        <y>170</y>
        <width>461</width>
-       <height>51</height>
+       <height>70</height>
       </rect>
      </property>
      <property name="frameShape">
@@ -122,7 +132,7 @@
         <x>0</x>
         <y>0</y>
         <width>251</width>
-        <height>41</height>
+        <height>20</height>
        </rect>
       </property>
       <property name="text">
@@ -135,7 +145,7 @@
         <x>260</x>
         <y>0</y>
         <width>161</width>
-        <height>20</height>
+        <height>30</height>
        </rect>
       </property>
       <property name="text">
@@ -146,9 +156,9 @@
       <property name="geometry">
        <rect>
         <x>260</x>
-        <y>20</y>
+        <y>40</y>
         <width>161</width>
-        <height>20</height>
+        <height>30</height>
        </rect>
       </property>
       <property name="text">
@@ -257,9 +267,9 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>0</y>
+       <y>-10</y>
        <width>451</width>
-       <height>41</height>
+       <height>50</height>
       </rect>
      </property>
      <property name="font">
@@ -267,6 +277,8 @@
        <pointsize>12</pointsize>
        <weight>75</weight>
        <bold>true</bold>
+       <underline>false</underline>
+       <kerning>true</kerning>
       </font>
      </property>
      <property name="text">
@@ -374,9 +386,9 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>0</y>
-       <width>451</width>
-       <height>41</height>
+       <y>-10</y>
+       <width>440</width>
+       <height>50</height>
       </rect>
      </property>
      <property name="font">
