@@ -10,6 +10,11 @@
     <height>357</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>5</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Blueprints</string>
   </property>
@@ -294,7 +299,7 @@
     <rect>
      <x>30</x>
      <y>20</y>
-     <width>211</width>
+     <width>290</width>
      <height>31</height>
     </rect>
    </property>

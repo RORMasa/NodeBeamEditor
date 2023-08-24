@@ -465,7 +465,7 @@ void GLWidget::drawpicking()
     GLubyte pixel[3];
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT,viewport);
-
+    glEnable(GL_LIGHTING);
     //glReadPixels(cursorX,viewport[3]-cursorY,1,1,GL_RGB,GL_UNSIGNED_BYTE,(void *)pixel);
     glReadPixels(lastPos.x(), viewport[3]-lastPos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, (void *) pixel);
     qDebug() << pixel[0] << ", " << pixel[1] << "," << pixel[2];
@@ -484,7 +484,7 @@ void GLWidget::drawpicking()
         }
     }
 
-    glEnable(GL_LIGHTING);
+
 
     // Turn on antialiasing
     glEnable (GL_BLEND);
@@ -830,7 +830,7 @@ void GLWidget::initializeGL()
 }
 
 void GLWidget::paintGL()
-{  
+{
     /* Set background color */
     glClearColor(backgroundcolor.at(0), backgroundcolor.at(1), backgroundcolor.at(2), backgroundcolor.at(3));
 
@@ -2367,7 +2367,7 @@ void GLWidget::DrawRectSelect()
 {
     QVector4D test,RectSel_1V,RectSel_2V,RectSel_3V,RectSel_4V;
 
-    /*
+
     glBegin(GL_POINTS);
     glColor3f(0.0, 1.0, 0.0);
     for(int i=0; i<20 ; i++)
@@ -2398,7 +2398,7 @@ void GLWidget::DrawRectSelect()
         glVertex3d(test.x(), test.y(), test.z());
     }
 
-    glEnd();*/
+    glEnd();
 
     glLineStipple(1, 0x3F07);
     glEnable(GL_LINE_STIPPLE);
@@ -2435,7 +2435,7 @@ void GLWidget::DrawRectSelect()
     QVector3D normal_4 = QVector3D::crossProduct(vec2,vec4);
     //qDebug() << normal_1 << normal_2 << normal_3 << normal_4;
 
-    /* Draw selection plane normals
+    /* Draw selection plane normals*/
     glBegin(GL_LINES);
     QVector3D campos2 = campos.toVector3D();
     QVector3D normal = campos2 + normal_1;
@@ -2455,7 +2455,7 @@ void GLWidget::DrawRectSelect()
     glVertex3d(campos.x(), campos.y(), campos.z());
 
 
-    glEnd();*/
+    glEnd();
 
 }
 
@@ -2470,38 +2470,38 @@ void GLWidget::keyPressEvent(QKeyEvent * event)
 
     QVector3D CameraLeft = QVector3D::crossProduct(CameraDirection,CameraUpVector);
 
-    if(event->key() == Qt::Key_4)
+    if(event->key() == Qt::Key_Left || event->key() == Qt::Key_A)
     {
         ViewOffsetX += CameraLeft.x()*0.2f;
         ViewOffsetY += CameraLeft.y()*0.2f;
         updateGL();
     }
-    else if(event->key() == Qt::Key_6)
+    else if(event->key() == Qt::Key_Right || event->key() == Qt::Key_D)
     {
         ViewOffsetX -= CameraLeft.x()*0.2f;
         ViewOffsetY -= CameraLeft.y()*0.2f;
         updateGL();
     }
-    else if(event->key() == Qt::Key_8)
+    else if(event->key() == Qt::Key_Equal || event->key() == Qt::Key_W)
     {
         ViewOffsetX -= CameraDirection.x()*0.2f;
         ViewOffsetY -= CameraDirection.y()*0.2f;
-        //ViewOffsetZ -= CameraDirection.z()*0.2f;
+       // ViewOffsetZ -= CameraDirection.z()*0.2f;
         updateGL();
     }
-    else if(event->key() == Qt::Key_2)
+    else if(event->key() == Qt::Key_Minus || event->key() == Qt::Key_S)
     {
         ViewOffsetX += CameraDirection.x()*0.2f;
         ViewOffsetY += CameraDirection.y()*0.2f;
-        //ViewOffsetZ += CameraDirection.z()*0.2f;
+       // ViewOffsetZ += CameraDirection.z()*0.2f;
         updateGL();
     }
-    else if(event->key() == Qt::Key_7)
+    else if(event->key() == Qt::Key_Up || event->key() == Qt::Key_E)
     {
         ViewOffsetZ -= 0.1f;
         updateGL();
     }
-    else if(event->key() == Qt::Key_1)
+    else if(event->key() == Qt::Key_Down || event->key() == Qt::Key_Q)
     {
         ViewOffsetZ += 0.1f;
         updateGL();

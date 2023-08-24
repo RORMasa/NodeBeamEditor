@@ -10,6 +10,11 @@
     <height>543</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>5</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Arguments Editor</string>
   </property>
